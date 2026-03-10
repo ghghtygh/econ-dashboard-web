@@ -1,0 +1,91 @@
+name: Review Agent - PR 코드 리뷰
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    if: contains(github.event.pull_request.labels.*.name, 'auto-dev')
+    runs-on: [self-hosted, econ-web]
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: PR diff 가져오기
+        id: diff
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Claude Code로 리뷰
+        run: |
+          PR_BODY=$(gh pr view ${{ steps.diff.outputs.pr_number }} --json body --jq '.body')
+
+          REVIEW=$(claude -p "
+          당신은 시니어 프론트엔드 코드 리뷰어입니다.
+          아래 PR의 diff를 리뷰해주세요.
+
+          ## PR 설명
+          ${PR_BODY}
+
+          ## Diff
+          $(cat /tmp/pr-diff.txt)
+
+          ## 리뷰 기준
+          1. 코드 품질 (가독성, 네이밍, 컴포넌트 구조)
+          2. React 모범 사례 (불필요한 리렌더링, 훅 사용)
+          3. TypeScript 타입 안전성
+          4. 접근성 (a11y)
+          5. 성능 이슈
+          6. TailwindCSS 스타일 일관성
+
+          ## 출력 형식
+          각 항목별로 점수(✅ 양호 / ⚠️ 개선 필요 / ❌ 수정 필수)와 구체적인 코멘트를 작성하세요.
+          마지막에 전체 판정: APPROVE 또는 REQUEST_CHANGES 를 명시하세요.
+          " --allowedTools "Read,Glob,Grep")
+
+          echo "$REVIEW" > /tmp/review-result.txt
+
+          if echo "$REVIEW" | grep -q "REQUEST_CHANGES"; then
+            echo "VERDICT=REQUEST_CHANGES" >> $GITHUB_ENV
+          else
+            echo "VERDICT=APPROVE" >> $GITHUB_ENV
+          fi
+
+      - name: 리뷰 코멘트 등록
+        run: |
+          REVIEW_BODY=$(cat /tmp/review-result.txt)
+
+          if [ "$VERDICT" = "APPROVE" ]; then
+            gh pr review ${{ steps.diff.outputs.pr_number }} \
+              --approve \
+              --body "$(cat <<EOF
+          ## 🤖 Review Agent 리뷰 결과
+
+          ${REVIEW_BODY}
+
+          ---
+          ✅ Auto-approved by Review Agent
+          EOF
+          )"
+          else
+            gh pr review ${{ steps.diff.outputs.pr_number }} \
+              --request-changes \
+              --body "$(cat <<EOF
+          ## 🤖 Review Agent 리뷰 결과
+
+          ${REVIEW_BODY}
+
+          ---
+          ⚠️ Changes requested by Review Agent
+          EOF
+          )"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
