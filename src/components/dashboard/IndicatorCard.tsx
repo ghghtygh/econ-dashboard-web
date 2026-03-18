@@ -5,11 +5,16 @@ import type { Indicator, IndicatorData } from '@/types/indicator'
 interface IndicatorCardProps {
   indicator: Indicator
   latest?: IndicatorData
+  prevClose?: number
 }
 
-export function IndicatorCard({ indicator, latest }: IndicatorCardProps) {
-  const isPositive = (latest?.changePercent ?? 0) > 0
-  const isNegative = (latest?.changePercent ?? 0) < 0
+export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardProps) {
+  const changePercent = latest && prevClose && prevClose !== 0
+    ? ((latest.value - prevClose) / prevClose) * 100
+    : (latest?.change ?? 0)
+
+  const isPositive = changePercent > 0
+  const isNegative = changePercent < 0
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-slate-700 transition-colors">
@@ -24,8 +29,8 @@ export function IndicatorCard({ indicator, latest }: IndicatorCardProps) {
       {latest ? (
         <div>
           <p className="text-2xl font-bold text-white">
-            {latest.value.toLocaleString()}
-            {indicator.unit && <span className="text-sm font-normal text-slate-400 ml-1">{indicator.unit}</span>}
+            {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            <span className="text-sm font-normal text-slate-400 ml-1">{indicator.unit}</span>
           </p>
           <div className={cn('flex items-center gap-1 mt-1 text-sm', {
             'text-green-400': isPositive,
@@ -33,7 +38,7 @@ export function IndicatorCard({ indicator, latest }: IndicatorCardProps) {
             'text-slate-400': !isPositive && !isNegative,
           })}>
             {isPositive ? <TrendingUp size={14} /> : isNegative ? <TrendingDown size={14} /> : <Minus size={14} />}
-            <span>{latest.changePercent?.toFixed(2)}%</span>
+            <span>{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
           </div>
         </div>
       ) : (

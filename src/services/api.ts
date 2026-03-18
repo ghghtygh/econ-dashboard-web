@@ -9,13 +9,14 @@ const api = axios.create({
 export default api
 
 export const indicatorApi = {
-  getAll: () => api.get('/indicators'),
+  getAll: (category?: string) =>
+    api.get('/indicators', { params: category ? { category } : undefined }),
   getById: (id: string) => api.get(`/indicators/${id}`),
   getCategories: () => api.get('/indicators/categories'),
   getData: (id: string, from?: string, to?: string) =>
-    api.get(`/indicators/${id}/data`, { params: { from, to } }),
-  getSeries: (ids: string[], from?: string, to?: string) =>
-    api.post('/indicators/series', { ids, from, to }),
+    api.get(`/indicators/${id}/data`, { params: { from, to, size: 100 } }),
+  getSeries: (indicatorIds: number[], startDate: string, endDate: string) =>
+    api.post('/indicators/series', { indicatorIds, startDate, endDate }),
 }
 
 export const dashboardApi = {
