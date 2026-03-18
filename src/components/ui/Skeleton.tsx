@@ -1,12 +1,25 @@
+import { type HTMLAttributes } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-interface SkeletonProps {
-  className?: string
-}
+const skeletonVariants = cva('animate-pulse rounded-lg', {
+  variants: {
+    variant: {
+      default: 'bg-slate-800',
+      light: 'bg-slate-700',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+})
 
-export function Skeleton({ className }: SkeletonProps) {
+type SkeletonProps = HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof skeletonVariants>
+
+export function Skeleton({ className, variant, ...props }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse rounded-lg bg-slate-800', className)} />
+    <div className={cn(skeletonVariants({ variant, className }))} {...props} />
   )
 }
 
