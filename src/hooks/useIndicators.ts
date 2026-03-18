@@ -6,10 +6,10 @@ export function useIndicators(category?: IndicatorCategory) {
   return useQuery({
     queryKey: ['indicators', category],
     queryFn: async () => {
-      const params = category ? `?category=${category}` : ''
-      const res = await indicatorApi.getAll(params)
+      const res = await indicatorApi.getAll(category)
       return (res.data as ApiResponse<Indicator[]>).data
     },
+    refetchInterval: 1000 * 60 * 5,
   })
 }
 
@@ -64,6 +64,7 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
       return results
     },
     enabled: ids.length > 0,
+    refetchInterval: 1000 * 60 * 5,
   })
 }
 

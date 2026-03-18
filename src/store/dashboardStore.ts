@@ -1,14 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { DashboardWidget, Indicator } from '@/types/indicator'
+import type { DashboardWidget } from '@/types/indicator'
 
 interface DashboardStore {
   widgets: DashboardWidget[]
-  selectedIndicators: string[]
+  selectedIndicators: number[]
   addWidget: (widget: DashboardWidget) => void
   removeWidget: (id: string) => void
   updateWidget: (id: string, updates: Partial<DashboardWidget>) => void
-  toggleIndicator: (id: string) => void
+  toggleIndicator: (id: number) => void
   setWidgets: (widgets: DashboardWidget[]) => void
 }
 
@@ -36,13 +36,3 @@ export const useDashboardStore = create<DashboardStore>()(
     { name: 'econ-dashboard' }
   )
 )
-
-interface IndicatorStore {
-  indicators: Indicator[]
-  setIndicators: (indicators: Indicator[]) => void
-}
-
-export const useIndicatorStore = create<IndicatorStore>((set) => ({
-  indicators: [],
-  setIndicators: (indicators) => set({ indicators }),
-}))
