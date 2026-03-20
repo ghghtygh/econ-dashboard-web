@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { LayoutDashboard, RefreshCw } from 'lucide-react'
+import { LayoutDashboard, RefreshCw, Plus } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { IndicatorCard } from '@/components/dashboard/IndicatorCard'
-import { LineChart } from '@/components/charts/LineChart'
-import { IndicatorCardSkeleton, ChartSkeleton } from '@/components/ui/Skeleton'
+import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
+import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
+import { IndicatorCardSkeleton } from '@/components/ui/Skeleton'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
-import type { DateRange } from '@/hooks/useIndicators'
+import { useDashboardStore } from '@/store/dashboardStore'
 import type { IndicatorCategory } from '@/types/indicator'
 
 const CATEGORY_LABELS: Record<IndicatorCategory, string> = {
@@ -18,31 +19,15 @@ const CATEGORY_LABELS: Record<IndicatorCategory, string> = {
   COMMODITY: '원자재',
 }
 
-const CHART_COLORS: Record<IndicatorCategory, string> = {
-  STOCK: '#3b82f6',
-  FOREX: '#8b5cf6',
-  CRYPTO: '#f59e0b',
-  MACRO: '#10b981',
-  BOND: '#ef4444',
-  COMMODITY: '#ec4899',
-}
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { value: '1D', label: '1일' },
-  { value: '1W', label: '1주' },
-  { value: '1M', label: '1개월' },
-  { value: '3M', label: '3개월' },
-  { value: '1Y', label: '1년' },
-]
-
 export function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<IndicatorCategory | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange>('1M')
+  const [addModalOpen, setAddModalOpen] = useState(false)
   const queryClient = useQueryClient()
   const { data: indicators, isLoading, isError, error } = useIndicators()
+  const widgets = useDashboardStore((s) => s.widgets)
 
   const indicatorIds = indicators?.map((i) => i.id) ?? []
-  const { data: allData, isLoading: isChartLoading } = useIndicatorSeries(indicatorIds, dateRange)
+  const { data: allData } = useIndicatorSeries(indicatorIds, '1M')
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['indicators'] })
@@ -67,23 +52,32 @@ export function DashboardPage() {
   const filteredIndicators = selectedCategory
     ? (indicators ?? []).filter((i) => i.category === selectedCategory)
     : (indicators ?? [])
-  const chartIndicators = filteredIndicators.filter((i) => (allData?.[i.id]?.length ?? 0) > 0)
 
   return (
     <ErrorBoundary>
       <main className="max-w-screen-2xl mx-auto px-6 py-6">
+        {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <LayoutDashboard size={18} className="text-blue-400" />
             <h1 className="text-lg font-semibold text-white">대시보드</h1>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs transition-colors"
-          >
-            <RefreshCw size={12} />
-            새로고침
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setAddModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 text-xs transition-colors"
+            >
+              <Plus size={12} />
+              위젯 추가
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs transition-colors"
+            >
+              <RefreshCw size={12} />
+              새로고침
+            </button>
+          </div>
         </div>
 
         {/* 카테고리 필터 */}
@@ -135,48 +129,20 @@ export function DashboardPage() {
           </div>
         </section>
 
-        {/* 차트 */}
+        {/* 위젯 그리드 */}
         <section className="mt-8">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm text-slate-500 uppercase tracking-wide">차트</h2>
-            <div className="flex gap-1">
-              {DATE_RANGE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setDateRange(opt.value)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    dateRange === opt.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {isChartLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => <ChartSkeleton key={i} />)}
-            </div>
-          ) : chartIndicators.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {chartIndicators.map((indicator) => (
-                <LineChart
-                  key={indicator.id}
-                  data={allData![indicator.id]}
-                  title={indicator.name}
-                  color={CHART_COLORS[indicator.category]}
-                  unit={indicator.unit}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center">
-              <p className="text-slate-600">수집된 차트 데이터가 없습니다</p>
-            </div>
-          )}
+          <h2 className="text-sm text-slate-500 mb-3 uppercase tracking-wide">
+            위젯 ({widgets.length})
+          </h2>
+          <WidgetGrid indicators={indicators ?? []} />
         </section>
+
+        {/* 위젯 추가 모달 */}
+        <AddWidgetModal
+          open={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          indicators={indicators ?? []}
+        />
       </main>
     </ErrorBoundary>
   )
