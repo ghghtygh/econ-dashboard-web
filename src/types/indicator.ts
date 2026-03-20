@@ -41,7 +41,7 @@ export interface PagedResponse<T> {
   number: number
 }
 
-export type ChartType = 'line' | 'bar' | 'area' | 'number'
+export type ChartType = 'line' | 'bar' | 'area' | 'candlestick' | 'number'
 
 export interface DashboardWidget {
   id: string
