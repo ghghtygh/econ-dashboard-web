@@ -41,10 +41,14 @@ export interface PagedResponse<T> {
   number: number
 }
 
+export type ChartType = 'line' | 'bar' | 'area' | 'number'
+
 export interface DashboardWidget {
   id: string
-  indicatorId: string
-  chartType: 'line' | 'bar' | 'area' | 'number'
+  indicatorId: number
+  chartType: ChartType
   position: { x: number; y: number; w: number; h: number }
   title?: string
+  color?: string
+  dateRange?: '1D' | '1W' | '1M' | '3M' | '1Y'
 }
