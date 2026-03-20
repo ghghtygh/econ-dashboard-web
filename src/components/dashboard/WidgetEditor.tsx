@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, LineChartIcon, AreaChartIcon, Hash } from 'lucide-react'
+import { BarChart3, LineChartIcon, AreaChartIcon, Hash, CandlestickChart } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
@@ -20,6 +20,7 @@ const CHART_TYPE_OPTIONS: { value: ChartType; label: string; icon: typeof LineCh
   { value: 'line', label: 'Line', icon: LineChartIcon },
   { value: 'bar', label: 'Bar', icon: BarChart3 },
   { value: 'area', label: 'Area', icon: AreaChartIcon },
+  { value: 'candlestick', label: 'Candle', icon: CandlestickChart },
   { value: 'number', label: 'Number', icon: Hash },
 ]
 
@@ -72,7 +73,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
         {/* 차트 타입 */}
         <div>
           <label className="block text-xs text-slate-400 mb-1.5">차트 타입</label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {CHART_TYPE_OPTIONS.map((opt) => {
               const Icon = opt.icon
               return (
