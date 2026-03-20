@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
-import { X, GripVertical } from 'lucide-react'
+import { X, GripVertical, Settings } from 'lucide-react'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
+import { WidgetEditor } from '@/components/dashboard/WidgetEditor'
 import { useDashboardStore } from '@/store/dashboardStore'
 import { useIndicatorSeries } from '@/hooks/useIndicators'
 import type { Indicator, DashboardWidget } from '@/types/indicator'
@@ -12,11 +13,12 @@ interface WidgetGridProps {
   indicators: Indicator[]
 }
 
-function WidgetItem({ widget, indicator, data, isLoading }: {
+function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
   widget: DashboardWidget
   indicator?: Indicator
   data?: import('@/types/indicator').IndicatorData[]
   isLoading: boolean
+  onEdit: () => void
 }) {
   const removeWidget = useDashboardStore((s) => s.removeWidget)
 
@@ -29,12 +31,20 @@ function WidgetItem({ widget, indicator, data, isLoading }: {
             {widget.title ?? indicator?.name ?? '위젯'}
           </h3>
         </div>
-        <button
-          onClick={() => removeWidget(widget.id)}
-          className="text-slate-600 hover:text-red-400 transition-colors shrink-0 ml-2"
-        >
-          <X size={14} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0 ml-2">
+          <button
+            onClick={onEdit}
+            className="text-slate-600 hover:text-blue-400 transition-colors"
+          >
+            <Settings size={14} />
+          </button>
+          <button
+            onClick={() => removeWidget(widget.id)}
+            className="text-slate-600 hover:text-red-400 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
       </div>
       <div className="flex-1 p-3 min-h-0">
         {isLoading ? (
@@ -77,6 +87,9 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   const containerWidth = useContainerWidth(containerRef)
   const widgets = useDashboardStore((s) => s.widgets)
   const updateLayouts = useDashboardStore((s) => s.updateLayouts)
+  const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
+  const editingWidget = widgets.find((w) => w.id === editingWidgetId)
+  const editingIndicator = editingWidget ? indicators.find((i) => i.id === editingWidget.indicatorId) : undefined
 
   const indicatorIds = useMemo(
     () => [...new Set(widgets.map((w) => w.indicatorId))],
@@ -131,11 +144,20 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 indicator={indicator}
                 data={data}
                 isLoading={isLoading}
+                onEdit={() => setEditingWidgetId(widget.id)}
               />
             </div>
           )
         })}
       </ResponsiveGridLayout>
+      {editingWidget && (
+        <WidgetEditor
+          widget={editingWidget}
+          indicator={editingIndicator}
+          open={!!editingWidgetId}
+          onClose={() => setEditingWidgetId(null)}
+        />
+      )}
     </div>
   )
 }

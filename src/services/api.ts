@@ -22,4 +22,5 @@ export const indicatorApi = {
 export const dashboardApi = {
   getWidgets: () => api.get('/dashboard/widgets'),
   saveWidgets: (widgets: unknown[]) => api.post('/dashboard/widgets', widgets),
+  updateWidget: (id: string, widget: unknown) => api.put(`/dashboard/widgets/${id}`, widget),
 }
