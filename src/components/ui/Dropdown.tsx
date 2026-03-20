@@ -37,20 +37,20 @@ export function Dropdown({ options, value, onChange, placeholder = '선택', cla
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex items-center justify-between gap-2 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition-colors',
-          'hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500',
-          selected ? 'text-slate-200' : 'text-slate-400',
+          'flex items-center justify-between gap-2 w-full rounded-lg border border-border-mid bg-elevated px-3 py-2 text-sm transition-colors',
+          'hover:border-border-mid focus:outline-none focus:ring-2 focus:ring-blue-500',
+          selected ? 'text-body' : 'text-muted',
         )}
       >
         <span className="truncate">{selected?.label ?? placeholder}</span>
         <ChevronDown
           size={14}
-          className={cn('text-slate-400 transition-transform', open && 'rotate-180')}
+          className={cn('text-muted transition-transform', open && 'rotate-180')}
         />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border-mid bg-elevated py-1 shadow-xl">
           {options.map((option) => (
             <button
               key={option.value}
@@ -62,7 +62,7 @@ export function Dropdown({ options, value, onChange, placeholder = '선택', cla
                 'w-full px-3 py-2 text-left text-sm transition-colors',
                 option.value === value
                   ? 'bg-blue-600/20 text-blue-300'
-                  : 'text-slate-300 hover:bg-slate-700',
+                  : 'text-body hover:bg-hover',
               )}
             >
               {option.label}
@@ -103,7 +103,7 @@ export function DropdownMenu({ trigger, children, align = 'left', className }: D
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-1 min-w-[160px] rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl',
+            'absolute z-50 mt-1 min-w-[160px] rounded-lg border border-border-mid bg-elevated py-1 shadow-xl',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
@@ -131,7 +131,7 @@ export function DropdownMenuItem({ children, onClick, danger, className }: Dropd
         'w-full px-3 py-2 text-left text-sm transition-colors',
         danger
           ? 'text-red-400 hover:bg-red-900/30'
-          : 'text-slate-300 hover:bg-slate-700',
+          : 'text-body hover:bg-hover',
         className,
       )}
     >

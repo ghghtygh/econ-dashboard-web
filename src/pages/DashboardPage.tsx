@@ -40,7 +40,7 @@ export function DashboardPage() {
         <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-8 text-center">
           <p className="text-red-300">API 연결에 실패했습니다</p>
           <p className="text-red-400/60 text-sm mt-1">{(error as Error)?.message}</p>
-          <button onClick={handleRefresh} className="mt-4 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm hover:bg-slate-700">
+          <button onClick={handleRefresh} className="mt-4 px-4 py-2 bg-elevated text-body rounded-lg text-sm hover:bg-hover">
             다시 시도
           </button>
         </div>
@@ -60,7 +60,7 @@ export function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <LayoutDashboard size={18} className="text-blue-400" />
-            <h1 className="text-lg font-semibold text-white">대시보드</h1>
+            <h1 className="text-lg font-semibold text-heading">대시보드</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -72,7 +72,7 @@ export function DashboardPage() {
             </button>
             <button
               onClick={handleRefresh}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated text-muted hover:text-heading text-xs transition-colors"
             >
               <RefreshCw size={12} />
               새로고침
@@ -87,7 +87,7 @@ export function DashboardPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               selectedCategory === null
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:text-white'
+                : 'bg-elevated text-muted hover:text-heading'
             }`}
           >
             전체
@@ -99,7 +99,7 @@ export function DashboardPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 selectedCategory === cat
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  : 'bg-elevated text-muted hover:text-heading'
               }`}
             >
               {CATEGORY_LABELS[cat]}
@@ -109,7 +109,7 @@ export function DashboardPage() {
 
         {/* 주요 지표 카드 */}
         <section>
-          <h2 className="text-sm text-slate-500 mb-3 uppercase tracking-wide">주요 지표</h2>
+          <h2 className="text-sm text-muted mb-3 uppercase tracking-wide">주요 지표</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {isLoading
               ? Array.from({ length: 10 }).map((_, i) => <IndicatorCardSkeleton key={i} />)
@@ -131,7 +131,7 @@ export function DashboardPage() {
 
         {/* 위젯 그리드 */}
         <section className="mt-8">
-          <h2 className="text-sm text-slate-500 mb-3 uppercase tracking-wide">
+          <h2 className="text-sm text-muted mb-3 uppercase tracking-wide">
             위젯 ({widgets.length})
           </h2>
           <WidgetGrid indicators={indicators ?? []} />

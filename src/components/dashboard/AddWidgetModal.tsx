@@ -61,12 +61,12 @@ export function AddWidgetModal({ open, onClose, indicators }: AddWidgetModalProp
       <ModalHeader onClose={onClose}>위젯 추가</ModalHeader>
       <ModalBody className="space-y-4">
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">지표 선택</label>
+          <label className="block text-xs text-muted mb-1.5">지표 선택</label>
           <Dropdown options={indicatorOptions} value={selectedIndicator} onChange={setSelectedIndicator} placeholder="지표를 선택하세요" />
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">차트 타입</label>
+          <label className="block text-xs text-muted mb-1.5">차트 타입</label>
           <div className="grid grid-cols-5 gap-2">
             {CHART_TYPE_OPTIONS.map((opt) => {
               const Icon = opt.icon
@@ -78,7 +78,7 @@ export function AddWidgetModal({ open, onClose, indicators }: AddWidgetModalProp
                     'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs transition-colors',
                     chartType === opt.value
                       ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                      : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600',
+                      : 'border-border-mid bg-elevated text-muted hover:border-border-mid',
                   )}
                 >
                   <Icon size={18} />
@@ -90,7 +90,7 @@ export function AddWidgetModal({ open, onClose, indicators }: AddWidgetModalProp
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">색상</label>
+          <label className="block text-xs text-muted mb-1.5">색상</label>
           <div className="flex gap-2">
             {COLORS.map((c) => (
               <button

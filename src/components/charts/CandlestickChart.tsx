@@ -32,13 +32,13 @@ function CandlestickTooltip({ active, payload }: {
   if (!active || !payload?.length) return null
   const d = payload[0].payload
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 shadow-lg text-xs">
-      <p className="text-slate-400 mb-1">{d.date}</p>
+    <div className="rounded-lg border border-border-mid bg-elevated px-3 py-2 shadow-lg text-xs">
+      <p className="text-muted mb-1">{d.date}</p>
       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
-        <span className="text-slate-500">시가</span><span className="text-slate-200">{formatPrice(d.open)}</span>
-        <span className="text-slate-500">고가</span><span className="text-green-400">{formatPrice(d.high)}</span>
-        <span className="text-slate-500">저가</span><span className="text-red-400">{formatPrice(d.low)}</span>
-        <span className="text-slate-500">종가</span><span className="text-slate-200">{formatPrice(d.close)}</span>
+        <span className="text-muted">시가</span><span className="text-body">{formatPrice(d.open)}</span>
+        <span className="text-muted">고가</span><span className="text-green-400">{formatPrice(d.high)}</span>
+        <span className="text-muted">저가</span><span className="text-red-400">{formatPrice(d.low)}</span>
+        <span className="text-muted">종가</span><span className="text-body">{formatPrice(d.close)}</span>
       </div>
     </div>
   )
@@ -50,7 +50,7 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
   if (!hasOHLC) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-slate-600 text-xs">OHLC 데이터가 없습니다</p>
+        <p className="text-faint text-xs">OHLC 데이터가 없습니다</p>
       </div>
     )
   }
@@ -80,10 +80,10 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={formatted}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-        <XAxis dataKey="shortDate" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
+        <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
         <YAxis
-          tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false}
+          tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
           tickFormatter={(v) => formatPrice(v)} width={60}
           domain={['auto', 'auto']}
         />

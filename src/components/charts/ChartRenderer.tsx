@@ -23,7 +23,7 @@ interface ChartRendererProps {
 
 export function ChartRenderer({ type, data, color = '#3b82f6', unit }: ChartRendererProps) {
   if (data.length === 0) {
-    return <p className="text-slate-600 text-sm text-center py-8">데이터 없음</p>
+    return <p className="text-faint text-sm text-center py-8">데이터 없음</p>
   }
 
   switch (type) {
@@ -41,9 +41,9 @@ export function ChartRenderer({ type, data, color = '#3b82f6', unit }: ChartRend
       return (
         <ResponsiveContainer width="100%" height="100%">
           <RechartsLineChart data={formatted}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey="shortDate" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false}
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
+            <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
               tickFormatter={(v) => formatPrice(v)} width={60} />
             <Tooltip content={<ChartTooltip unit={unit} color={color} />} />
             <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />

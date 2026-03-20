@@ -8,7 +8,7 @@ interface NumberCardProps {
 }
 
 export function NumberCard({ data, color = '#3b82f6', unit }: NumberCardProps) {
-  if (data.length === 0) return <p className="text-slate-600 text-sm">데이터 없음</p>
+  if (data.length === 0) return <p className="text-faint text-sm">데이터 없음</p>
 
   const latest = data[data.length - 1]
   const prev = data.length > 1 ? data[data.length - 2] : null
@@ -20,11 +20,11 @@ export function NumberCard({ data, color = '#3b82f6', unit }: NumberCardProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-2">
-      <p className="text-4xl font-bold text-white">
+      <p className="text-4xl font-bold text-heading">
         {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </p>
-      {unit && <p className="text-sm text-slate-400">{unit}</p>}
-      <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-slate-400'}`}>
+      {unit && <p className="text-sm text-muted">{unit}</p>}
+      <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-muted'}`}>
         {isPositive ? <TrendingUp size={16} /> : isNegative ? <TrendingDown size={16} /> : <Minus size={16} />}
         <span style={{ color }}>{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
       </div>

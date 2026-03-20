@@ -35,10 +35,10 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
         if (e.target === overlayRef.current) onClose()
       }}
     >
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-overlay backdrop-blur-sm" />
       <div
         className={cn(
-          'relative z-10 w-full max-w-lg rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl',
+          'relative z-10 w-full max-w-lg rounded-xl border border-border-dim bg-surface p-6 shadow-xl',
           className,
         )}
       >
@@ -57,11 +57,11 @@ interface ModalHeaderProps {
 export function ModalHeader({ children, onClose, className }: ModalHeaderProps) {
   return (
     <div className={cn('flex items-center justify-between mb-4', className)}>
-      <h2 className="text-lg font-semibold text-white">{children}</h2>
+      <h2 className="text-lg font-semibold text-heading">{children}</h2>
       {onClose && (
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-white transition-colors"
+          className="text-muted hover:text-heading transition-colors"
         >
           <X size={18} />
         </button>
@@ -76,7 +76,7 @@ interface ModalBodyProps {
 }
 
 export function ModalBody({ children, className }: ModalBodyProps) {
-  return <div className={cn('text-slate-300', className)}>{children}</div>
+  return <div className={cn('text-body', className)}>{children}</div>
 }
 
 interface ModalFooterProps {

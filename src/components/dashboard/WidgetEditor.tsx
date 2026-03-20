@@ -61,18 +61,18 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
       <ModalBody className="space-y-5">
         {/* 제목 */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">위젯 제목</label>
+          <label className="block text-xs text-muted mb-1.5">위젯 제목</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={indicator?.name ?? '위젯 제목'}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border-mid bg-elevated px-3 py-2 text-sm text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* 차트 타입 */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">차트 타입</label>
+          <label className="block text-xs text-muted mb-1.5">차트 타입</label>
           <div className="grid grid-cols-5 gap-2">
             {CHART_TYPE_OPTIONS.map((opt) => {
               const Icon = opt.icon
@@ -84,7 +84,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
                     'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs transition-colors',
                     chartType === opt.value
                       ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                      : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600',
+                      : 'border-border-mid bg-elevated text-muted hover:border-border-mid',
                   )}
                 >
                   <Icon size={18} />
@@ -97,7 +97,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 기간 */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">데이터 기간</label>
+          <label className="block text-xs text-muted mb-1.5">데이터 기간</label>
           <div className="flex gap-1">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
@@ -107,7 +107,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
                   'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
                   dateRange === opt.value
                     ? 'bg-blue-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-white',
+                    : 'bg-elevated text-muted hover:text-heading',
                 )}
               >
                 {opt.label}
@@ -118,7 +118,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 색상 */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">차트 색상</label>
+          <label className="block text-xs text-muted mb-1.5">차트 색상</label>
           <div className="flex gap-2">
             {COLORS.map((c) => (
               <button
@@ -136,8 +136,8 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 미리보기 */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1.5">미리보기</label>
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 h-[180px]">
+          <label className="block text-xs text-muted mb-1.5">미리보기</label>
+          <div className="rounded-xl border border-border-dim bg-page p-4 h-[180px]">
             {previewData && previewData.length > 0 ? (
               <ChartRenderer
                 type={chartType}
@@ -147,7 +147,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-slate-600 text-xs">미리보기 데이터 로딩 중...</p>
+                <p className="text-faint text-xs">미리보기 데이터 로딩 중...</p>
               </div>
             )}
           </div>
