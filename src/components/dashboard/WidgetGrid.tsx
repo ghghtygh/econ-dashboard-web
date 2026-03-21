@@ -23,24 +23,24 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
   const removeWidget = useDashboardStore((s) => s.removeWidget)
 
   return (
-    <div className="h-full rounded-xl border border-slate-800 bg-slate-900 flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800 shrink-0">
+    <div className="h-full rounded-xl border border-border-dim bg-surface flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border-dim shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <GripVertical size={14} className="text-slate-600 cursor-grab shrink-0 drag-handle" />
-          <h3 className="text-xs font-medium text-slate-300 truncate">
+          <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
+          <h3 className="text-xs font-medium text-body truncate">
             {widget.title ?? indicator?.name ?? '위젯'}
           </h3>
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
           <button
             onClick={onEdit}
-            className="text-slate-600 hover:text-blue-400 transition-colors"
+            className="text-faint hover:text-blue-400 transition-colors"
           >
             <Settings size={14} />
           </button>
           <button
             onClick={() => removeWidget(widget.id)}
-            className="text-slate-600 hover:text-red-400 transition-colors"
+            className="text-faint hover:text-red-400 transition-colors"
           >
             <X size={14} />
           </button>
@@ -58,7 +58,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-slate-600 text-xs">데이터 없음</p>
+            <p className="text-faint text-xs">데이터 없음</p>
           </div>
         )}
       </div>
@@ -115,8 +115,8 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
 
   if (widgets.length === 0) {
     return (
-      <div ref={containerRef} className="rounded-xl border border-dashed border-slate-800 p-12 text-center">
-        <p className="text-slate-600">위젯을 추가하여 대시보드를 구성하세요</p>
+      <div ref={containerRef} className="rounded-xl border border-dashed border-border-dim p-12 text-center">
+        <p className="text-faint">위젯을 추가하여 대시보드를 구성하세요</p>
       </div>
     )
   }

@@ -21,9 +21,9 @@ export function BarChart({ data, color = '#3b82f6', unit }: BarChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RechartsBarChart data={formatted}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-        <XAxis dataKey="shortDate" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false}
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
+        <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
           tickFormatter={(v) => formatPrice(v)} width={60} />
         <Tooltip content={<ChartTooltip unit={unit} color={color} />} />
         <Bar dataKey="value" fill={color} radius={[2, 2, 0, 0]} />

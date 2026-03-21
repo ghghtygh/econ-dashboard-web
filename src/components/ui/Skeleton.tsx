@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils'
 const skeletonVariants = cva('animate-pulse rounded-lg', {
   variants: {
     variant: {
-      default: 'bg-slate-800',
-      light: 'bg-slate-700',
+      default: 'bg-[var(--th-skeleton)]',
+      light: 'bg-[var(--th-skeleton-light)]',
     },
   },
   defaultVariants: {
@@ -25,7 +25,7 @@ export function Skeleton({ className, variant, ...props }: SkeletonProps) {
 
 export function ChartSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+    <div className="rounded-xl border border-border-dim bg-surface p-4">
       <Skeleton className="h-4 w-32 mb-4" />
       <Skeleton className="h-[200px] w-full" />
     </div>
@@ -34,7 +34,7 @@ export function ChartSkeleton() {
 
 export function IndicatorCardSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+    <div className="rounded-xl border border-border-dim bg-surface p-4">
       <div className="flex items-start justify-between mb-3">
         <div>
           <Skeleton className="h-3 w-12 mb-2" />

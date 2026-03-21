@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Header } from '@/components/layout/Header'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { useThemeStore } from '@/store/themeStore'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -9,9 +11,15 @@ const queryClient = new QueryClient({
 })
 
 function App() {
+  const theme = useThemeStore((s) => s.theme)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-[#0f1117]">
+      <div className="min-h-screen bg-page">
         <Header />
         <DashboardPage />
       </div>

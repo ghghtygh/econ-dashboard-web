@@ -37,8 +37,8 @@ function CustomTooltip({ active, payload, label, unit, color }: CustomTooltipPro
   if (!active || !payload?.length) return null
   const value = payload[0].value
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 shadow-lg">
-      <p className="text-xs text-slate-400 mb-1">{label}</p>
+    <div className="rounded-lg border border-border-mid bg-elevated px-3 py-2 shadow-lg">
+      <p className="text-xs text-muted mb-1">{label}</p>
       <p className="text-sm font-semibold" style={{ color }}>
         {formatPrice(value)}{unit ? ` ${unit}` : ''}
       </p>
@@ -54,13 +54,13 @@ export function LineChart({ data, title, color = '#3b82f6', unit }: LineChartPro
   }))
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-      {title && <h3 className="text-sm font-medium text-slate-300 mb-4">{title}</h3>}
+    <div className="rounded-xl border border-border-dim bg-surface p-4">
+      {title && <h3 className="text-sm font-medium text-body mb-4">{title}</h3>}
       <ResponsiveContainer width="100%" height={200}>
         <RechartsLineChart data={formatted}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="shortDate" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false}
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
+          <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
             tickFormatter={(v) => formatPrice(v)} width={60} />
           <Tooltip content={<CustomTooltip unit={unit} color={color} />} />
           <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
