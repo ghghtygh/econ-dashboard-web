@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { LayoutDashboard, RefreshCw, Plus } from 'lucide-react'
+import { RefreshCw, Plus, ChevronDown, ChevronUp } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
+import { MarketCard } from '@/components/dashboard/MarketCard'
 import { IndicatorCard } from '@/components/dashboard/IndicatorCard'
+import { CorrelationHeatmap } from '@/components/dashboard/CorrelationHeatmap'
+import { AIPanel } from '@/components/dashboard/AIPanel'
+import { NewsTimeline } from '@/components/dashboard/NewsTimeline'
 import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
 import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
 import { IndicatorCardSkeleton } from '@/components/ui/Skeleton'
@@ -10,18 +14,21 @@ import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
 import type { IndicatorCategory } from '@/types/indicator'
 
-const CATEGORY_LABELS: Record<IndicatorCategory, string> = {
+const CATEGORY_LABELS: Record<string, string> = {
+  ALL: '주요 지표',
   STOCK: '주식',
   FOREX: '외환',
+  COMMODITY: '원자재',
+  BOND: '채권',
   CRYPTO: '암호화폐',
   MACRO: '거시경제',
-  BOND: '채권',
-  COMMODITY: '원자재',
 }
 
 export function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<IndicatorCategory | null>(null)
+  const [selectedIndicatorId, setSelectedIndicatorId] = useState<number | undefined>()
   const [addModalOpen, setAddModalOpen] = useState(false)
+  const [showAllIndicators, setShowAllIndicators] = useState(false)
   const queryClient = useQueryClient()
   const { data: indicators, isLoading, isError, error } = useIndicators()
   const widgets = useDashboardStore((s) => s.widgets)
@@ -36,7 +43,7 @@ export function DashboardPage() {
 
   if (isError) {
     return (
-      <main className="max-w-screen-2xl mx-auto px-6 py-6">
+      <main className="dash-container">
         <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-8 text-center">
           <p className="text-red-300">API 연결에 실패했습니다</p>
           <p className="text-red-400/60 text-sm mt-1">{(error as Error)?.message}</p>
@@ -53,91 +60,155 @@ export function DashboardPage() {
     ? (indicators ?? []).filter((i) => i.category === selectedCategory)
     : (indicators ?? [])
 
+  // Top 4 indicators for market cards (highlight row)
+  const topIndicators = filteredIndicators.slice(0, 4)
+  // Remaining indicators for expanded grid
+  const remainingIndicators = filteredIndicators.slice(4)
+  const selectedIndicator = indicators?.find((i) => i.id === selectedIndicatorId)
+  const selectedSeries = selectedIndicatorId ? allData?.[selectedIndicatorId] : undefined
+
   return (
     <ErrorBoundary>
-      <main className="max-w-screen-2xl mx-auto px-6 py-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <LayoutDashboard size={18} className="text-blue-400" />
-            <h1 className="text-lg font-semibold text-heading">대시보드</h1>
-          </div>
-          <div className="flex items-center gap-2">
+      <main className="dash-container">
+        {/* Top Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-border-dim">
+          <h1 className="text-lg font-semibold text-heading">경제 지표 대시보드</h1>
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
-              onClick={() => setAddModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 text-xs transition-colors"
+              onClick={() => setSelectedCategory(null)}
+              className={tabClass(selectedCategory === null)}
             >
-              <Plus size={12} />
-              위젯 추가
+              {CATEGORY_LABELS.ALL}
             </button>
-            <button
-              onClick={handleRefresh}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated text-muted hover:text-heading text-xs transition-colors"
-            >
-              <RefreshCw size={12} />
-              새로고침
-            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={tabClass(selectedCategory === cat)}
+              >
+                {CATEGORY_LABELS[cat] ?? cat}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* 카테고리 필터 */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              selectedCategory === null
-                ? 'bg-blue-600 text-white'
-                : 'bg-elevated text-muted hover:text-heading'
-            }`}
-          >
-            전체
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                selectedCategory === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-elevated text-muted hover:text-heading'
-              }`}
-            >
-              {CATEGORY_LABELS[cat]}
-            </button>
-          ))}
-        </div>
-
-        {/* 주요 지표 카드 */}
-        <section>
-          <h2 className="text-sm text-muted mb-3 uppercase tracking-wide">주요 지표</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Market Grid - Top 4 cards with sparklines */}
+        <section className="mb-8 pb-8 border-b border-border-dim">
+          <h2 className="section-label">실시간 마켓</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {isLoading
-              ? Array.from({ length: 10 }).map((_, i) => <IndicatorCardSkeleton key={i} />)
-              : filteredIndicators.map((indicator) => {
+              ? Array.from({ length: 4 }).map((_, i) => <IndicatorCardSkeleton key={i} />)
+              : topIndicators.map((indicator) => (
+                  <MarketCard
+                    key={indicator.id}
+                    indicator={indicator}
+                    series={allData?.[indicator.id] ?? []}
+                    isSelected={selectedIndicatorId === indicator.id}
+                    onClick={() =>
+                      setSelectedIndicatorId(
+                        selectedIndicatorId === indicator.id ? undefined : indicator.id,
+                      )
+                    }
+                  />
+                ))}
+          </div>
+        </section>
+
+        {/* Expandable All Indicators Grid */}
+        {remainingIndicators.length > 0 && (
+          <section className="mb-8 pb-8 border-b border-border-dim">
+            <button
+              onClick={() => setShowAllIndicators(!showAllIndicators)}
+              className="flex items-center gap-1.5 text-xs text-muted hover:text-heading transition-colors py-3 mb-4"
+            >
+              {showAllIndicators ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              전체 지표 보기 ({filteredIndicators.length}개)
+            </button>
+            {showAllIndicators && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fadeIn">
+                {remainingIndicators.map((indicator) => {
                   const series = allData?.[indicator.id] ?? []
                   const latest = series.length > 0 ? series[series.length - 1] : undefined
                   const prev = series.length > 1 ? series[series.length - 2] : undefined
                   return (
-                    <IndicatorCard
+                    <div
                       key={indicator.id}
-                      indicator={indicator}
-                      latest={latest}
-                      prevClose={prev?.value}
-                    />
+                      className="cursor-pointer"
+                      onClick={() =>
+                        setSelectedIndicatorId(
+                          selectedIndicatorId === indicator.id ? undefined : indicator.id,
+                        )
+                      }
+                    >
+                      <IndicatorCard
+                        indicator={indicator}
+                        latest={latest}
+                        prevClose={prev?.value}
+                      />
+                    </div>
                   )
                 })}
-          </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Divider */}
+        <hr className="section-divider" />
+
+        {/* Bottom 3-column Grid */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
+          {/* Left: Correlation Heatmap */}
+          <CorrelationHeatmap
+            indicators={filteredIndicators.slice(0, 5)}
+            dataMap={allData ?? {}}
+            selectedId={selectedIndicatorId}
+            onSelect={(id) =>
+              setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
+            }
+          />
+
+          {/* Center: AI Panel */}
+          <AIPanel
+            selectedIndicator={selectedIndicator}
+            series={selectedSeries}
+            allIndicators={indicators}
+          />
+
+          {/* Right: News Timeline */}
+          <NewsTimeline />
         </section>
 
-        {/* 위젯 그리드 */}
-        <section className="mt-8">
-          <h2 className="text-sm text-muted mb-3 uppercase tracking-wide">
-            위젯 ({widgets.length})
-          </h2>
+        {/* Divider */}
+        <hr className="section-divider" />
+
+        {/* Widget Section (existing) */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="section-label !mb-0">
+              위젯 ({widgets.length})
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setAddModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 text-xs transition-colors"
+              >
+                <Plus size={12} />
+                위젯 추가
+              </button>
+              <button
+                onClick={handleRefresh}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated text-muted hover:text-heading text-xs transition-colors"
+              >
+                <RefreshCw size={12} />
+                새로고침
+              </button>
+            </div>
+          </div>
           <WidgetGrid indicators={indicators ?? []} />
         </section>
 
-        {/* 위젯 추가 모달 */}
+        {/* Add Widget Modal */}
         <AddWidgetModal
           open={addModalOpen}
           onClose={() => setAddModalOpen(false)}
@@ -146,4 +217,12 @@ export function DashboardPage() {
       </main>
     </ErrorBoundary>
   )
+}
+
+function tabClass(active: boolean) {
+  return `text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+    active
+      ? 'bg-elevated text-heading border-border-mid'
+      : 'border-border-dim text-muted hover:text-heading hover:border-border-mid'
+  }`
 }

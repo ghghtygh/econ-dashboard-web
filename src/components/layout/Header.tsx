@@ -5,8 +5,8 @@ export function Header() {
   const { theme, toggleTheme } = useThemeStore()
 
   return (
-    <header className="border-b border-border-dim bg-surface/50 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-screen-2xl mx-auto px-6 h-14 flex items-center gap-3">
+    <header className="border-b border-border-dim bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
+      <div className="max-w-screen-2xl mx-auto px-6 h-16 flex items-center gap-3">
         <BarChart2 className="text-blue-400" size={22} />
         <span className="font-semibold text-heading text-lg">Econ Dashboard</span>
         <div className="flex items-center gap-2 ml-auto">
