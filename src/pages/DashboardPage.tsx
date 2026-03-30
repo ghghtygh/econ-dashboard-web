@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { MarketCard } from '@/components/dashboard/MarketCard'
 import { IndicatorCard } from '@/components/dashboard/IndicatorCard'
 import { CorrelationHeatmap } from '@/components/dashboard/CorrelationHeatmap'
+import { HistoricalComparison } from '@/components/dashboard/HistoricalComparison'
 import { AIPanel } from '@/components/dashboard/AIPanel'
 import { NewsTimeline } from '@/components/dashboard/NewsTimeline'
 import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
@@ -177,6 +178,18 @@ export function DashboardPage() {
 
           {/* Right: News Timeline */}
           <NewsTimeline />
+        </section>
+
+        {/* Historical Comparison */}
+        <section className="mb-8">
+          <HistoricalComparison
+            indicators={filteredIndicators}
+            dataMap={allData ?? {}}
+            selectedId={selectedIndicatorId}
+            onSelect={(id) =>
+              setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
+            }
+          />
         </section>
 
         {/* Divider */}
