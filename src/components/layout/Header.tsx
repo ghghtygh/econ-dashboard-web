@@ -34,15 +34,17 @@ export function Header() {
   const recentNotifications = notifications.slice(0, 5)
 
   return (
-    <header className="border-b border-border-dim bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-b border-border-dim bg-surface/90 backdrop-blur-md sticky top-0 z-50" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <div className="max-w-screen-2xl mx-auto px-6 h-14 flex items-center gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <BarChart2 className="text-blue-400" size={20} />
-          <span className="font-semibold text-heading text-[15px]">Econ Dashboard</span>
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <BarChart2 className="text-white" size={18} />
+          </div>
+          <span className="font-bold text-heading text-[15px] tracking-tight">Econ Dashboard</span>
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-1 ml-4">
+        <nav className="flex items-center gap-0.5 ml-6">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path
             return (
@@ -50,43 +52,43 @@ export function Header() {
                 key={path}
                 to={path}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                  'flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all',
                   active
-                    ? 'bg-elevated text-heading'
-                    : 'text-muted hover:text-heading hover:bg-elevated/50',
+                    ? 'bg-accent-soft text-accent'
+                    : 'text-muted hover:text-heading hover:bg-elevated',
                 )}
               >
-                <Icon size={14} />
+                <Icon size={15} />
                 {label}
               </Link>
             )
           })}
         </nav>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1 ml-auto">
           {/* Alert Bell */}
           <div ref={bellRef} className="relative">
             <button
               onClick={() => setBellOpen(!bellOpen)}
-              className="relative p-2 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-colors"
+              className="relative p-2.5 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-all"
               aria-label="알림"
             >
-              <Bell size={16} />
+              <Bell size={17} />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
 
             {bellOpen && (
-              <div className="absolute right-0 top-full mt-1 w-80 rounded-xl border border-border-mid bg-surface shadow-xl animate-fadeIn z-50">
+              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-dim bg-surface animate-fadeIn z-50" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border-dim">
-                  <span className="text-xs font-medium text-heading">알림</span>
+                  <span className="text-sm font-semibold text-heading">알림</span>
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      className="text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
+                      className="text-[11px] text-accent hover:underline transition-colors"
                     >
                       모두 읽음
                     </button>
@@ -94,23 +96,23 @@ export function Header() {
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {recentNotifications.length === 0 ? (
-                    <p className="text-xs text-faint text-center py-6">알림이 없습니다</p>
+                    <p className="text-xs text-faint text-center py-8">알림이 없습니다</p>
                   ) : (
                     recentNotifications.map((n) => (
                       <div
                         key={n.id}
                         className={cn(
-                          'px-4 py-2.5 border-b border-border-dim last:border-0 text-xs',
-                          !n.read && 'bg-blue-500/5',
+                          'px-4 py-3 border-b border-border-dim last:border-0 text-xs',
+                          !n.read && 'bg-accent-soft',
                         )}
                       >
                         <div className="flex items-start gap-2">
                           {!n.read && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1 shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-accent mt-1 shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="text-body leading-relaxed">{n.message}</p>
-                            <p className="text-faint text-[10px] mt-0.5">
+                            <p className="text-faint text-[10px] mt-1">
                               {n.indicatorName} · {new Date(n.triggeredAt).toLocaleString('ko-KR')}
                             </p>
                           </div>
@@ -125,10 +127,10 @@ export function Header() {
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-colors"
+            className="p-2.5 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-all"
             aria-label="테마 전환"
           >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
         </div>
       </div>
