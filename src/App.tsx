@@ -1,10 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Sidebar } from '@/components/layout/Sidebar'
 import { DashboardPage } from '@/pages/DashboardPage'
-import { ExplorePage } from '@/pages/ExplorePage'
-import { NewsPage } from '@/pages/NewsPage'
 import { useThemeStore } from '@/store/themeStore'
 
 const queryClient = new QueryClient({
@@ -23,16 +20,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-page">
-          <Sidebar />
-          <div className="lg:pl-64">
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/news" element={<NewsPage />} />
-            </Routes>
-          </div>
-        </div>
+        <Routes>
+          <Route path="/*" element={<DashboardPage />} />
+        </Routes>
       </BrowserRouter>
     </QueryClientProvider>
   )
