@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Header } from '@/components/layout/Header'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { ExplorePage } from '@/pages/ExplorePage'
 import { useThemeStore } from '@/store/themeStore'
 
 const queryClient = new QueryClient({
@@ -19,10 +21,15 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-page">
-        <Header />
-        <DashboardPage />
-      </div>
+      <BrowserRouter>
+        <div className="min-h-screen bg-page">
+          <Header />
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
     </QueryClientProvider>
   )
 }
