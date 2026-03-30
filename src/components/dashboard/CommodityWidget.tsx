@@ -76,7 +76,7 @@ function CommodityCard({
   return (
     <div
       className={cn(
-        'rounded-xl border bg-surface p-4 cursor-pointer transition-colors',
+        'rounded-lg border bg-surface p-4 cursor-pointer transition-colors',
         'border-border-dim hover:border-border-mid',
       )}
       onClick={() => setExpanded((v) => !v)}

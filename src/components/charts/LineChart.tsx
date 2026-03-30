@@ -54,7 +54,7 @@ export function LineChart({ data, title, color = '#3b82f6', unit }: LineChartPro
   }))
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-4">
+    <div className="rounded-lg border border-border-dim bg-surface p-4">
       {title && <h3 className="text-sm font-medium text-body mb-4">{title}</h3>}
       <ResponsiveContainer width="100%" height={200}>
         <RechartsLineChart data={formatted}>

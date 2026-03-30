@@ -88,7 +88,7 @@ export function DashboardPage() {
 
         {/* API Error Banner */}
         {isError && (
-          <div className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4 mb-6 flex items-center justify-between">
+          <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4 mb-6 flex items-center justify-between">
             <div>
               <p className="text-red-700 dark:text-red-300 text-sm font-medium">API 연결에 실패했습니다</p>
               <p className="text-red-500/70 dark:text-red-400/60 text-xs mt-0.5">{(error as Error)?.message}</p>

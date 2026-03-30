@@ -91,7 +91,7 @@ export function NewsTimeline({ filterTag }: NewsTimelineProps) {
   }, [filterTag])
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5 h-full flex flex-col">
+    <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       <h3 className="text-[11px] font-medium text-muted uppercase tracking-wider mb-3">
         뉴스 타임라인
       </h3>

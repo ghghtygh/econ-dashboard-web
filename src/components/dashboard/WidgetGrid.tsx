@@ -33,7 +33,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
   const currentRange = widget.dateRange ?? '1M'
 
   return (
-    <div className="h-full rounded-xl border border-border-dim bg-surface flex flex-col overflow-hidden">
+    <div className="h-full rounded-lg border border-border-dim bg-surface flex flex-col overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-dim shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
