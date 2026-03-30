@@ -66,7 +66,7 @@ export function DashboardPage() {
       <main className="dash-container">
         {/* Top Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6">
-          <h1 className="text-xl font-bold text-heading tracking-tight">경제 지표 대시보드</h1>
+          <h1 className="text-2xl font-bold text-heading tracking-tight">경제 지표 대시보드</h1>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setSelectedCategory(null)}
@@ -93,16 +93,16 @@ export function DashboardPage() {
               <p className="text-red-700 dark:text-red-300 text-sm font-medium">API 연결에 실패했습니다</p>
               <p className="text-red-500/70 dark:text-red-400/60 text-xs mt-0.5">{(error as Error)?.message}</p>
             </div>
-            <button onClick={handleRefresh} className="px-4 py-2 bg-white dark:bg-elevated text-body rounded-xl text-xs font-medium hover:bg-elevated dark:hover:bg-hover shrink-0 border border-border-dim">
+            <button onClick={handleRefresh} className="px-5 py-2.5 bg-white dark:bg-elevated text-body rounded-lg text-sm font-medium hover:bg-elevated dark:hover:bg-hover shrink-0 border border-border-dim">
               다시 시도
             </button>
           </div>
         )}
 
         {/* Market Grid - Top 4 cards with sparklines */}
-        <section className="mb-10">
+        <section className="mb-12">
           <h2 className="section-label">실시간 마켓</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {isLoading
               ? Array.from({ length: 4 }).map((_, i) => <IndicatorCardSkeleton key={i} />)
               : topIndicators.map((indicator) => (
@@ -123,7 +123,7 @@ export function DashboardPage() {
 
         {/* Expandable All Indicators Grid */}
         {remainingIndicators.length > 0 && (
-          <section className="mb-10">
+          <section className="mb-12">
             <button
               onClick={() => setShowAllIndicators(!showAllIndicators)}
               className="flex items-center gap-1.5 text-xs text-muted hover:text-heading transition-colors py-3 mb-4"
@@ -164,7 +164,7 @@ export function DashboardPage() {
         <hr className="section-divider" />
 
         {/* Market Sentiment & Additional Indices (#22) */}
-        <section className="mb-10">
+        <section className="mb-12">
           <MarketSentimentWidget
             indicators={indicators ?? []}
             dataMap={allData ?? {}}
@@ -172,7 +172,7 @@ export function DashboardPage() {
         </section>
 
         {/* Macro Indicators (#19) */}
-        <section className="mb-10">
+        <section className="mb-12">
           <MacroIndicatorPanel
             indicators={indicators ?? []}
             dataMap={allData ?? {}}
@@ -180,7 +180,7 @@ export function DashboardPage() {
         </section>
 
         {/* Bond & Commodity side by side (#20, #21) */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-10">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-12">
           <BondSpreadWidget
             indicators={indicators ?? []}
             dataMap={allData ?? {}}
@@ -192,7 +192,7 @@ export function DashboardPage() {
         </section>
 
         {/* Chart Overlay Comparison (#23) */}
-        <section className="hidden lg:block mb-10">
+        <section className="hidden lg:block mb-12">
           <ChartOverlay
             indicators={indicators ?? []}
             dataMap={allData ?? {}}
@@ -200,7 +200,7 @@ export function DashboardPage() {
         </section>
 
         {/* Bottom 3-column Grid: Correlation + AI + News */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
           {/* Left: Correlation Heatmap */}
           <div className="hidden lg:block">
             <CorrelationHeatmap
@@ -225,7 +225,7 @@ export function DashboardPage() {
         </section>
 
         {/* Calendar & Alerts side by side (#25, #26) */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-10">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-12">
           <EconomicCalendar />
           <AlertPanel
             indicators={indicators ?? []}
@@ -234,7 +234,7 @@ export function DashboardPage() {
         </section>
 
         {/* Historical Comparison */}
-        <section className="hidden lg:block mb-10">
+        <section className="hidden lg:block mb-12">
           <HistoricalComparison
             indicators={filteredIndicators}
             dataMap={allData ?? {}}
@@ -257,14 +257,14 @@ export function DashboardPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setAddModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 text-xs transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 text-sm font-medium transition-colors"
               >
                 <Plus size={12} />
                 위젯 추가
               </button>
               <button
                 onClick={handleRefresh}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated text-muted hover:text-heading text-xs transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-elevated text-muted hover:text-heading text-sm font-medium transition-colors"
               >
                 <RefreshCw size={12} />
                 새로고침
@@ -286,9 +286,9 @@ export function DashboardPage() {
 }
 
 function tabClass(active: boolean) {
-  return `text-[13px] font-medium px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+  return `text-sm font-medium px-4 py-2 rounded-lg transition-all cursor-pointer border ${
     active
-      ? 'bg-accent-soft text-accent'
-      : 'text-muted hover:text-heading hover:bg-elevated'
+      ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30'
+      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-transparent dark:text-muted dark:hover:text-heading dark:hover:bg-elevated'
   }`
 }

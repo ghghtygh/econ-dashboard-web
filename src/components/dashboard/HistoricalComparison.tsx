@@ -142,7 +142,7 @@ export function HistoricalComparison({ indicators, dataMap, selectedId, onSelect
         <div className="flex items-center gap-2">
           <History size={16} className="text-muted" />
           <div>
-            <h3 className="text-[13px] font-medium text-heading">이력 비교 모드</h3>
+            <h3 className="text-base font-semibold text-heading">이력 비교 모드</h3>
             <p className="text-[11px] text-muted mt-0.5">과거 위기 시점과 현재를 정규화하여 비교</p>
           </div>
         </div>

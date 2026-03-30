@@ -79,7 +79,7 @@ function EventDetail({
   return (
     <div className="animate-fadeIn rounded-lg border border-border-dim bg-surface p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
-        <h4 className="text-sm font-semibold text-heading">{event.title}</h4>
+        <h4 className="text-base font-semibold text-heading">{event.title}</h4>
         <button
           onClick={onClose}
           className="shrink-0 text-muted hover:text-heading transition-colors"
@@ -176,7 +176,7 @@ function MonthlyView({
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-sm font-semibold text-heading">
+        <span className="text-base font-semibold text-heading">
           {year}년 {month + 1}월
         </span>
         <button

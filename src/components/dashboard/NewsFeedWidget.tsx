@@ -151,7 +151,7 @@ export function NewsFeedWidget() {
   return (
     <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       {/* Header */}
-      <h3 className="text-[11px] font-medium text-muted uppercase tracking-wider mb-3">
+      <h3 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
         경제 뉴스
       </h3>
 

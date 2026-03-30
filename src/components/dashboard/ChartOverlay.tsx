@@ -249,7 +249,7 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-muted" />
           <div>
-            <h3 className="text-[13px] font-medium text-heading">지표 비교 오버레이</h3>
+            <h3 className="text-base font-semibold text-heading">지표 비교 오버레이</h3>
             <p className="text-[11px] text-muted mt-0.5">
               다중 지표를 겹쳐 비교하고 상관관계를 발견하세요
             </p>

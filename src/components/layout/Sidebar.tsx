@@ -19,11 +19,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-border-dim px-6">
+      <div className="flex h-20 items-center gap-3 border-b border-border-dim px-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
           <BarChart2 className="text-white" size={18} />
         </div>
-        <span className="text-sm font-bold text-heading tracking-tight">Econ Dashboard</span>
+        <span className="text-base font-semibold text-heading tracking-tight">Econ Dashboard</span>
         {onClose && (
           <button onClick={onClose} className="ml-auto p-1 text-muted hover:text-heading lg:hidden">
             <X size={20} />
@@ -32,8 +32,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        <p className="px-3 mb-2 text-xs font-medium text-faint uppercase tracking-wider">메뉴</p>
+      <nav className="flex-1 px-5 py-6 space-y-1.5">
+        <p className="px-3 mb-3 text-[11px] font-medium text-faint uppercase tracking-wider">메뉴</p>
         {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
           const active = location.pathname === path
           return (
@@ -42,13 +42,13 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               to={path}
               onClick={onClose}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px] font-medium transition-colors',
                 active
                   ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
                   : 'text-muted hover:bg-elevated hover:text-heading',
               )}
             >
-              <Icon size={18} />
+              <Icon size={20} />
               {label}
               {path === '/' && unreadCount > 0 && (
                 <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold text-red-700 dark:bg-red-500/20 dark:text-red-400">
@@ -61,10 +61,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-border-dim px-4 py-4 space-y-1">
+      <div className="border-t border-border-dim px-5 py-5 space-y-1">
         <button
           onClick={toggleTheme}
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-elevated hover:text-heading transition-colors"
+          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-[15px] font-medium text-muted hover:bg-elevated hover:text-heading transition-colors"
         >
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           {theme === 'dark' ? '라이트 모드' : '다크 모드'}
@@ -80,7 +80,7 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile toggle */}
-      <div className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-border-dim bg-surface px-4 lg:hidden">
+      <div className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border-dim bg-surface px-4 lg:hidden">
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-md text-muted hover:bg-elevated hover:text-heading transition-colors"
@@ -92,7 +92,7 @@ export function Sidebar() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600">
             <BarChart2 className="text-white" size={14} />
           </div>
-          <span className="text-sm font-bold text-heading">Econ Dashboard</span>
+          <span className="text-base font-semibold text-heading">Econ Dashboard</span>
         </div>
       </div>
 
