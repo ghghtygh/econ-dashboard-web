@@ -19,6 +19,12 @@ export const indicatorApi = {
     api.post('/indicators/series', { indicatorIds, startDate, endDate }),
 }
 
+export const newsApi = {
+  getList: (category?: string, page = 0, size = 20) =>
+    api.get('/news', { params: { category, page, size } }),
+  getById: (id: string) => api.get(`/news/${id}`),
+}
+
 export const dashboardApi = {
   getWidgets: () => api.get('/dashboard/widgets'),
   saveWidgets: (widgets: unknown[]) => api.post('/dashboard/widgets', widgets),
