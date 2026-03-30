@@ -49,20 +49,6 @@ export function DashboardPage() {
     queryClient.invalidateQueries({ queryKey: ['indicatorSeries'] })
   }
 
-  if (isError) {
-    return (
-      <main className="dash-container">
-        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-8 text-center">
-          <p className="text-red-300">API 연결에 실패했습니다</p>
-          <p className="text-red-400/60 text-sm mt-1">{(error as Error)?.message}</p>
-          <button onClick={handleRefresh} className="mt-4 px-4 py-2 bg-elevated text-body rounded-lg text-sm hover:bg-hover">
-            다시 시도
-          </button>
-        </div>
-      </main>
-    )
-  }
-
   const categories = [...new Set(indicators?.map((i) => i.category) ?? [])] as IndicatorCategory[]
   const filteredIndicators = selectedCategory
     ? (indicators ?? []).filter((i) => i.category === selectedCategory)
@@ -99,6 +85,19 @@ export function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* API Error Banner */}
+        {isError && (
+          <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-4 mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-red-300 text-sm">API 연결에 실패했습니다</p>
+              <p className="text-red-400/60 text-xs mt-0.5">{(error as Error)?.message}</p>
+            </div>
+            <button onClick={handleRefresh} className="px-3 py-1.5 bg-elevated text-body rounded-lg text-xs hover:bg-hover shrink-0">
+              다시 시도
+            </button>
+          </div>
+        )}
 
         {/* Market Grid - Top 4 cards with sparklines */}
         <section className="mb-8 pb-8 border-b border-border-dim">
