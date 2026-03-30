@@ -38,7 +38,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
       <div className="fixed inset-0 bg-overlay backdrop-blur-sm" />
       <div
         className={cn(
-          'relative z-10 w-full max-w-lg rounded-xl border border-border-dim bg-surface p-6 shadow-xl',
+          'relative z-10 w-full max-w-lg rounded-lg border border-border-dim bg-surface p-6 shadow-xl',
           className,
         )}
       >

@@ -6,7 +6,14 @@ import { IndicatorCard } from '@/components/dashboard/IndicatorCard'
 import { CorrelationHeatmap } from '@/components/dashboard/CorrelationHeatmap'
 import { HistoricalComparison } from '@/components/dashboard/HistoricalComparison'
 import { AIPanel } from '@/components/dashboard/AIPanel'
-import { NewsTimeline } from '@/components/dashboard/NewsTimeline'
+import { MacroIndicatorPanel } from '@/components/dashboard/MacroIndicatorPanel'
+import { BondSpreadWidget } from '@/components/dashboard/BondSpreadWidget'
+import { CommodityWidget } from '@/components/dashboard/CommodityWidget'
+import { MarketSentimentWidget } from '@/components/dashboard/MarketSentimentWidget'
+import { ChartOverlay } from '@/components/dashboard/ChartOverlay'
+import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
+import { AlertPanel } from '@/components/dashboard/AlertPanel'
+import { NewsFeedWidget } from '@/components/dashboard/NewsFeedWidget'
 import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
 import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
 import { IndicatorCardSkeleton } from '@/components/ui/Skeleton'
@@ -42,20 +49,6 @@ export function DashboardPage() {
     queryClient.invalidateQueries({ queryKey: ['indicatorSeries'] })
   }
 
-  if (isError) {
-    return (
-      <main className="dash-container">
-        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-8 text-center">
-          <p className="text-red-300">API 연결에 실패했습니다</p>
-          <p className="text-red-400/60 text-sm mt-1">{(error as Error)?.message}</p>
-          <button onClick={handleRefresh} className="mt-4 px-4 py-2 bg-elevated text-body rounded-lg text-sm hover:bg-hover">
-            다시 시도
-          </button>
-        </div>
-      </main>
-    )
-  }
-
   const categories = [...new Set(indicators?.map((i) => i.category) ?? [])] as IndicatorCategory[]
   const filteredIndicators = selectedCategory
     ? (indicators ?? []).filter((i) => i.category === selectedCategory)
@@ -72,8 +65,8 @@ export function DashboardPage() {
     <ErrorBoundary>
       <main className="dash-container">
         {/* Top Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-border-dim">
-          <h1 className="text-lg font-semibold text-heading">경제 지표 대시보드</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6">
+          <h1 className="text-xl font-bold text-heading tracking-tight">경제 지표 대시보드</h1>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setSelectedCategory(null)}
@@ -93,8 +86,21 @@ export function DashboardPage() {
           </div>
         </div>
 
+        {/* API Error Banner */}
+        {isError && (
+          <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4 mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-red-700 dark:text-red-300 text-sm font-medium">API 연결에 실패했습니다</p>
+              <p className="text-red-500/70 dark:text-red-400/60 text-xs mt-0.5">{(error as Error)?.message}</p>
+            </div>
+            <button onClick={handleRefresh} className="px-4 py-2 bg-white dark:bg-elevated text-body rounded-xl text-xs font-medium hover:bg-elevated dark:hover:bg-hover shrink-0 border border-border-dim">
+              다시 시도
+            </button>
+          </div>
+        )}
+
         {/* Market Grid - Top 4 cards with sparklines */}
-        <section className="mb-8 pb-8 border-b border-border-dim">
+        <section className="mb-10">
           <h2 className="section-label">실시간 마켓</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {isLoading
@@ -117,7 +123,7 @@ export function DashboardPage() {
 
         {/* Expandable All Indicators Grid */}
         {remainingIndicators.length > 0 && (
-          <section className="mb-8 pb-8 border-b border-border-dim">
+          <section className="mb-10">
             <button
               onClick={() => setShowAllIndicators(!showAllIndicators)}
               className="flex items-center gap-1.5 text-xs text-muted hover:text-heading transition-colors py-3 mb-4"
@@ -157,17 +163,55 @@ export function DashboardPage() {
         {/* Divider */}
         <hr className="section-divider" />
 
-        {/* Bottom 3-column Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
-          {/* Left: Correlation Heatmap */}
-          <CorrelationHeatmap
-            indicators={filteredIndicators.slice(0, 5)}
+        {/* Market Sentiment & Additional Indices (#22) */}
+        <section className="mb-10">
+          <MarketSentimentWidget
+            indicators={indicators ?? []}
             dataMap={allData ?? {}}
-            selectedId={selectedIndicatorId}
-            onSelect={(id) =>
-              setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
-            }
           />
+        </section>
+
+        {/* Macro Indicators (#19) */}
+        <section className="mb-10">
+          <MacroIndicatorPanel
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Bond & Commodity side by side (#20, #21) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-10">
+          <BondSpreadWidget
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+          <CommodityWidget
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Chart Overlay Comparison (#23) */}
+        <section className="hidden lg:block mb-10">
+          <ChartOverlay
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Bottom 3-column Grid: Correlation + AI + News */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
+          {/* Left: Correlation Heatmap */}
+          <div className="hidden lg:block">
+            <CorrelationHeatmap
+              indicators={filteredIndicators.slice(0, 5)}
+              dataMap={allData ?? {}}
+              selectedId={selectedIndicatorId}
+              onSelect={(id) =>
+                setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
+              }
+            />
+          </div>
 
           {/* Center: AI Panel */}
           <AIPanel
@@ -176,12 +220,21 @@ export function DashboardPage() {
             allIndicators={indicators}
           />
 
-          {/* Right: News Timeline */}
-          <NewsTimeline />
+          {/* Right: News Feed Widget (#27) */}
+          <NewsFeedWidget />
+        </section>
+
+        {/* Calendar & Alerts side by side (#25, #26) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-10">
+          <EconomicCalendar />
+          <AlertPanel
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
         </section>
 
         {/* Historical Comparison */}
-        <section className="mb-8">
+        <section className="hidden lg:block mb-10">
           <HistoricalComparison
             indicators={filteredIndicators}
             dataMap={allData ?? {}}
@@ -233,9 +286,9 @@ export function DashboardPage() {
 }
 
 function tabClass(active: boolean) {
-  return `text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+  return `text-[13px] font-medium px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
     active
-      ? 'bg-elevated text-heading border-border-mid'
-      : 'border-border-dim text-muted hover:text-heading hover:border-border-mid'
+      ? 'bg-accent-soft text-accent'
+      : 'text-muted hover:text-heading hover:bg-elevated'
   }`
 }

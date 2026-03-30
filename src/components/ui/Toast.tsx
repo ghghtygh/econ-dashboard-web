@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import { ToastContext } from './ToastContext'
 
 const toastVariants = cva(
   'flex items-start gap-3 w-full max-w-sm rounded-lg border p-4 shadow-lg transition-all',
@@ -26,18 +27,6 @@ interface Toast {
   id: string
   message: string
   variant: ToastVariant
-}
-
-interface ToastContextValue {
-  toast: (message: string, variant?: ToastVariant) => void
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null)
-
-export function useToast() {
-  const ctx = useContext(ToastContext)
-  if (!ctx) throw new Error('ToastProvider 내부에서 사용해야 합니다')
-  return ctx
 }
 
 const ICONS: Record<ToastVariant, ReactNode> = {

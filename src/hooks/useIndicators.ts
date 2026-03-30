@@ -56,8 +56,8 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
             if (paged.content.length > 0) {
               results[id] = paged.content
             }
-          } catch {
-            // skip failed requests
+          } catch (err) {
+            console.warn(`[useIndicatorSeries] Failed to fetch indicator ${id}:`, err)
           }
         })
       )

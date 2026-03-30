@@ -11,7 +11,8 @@ import { BarChart } from '@/components/charts/BarChart'
 import { AreaChart } from '@/components/charts/AreaChart'
 import { CandlestickChart } from '@/components/charts/CandlestickChart'
 import { NumberCard } from '@/components/charts/NumberCard'
-import { formatChartData, formatPrice, ChartTooltip } from '@/components/charts/chartUtils'
+import { formatChartData, formatPrice } from '@/components/charts/chartFormatters'
+import { ChartTooltip } from '@/components/charts/chartUtils'
 import type { ChartType, IndicatorData } from '@/types/indicator'
 
 interface ChartRendererProps {

@@ -12,12 +12,12 @@ interface MarketCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  STOCK: '#378ADD',
-  FOREX: '#E24B4A',
-  CRYPTO: '#EF9F27',
-  MACRO: '#7F77DD',
-  BOND: '#1D9E75',
-  COMMODITY: '#EF9F27',
+  STOCK: '#6366f1',
+  FOREX: '#ef4444',
+  CRYPTO: '#f59e0b',
+  MACRO: '#8b5cf6',
+  BOND: '#10b981',
+  COMMODITY: '#f97316',
 }
 
 export function MarketCard({ indicator, series, isSelected, onClick }: MarketCardProps) {
@@ -29,9 +29,8 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
     return ((latest.value - prev.value) / prev.value) * 100
   }, [latest, prev])
 
-  const changeAbs = latest && prev ? latest.value - prev.value : 0
   const isUp = changePercent >= 0
-  const color = CATEGORY_COLORS[indicator.category] ?? '#378ADD'
+  const color = CATEGORY_COLORS[indicator.category] ?? '#6366f1'
 
   const sparkPoints = useMemo(() => {
     if (series.length < 2) return ''
@@ -48,61 +47,65 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
       .join(' ')
   }, [series])
 
+  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
+
   return (
-    <div className="relative" onClick={onClick}>
+    <div onClick={onClick} className="cursor-pointer">
       <div
         className={cn(
-          'rounded-xl border bg-surface p-4 sm:p-5 cursor-pointer transition-colors',
-          isSelected ? 'border-blue-400/60' : 'border-border-dim hover:border-border-mid',
+          'rounded-lg border p-4 transition-all',
+          isSelected
+            ? 'border-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-500/20'
+            : 'border-border-dim hover:border-border-mid',
         )}
+        style={{ background: 'var(--th-surface)', boxShadow: 'var(--th-card-shadow)' }}
       >
-        {/* Badge */}
-        <span
-          className={cn(
-            'absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full font-medium',
-            isUp
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-          )}
-        >
-          {isUp ? '+' : ''}{changePercent.toFixed(1)}%
-        </span>
-
-        {/* Category & Name */}
-        <div className="flex items-center gap-1">
-          <p className="text-[10px] text-faint uppercase tracking-wide">
-            {indicator.category} · {indicator.symbol}
-          </p>
-          <InfoTooltip>
-            <IndicatorTooltipContent {...getIndicatorDescription(indicator.symbol, indicator.category)} />
-          </InfoTooltip>
+        {/* Top: Label + Badge */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+            <p className="text-xs text-muted font-medium">
+              {indicator.symbol}
+            </p>
+            <InfoTooltip>
+              <IndicatorTooltipContent {...desc} />
+            </InfoTooltip>
+          </div>
+          <span
+            className={cn(
+              'text-xs font-medium px-2 py-0.5 rounded-full',
+              isUp
+                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+            )}
+          >
+            {isUp ? '+' : ''}{changePercent.toFixed(1)}%
+          </span>
         </div>
-        <h3 className="text-[13px] font-medium text-heading mt-0.5 mb-2">
-          {indicator.name}
-        </h3>
 
-        {/* Value */}
+        {/* Name */}
+        <p className="text-sm text-muted mb-1 truncate">{indicator.name}</p>
+
+        {/* Metric */}
         {latest ? (
-          <>
-            <p className="text-xl font-medium text-heading">
-              {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-muted mt-0.5">
-              {changeAbs >= 0 ? '+' : ''}{changeAbs.toFixed(1)} 오늘
-            </p>
-          </>
+          <p className="text-2xl font-semibold text-heading tracking-tight">
+            {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </p>
         ) : (
           <p className="text-faint text-sm">데이터 없음</p>
         )}
 
         {/* Sparkline */}
         {sparkPoints && (
-          <svg className="mt-2.5 w-full h-8" viewBox="0 0 100 32" preserveAspectRatio="none">
+          <svg className="mt-3 w-full h-7" viewBox="0 0 100 32" preserveAspectRatio="none">
             <polyline
               points={sparkPoints}
               fill="none"
               stroke={color}
               strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.7"
             />
           </svg>
         )}

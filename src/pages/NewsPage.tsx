@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ExternalLink, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ExternalLink, Clock, User, ChevronLeft, ChevronRight, AlertCircle, Newspaper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNewsList } from '@/hooks/useNews'
 import type { NewsCategory } from '@/types/news'
@@ -78,16 +78,18 @@ export function NewsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 rounded-xl border border-border-dim bg-surface animate-pulse" />
+            <div key={i} className="h-52 rounded-lg border border-border-dim bg-surface animate-pulse" />
           ))}
         </div>
       ) : isError ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><AlertCircle size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">뉴스를 불러올 수 없습니다</p>
           <p className="text-faint text-xs mt-1">API 연결을 확인해주세요</p>
         </div>
       ) : articles.length === 0 ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><Newspaper size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">뉴스가 없습니다</p>
           <p className="text-faint text-xs mt-1">다른 카테고리를 선택해보세요</p>
         </div>
@@ -105,7 +107,7 @@ export function NewsPage() {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group rounded-xl border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
+                  className="group rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
                 >
                   {/* Category badge */}
                   <div className="flex items-center justify-between mb-3">

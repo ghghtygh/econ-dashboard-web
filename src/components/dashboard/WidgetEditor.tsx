@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BarChart3, LineChartIcon, AreaChartIcon, Hash, CandlestickChart } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -42,13 +42,6 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
   const updateWidget = useDashboardStore((s) => s.updateWidget)
 
   const { data: previewData } = useIndicatorData(widget.indicatorId)
-
-  useEffect(() => {
-    setTitle(widget.title ?? '')
-    setChartType(widget.chartType)
-    setDateRange(widget.dateRange ?? '1M')
-    setColor(widget.color ?? COLORS[0])
-  }, [widget])
 
   const handleSave = () => {
     updateWidget(widget.id, { title: title || undefined, chartType, dateRange, color })
@@ -137,7 +130,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
         {/* 미리보기 */}
         <div>
           <label className="block text-xs text-muted mb-1.5">미리보기</label>
-          <div className="rounded-xl border border-border-dim bg-page p-4 h-[180px]">
+          <div className="rounded-lg border border-border-dim bg-page p-4 h-[180px]">
             {previewData && previewData.length > 0 ? (
               <ChartRenderer
                 type={chartType}

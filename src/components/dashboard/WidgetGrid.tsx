@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
-import { X, GripVertical, Settings } from 'lucide-react'
+import { X, GripVertical, Settings, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
@@ -33,7 +33,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
   const currentRange = widget.dateRange ?? '1M'
 
   return (
-    <div className="h-full rounded-xl border border-border-dim bg-surface flex flex-col overflow-hidden">
+    <div className="h-full rounded-lg border border-border-dim bg-surface flex flex-col overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-dim shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
@@ -169,6 +169,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   if (widgets.length === 0) {
     return (
       <div ref={containerRef} className="rounded-xl border border-dashed border-border-dim p-12 text-center">
+        <div className="flex justify-center mb-3"><LayoutGrid size={40} className="text-faint" /></div>
         <p className="text-faint">위젯을 추가하여 대시보드를 구성하세요</p>
       </div>
     )
@@ -206,6 +207,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
       </ResponsiveGridLayout>
       {editingWidget && (
         <WidgetEditor
+          key={editingWidget.id}
           widget={editingWidget}
           indicator={editingIndicator}
           open={!!editingWidgetId}

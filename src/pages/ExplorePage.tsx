@@ -17,6 +17,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   MACRO: '거시경제',
 }
 
+function computeSparkPoints(values: { value: number }[]): string {
+  if (values.length < 2) return ''
+  const last12 = values.slice(-12)
+  const min = Math.min(...last12.map((d) => d.value))
+  const max = Math.max(...last12.map((d) => d.value))
+  const range = max - min || 1
+  return last12
+    .map((d, i) => {
+      const x = (i / (last12.length - 1)) * 120
+      const y = 36 - ((d.value - min) / range) * 30
+      return `${x},${y}`
+    })
+    .join(' ')
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
   STOCK: '#378ADD',
   FOREX: '#E24B4A',
@@ -60,7 +75,7 @@ export function ExplorePage() {
   const handleAddWidget = (indicatorId: number, name: string) => {
     if (widgetIndicatorIds.has(indicatorId)) return
     const widget: DashboardWidget = {
-      id: `widget-${indicatorId}-${Date.now()}`,
+      id: crypto.randomUUID(),
       indicatorId,
       chartType: 'line',
       position: { x: 0, y: Infinity, w: 4, h: 3 },
@@ -82,13 +97,13 @@ export function ExplorePage() {
       {/* Search + Category Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="지표명 또는 심볼로 검색..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-dim bg-surface text-body text-sm placeholder:text-faint focus:outline-none focus:border-blue-400/50 transition-colors"
+            className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-border-dim bg-surface text-body text-sm placeholder:text-faint focus:outline-none focus:border-blue-400/50 transition-colors"
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -120,11 +135,12 @@ export function ExplorePage() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 rounded-xl border border-border-dim bg-surface animate-pulse" />
+            <div key={i} className="h-48 rounded-lg border border-border-dim bg-surface animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><Search size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">검색 결과가 없습니다</p>
           <p className="text-faint text-xs mt-1">다른 키워드나 카테고리를 선택해보세요</p>
         </div>
@@ -144,25 +160,12 @@ export function ExplorePage() {
             const desc = getIndicatorDescription(indicator.symbol, indicator.category)
 
             // Mini sparkline
-            const sparkPoints = useMemo(() => {
-              if (series.length < 2) return ''
-              const last12 = series.slice(-12)
-              const min = Math.min(...last12.map((d) => d.value))
-              const max = Math.max(...last12.map((d) => d.value))
-              const range = max - min || 1
-              return last12
-                .map((d, i) => {
-                  const x = (i / (last12.length - 1)) * 120
-                  const y = 36 - ((d.value - min) / range) * 30
-                  return `${x},${y}`
-                })
-                .join(' ')
-            }, [series])
+            const sparkPoints = computeSparkPoints(series)
 
             return (
               <div
                 key={indicator.id}
-                className="rounded-xl border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
+                className="rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
               >
                 {/* Top: Category badge + tooltip */}
                 <div className="flex items-center justify-between mb-3">

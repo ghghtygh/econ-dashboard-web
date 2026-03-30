@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { ThresholdLevel } from '@/data/indicatorDescriptions'
 
 interface InfoTooltipProps {
   children: ReactNode
@@ -42,7 +43,7 @@ export function InfoTooltip({ children, className }: InfoTooltipProps) {
         <div
           className={cn(
             'absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2',
-            'w-64 rounded-lg border border-border-mid bg-surface p-3 shadow-lg',
+            'w-72 max-h-80 overflow-y-auto rounded-lg border border-border-mid bg-surface p-3 shadow-lg',
             'text-xs text-body leading-relaxed',
             'animate-fadeIn',
           )}
@@ -59,13 +60,29 @@ export function InfoTooltip({ children, className }: InfoTooltipProps) {
   )
 }
 
+const SEVERITY_COLORS: Record<string, string> = {
+  safe: '#1D9E75',
+  warning: '#EF9F27',
+  danger: '#E24B4A',
+}
+
 interface IndicatorTooltipContentProps {
   definition: string
   importance: string
   related: string[]
+  thresholds?: ThresholdLevel[]
+  interpretation?: string
+  learnMore?: string
 }
 
-export function IndicatorTooltipContent({ definition, importance, related }: IndicatorTooltipContentProps) {
+export function IndicatorTooltipContent({
+  definition,
+  importance,
+  related,
+  thresholds,
+  interpretation,
+  learnMore,
+}: IndicatorTooltipContentProps) {
   return (
     <div className="space-y-2">
       <div>
@@ -76,6 +93,29 @@ export function IndicatorTooltipContent({ definition, importance, related }: Ind
         <p className="font-medium text-heading mb-0.5">왜 중요한가</p>
         <p>{importance}</p>
       </div>
+      {interpretation && (
+        <div>
+          <p className="font-medium text-heading mb-0.5">해석 가이드</p>
+          <p className="text-muted">{interpretation}</p>
+        </div>
+      )}
+      {thresholds && thresholds.length > 0 && (
+        <div>
+          <p className="font-medium text-heading mb-1">주요 기준값</p>
+          <div className="space-y-0.5">
+            {thresholds.map((t) => (
+              <div key={t.level} className="flex items-center gap-1.5">
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: SEVERITY_COLORS[t.severity] }}
+                />
+                <span className="font-mono text-[10px] text-heading w-10 shrink-0">{t.level}</span>
+                <span className="text-[10px] text-muted">{t.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {related.length > 0 && (
         <div>
           <p className="font-medium text-heading mb-0.5">관련 지표</p>
@@ -89,6 +129,11 @@ export function IndicatorTooltipContent({ definition, importance, related }: Ind
               </span>
             ))}
           </div>
+        </div>
+      )}
+      {learnMore && (
+        <div className="pt-1 border-t border-border-dim">
+          <p className="text-[10px] text-faint">{learnMore}</p>
         </div>
       )}
     </div>

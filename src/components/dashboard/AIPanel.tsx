@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
@@ -109,7 +109,14 @@ function getSuggestions(indicator?: Indicator): ChipSuggestion[] {
   ]
 }
 
-export function AIPanel({ selectedIndicator, series, allIndicators: _allIndicators }: AIPanelProps) {
+function renderBoldText(text: string) {
+  const parts = text.split(/\*\*(.*?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i} className="font-medium">{part}</strong> : part,
+  )
+}
+
+export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'ai'; text: string }>>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -137,7 +144,7 @@ export function AIPanel({ selectedIndicator, series, allIndicators: _allIndicato
   }
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5 h-full flex flex-col">
+    <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       {/* Header */}
       <div className="mb-3">
         <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
@@ -146,16 +153,22 @@ export function AIPanel({ selectedIndicator, series, allIndicators: _allIndicato
         </span>
       </div>
 
-      {/* Main Insight */}
-      <div className="text-[13px] text-body leading-relaxed mb-3 prose-strong:font-medium flex-shrink-0"
-        dangerouslySetInnerHTML={{
-          __html: insight
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        }}
-      />
+      {/* Main Insight / Empty State */}
+      {!selectedIndicator && chatHistory.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
+          <Sparkles size={32} className="text-indigo-400/50 mb-3" />
+          <p className="text-[13px] text-muted leading-relaxed max-w-[240px]">
+            {renderBoldText(insight)}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="text-[13px] text-body leading-relaxed mb-3 flex-shrink-0">
+            {renderBoldText(insight)}
+          </div>
 
-      {/* Chat History */}
-      {chatHistory.length > 0 && (
+          {/* Chat History */}
+          {chatHistory.length > 0 && (
         <div className="flex-1 min-h-0 overflow-y-auto space-y-2 mb-3 border-t border-border-dim pt-3">
           {chatHistory.map((msg, i) => (
             <div
@@ -177,6 +190,8 @@ export function AIPanel({ selectedIndicator, series, allIndicators: _allIndicato
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       {/* Suggestion Chips */}
