@@ -109,6 +109,13 @@ function getSuggestions(indicator?: Indicator): ChipSuggestion[] {
   ]
 }
 
+function renderBoldText(text: string) {
+  const parts = text.split(/\*\*(.*?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i} className="font-medium">{part}</strong> : part,
+  )
+}
+
 export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'ai'; text: string }>>([])
@@ -147,12 +154,9 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
       </div>
 
       {/* Main Insight */}
-      <div className="text-[13px] text-body leading-relaxed mb-3 prose-strong:font-medium flex-shrink-0"
-        dangerouslySetInnerHTML={{
-          __html: insight
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        }}
-      />
+      <div className="text-[13px] text-body leading-relaxed mb-3 flex-shrink-0">
+        {renderBoldText(insight)}
+      </div>
 
       {/* Chat History */}
       {chatHistory.length > 0 && (
