@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
+import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface MarketCardProps {
@@ -67,9 +69,14 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
         </span>
 
         {/* Category & Name */}
-        <p className="text-[10px] text-faint uppercase tracking-wide">
-          {indicator.category} · {indicator.symbol}
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-[10px] text-faint uppercase tracking-wide">
+            {indicator.category} · {indicator.symbol}
+          </p>
+          <InfoTooltip>
+            <IndicatorTooltipContent {...getIndicatorDescription(indicator.symbol, indicator.category)} />
+          </InfoTooltip>
+        </div>
         <h3 className="text-[13px] font-medium text-heading mt-0.5 mb-2">
           {indicator.name}
         </h3>

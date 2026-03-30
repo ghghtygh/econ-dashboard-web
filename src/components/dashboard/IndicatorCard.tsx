@@ -1,5 +1,7 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
+import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface IndicatorCardProps {
@@ -20,7 +22,12 @@ export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardPro
     <div className="rounded-xl border border-border-dim bg-surface p-4 hover:border-border-mid transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <p className="text-xs text-muted uppercase tracking-wide">{indicator.category}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-xs text-muted uppercase tracking-wide">{indicator.category}</p>
+            <InfoTooltip>
+              <IndicatorTooltipContent {...getIndicatorDescription(indicator.symbol, indicator.category)} />
+            </InfoTooltip>
+          </div>
           <h3 className="text-sm font-medium text-body mt-0.5">{indicator.name}</h3>
         </div>
         <span className="text-xs text-faint font-mono">{indicator.symbol}</span>
