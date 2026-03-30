@@ -274,7 +274,7 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── 심리 지표 섹션 ── */}
-        <div className="rounded-xl border border-border-dim bg-surface p-4 sm:p-5 space-y-5">
+        <div className="rounded-lg border border-border-dim bg-surface p-4 sm:p-5 space-y-5">
           <p className="section-label">심리 지표</p>
 
           {/* VIX */}
@@ -414,7 +414,7 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
         </div>
 
         {/* ── 추가 주가지수 섹션 ── */}
-        <div className="rounded-xl border border-border-dim bg-surface p-4 sm:p-5">
+        <div className="rounded-lg border border-border-dim bg-surface p-4 sm:p-5">
           <p className="section-label">추가 주가지수</p>
 
           <IndexRow

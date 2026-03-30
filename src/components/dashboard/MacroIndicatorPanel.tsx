@@ -110,7 +110,7 @@ export function MacroIndicatorPanel({ indicators, dataMap }: MacroIndicatorPanel
             핵심 경제 건강 지표 — 클릭하면 학습 정보를 볼 수 있습니다
           </p>
         </div>
-        <div className="rounded-xl border border-border-dim bg-surface p-8 text-center">
+        <div className="rounded-lg border border-border-dim bg-surface p-8 text-center">
           <p className="text-muted text-sm">
             거시경제 지표 데이터가 아직 없습니다.
           </p>
@@ -183,7 +183,7 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
   return (
     <div
       className={cn(
-        'rounded-xl border bg-surface transition-colors cursor-pointer',
+        'rounded-lg border bg-surface transition-colors cursor-pointer',
         isExpanded ? 'border-purple-400/60' : 'border-border-dim hover:border-border-mid',
       )}
       onClick={onToggle}

@@ -209,7 +209,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5">
+    <div className="rounded-lg border border-border-dim bg-surface p-5">
       {/* 헤더 */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">

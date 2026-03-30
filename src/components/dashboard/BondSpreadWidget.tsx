@@ -89,7 +89,7 @@ export function BondSpreadWidget({ indicators, dataMap }: BondSpreadWidgetProps)
   if (bondIndicators.length === 0) return null
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5">
+    <div className="rounded-lg border border-border-dim bg-surface p-5">
       {/* Section Header */}
       <div className="mb-5">
         <h2 className="text-base font-semibold text-heading">채권 시장</h2>

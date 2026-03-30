@@ -129,24 +129,27 @@ function formatTimeAgo(dateStr: string): string {
 
 export function NewsFeedWidget() {
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | undefined>()
-  const { data, isError } = useNewsList(selectedCategory, 0, 10)
+  const { data, isLoading, isError } = useNewsList(selectedCategory, 0, 10)
   const isDark =
     typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
 
-  const useMock = isError || !data
+  // API에서 데이터를 가져왔지만 비어있는 경우와, 아예 실패한 경우를 구분
+  const hasApiData = !isError && !isLoading && data?.content && data.content.length > 0
   const articles: NewsArticle[] = useMemo(() => {
-    if (!useMock && data?.content) {
-      return data.content.slice(0, 10)
+    if (hasApiData) {
+      return data!.content.slice(0, 10)
     }
-    // Fallback to mock
+    // 로딩 중이면 빈 배열 (skeleton 대신 잠시 비움)
+    if (isLoading) return []
+    // API 에러 또는 빈 응답 → mock fallback
     if (selectedCategory) {
       return MOCK_NEWS.filter((n) => n.category === selectedCategory)
     }
     return MOCK_NEWS
-  }, [useMock, data, selectedCategory])
+  }, [hasApiData, data, isLoading, selectedCategory])
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5 h-full flex flex-col">
+    <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       {/* Header */}
       <h3 className="text-[11px] font-medium text-muted uppercase tracking-wider mb-3">
         경제 뉴스
@@ -172,7 +175,7 @@ export function NewsFeedWidget() {
       </div>
 
       {/* API fallback notice */}
-      {useMock && (
+      {!hasApiData && !isLoading && (
         <p className="text-[10px] text-faint mb-2">API 연결 대기 중 — 샘플 데이터 표시</p>
       )}
 

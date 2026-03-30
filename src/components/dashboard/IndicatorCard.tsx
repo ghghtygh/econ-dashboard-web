@@ -21,7 +21,7 @@ export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardPro
 
   return (
     <div
-      className="rounded-2xl border border-border-dim bg-surface p-4 hover:border-border-mid transition-all"
+      className="rounded-lg border border-border-dim bg-surface p-4 hover:border-border-mid transition-all"
       style={{ boxShadow: 'var(--th-card-shadow)' }}
     >
       <div className="flex items-start justify-between mb-3">

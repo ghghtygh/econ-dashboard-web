@@ -192,7 +192,7 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
   const selectedName = items.find((i) => i.id === selectedId)?.name
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5 h-full flex flex-col">
+    <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-[13px] font-medium text-heading">지표 간 상관관계</h3>

@@ -77,7 +77,7 @@ function EventDetail({
   onClose: () => void
 }) {
   return (
-    <div className="animate-fadeIn rounded-xl border border-border-dim bg-surface p-4">
+    <div className="animate-fadeIn rounded-lg border border-border-dim bg-surface p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
         <h4 className="text-sm font-semibold text-heading">{event.title}</h4>
         <button
@@ -404,7 +404,7 @@ export function EconomicCalendar() {
     useState<ImportanceFilter>('all')
 
   return (
-    <section className="rounded-xl border border-border-dim bg-surface p-5">
+    <section className="rounded-lg border border-border-dim bg-surface p-5">
       {/* Section title */}
       <div className="mb-4">
         <h3 className="text-base font-semibold text-heading">경제 캘린더</h3>

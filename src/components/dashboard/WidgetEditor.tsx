@@ -130,7 +130,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
         {/* 미리보기 */}
         <div>
           <label className="block text-xs text-muted mb-1.5">미리보기</label>
-          <div className="rounded-xl border border-border-dim bg-page p-4 h-[180px]">
+          <div className="rounded-lg border border-border-dim bg-page p-4 h-[180px]">
             {previewData && previewData.length > 0 ? (
               <ChartRenderer
                 type={chartType}

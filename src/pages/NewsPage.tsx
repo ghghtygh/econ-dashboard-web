@@ -78,7 +78,7 @@ export function NewsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 rounded-xl border border-border-dim bg-surface animate-pulse" />
+            <div key={i} className="h-52 rounded-lg border border-border-dim bg-surface animate-pulse" />
           ))}
         </div>
       ) : isError ? (
@@ -107,7 +107,7 @@ export function NewsPage() {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group rounded-xl border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
+                  className="group rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
                 >
                   {/* Category badge */}
                   <div className="flex items-center justify-between mb-3">

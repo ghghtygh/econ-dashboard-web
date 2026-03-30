@@ -82,7 +82,7 @@ export function Header() {
             </button>
 
             {bellOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-dim bg-surface animate-fadeIn z-50" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
+              <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-border-dim bg-surface animate-fadeIn z-50" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border-dim">
                   <span className="text-sm font-semibold text-heading">알림</span>
                   {unreadCount > 0 && (

@@ -144,7 +144,7 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
   }
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5 h-full flex flex-col">
+    <div className="rounded-lg border border-border-dim bg-surface p-5 h-full flex flex-col">
       {/* Header */}
       <div className="mb-3">
         <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">

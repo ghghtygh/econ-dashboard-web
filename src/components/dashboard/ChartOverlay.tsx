@@ -243,7 +243,7 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
   const currentPreset = PRESET_COMPARISONS.find((p) => p.id === activePreset)
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-5">
+    <div className="rounded-lg border border-border-dim bg-surface p-5">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2">
