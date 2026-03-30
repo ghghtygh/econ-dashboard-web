@@ -1,4 +1,4 @@
-import { BarChart2, Sun, Moon, Search, LayoutDashboard } from 'lucide-react'
+import { BarChart2, Sun, Moon, Search, LayoutDashboard, Newspaper } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useThemeStore } from '@/store/themeStore'
@@ -6,6 +6,7 @@ import { useThemeStore } from '@/store/themeStore'
 const NAV_ITEMS = [
   { path: '/', label: '대시보드', icon: LayoutDashboard },
   { path: '/explore', label: '지표 탐색', icon: Search },
+  { path: '/news', label: '뉴스', icon: Newspaper },
 ]
 
 export function Header() {

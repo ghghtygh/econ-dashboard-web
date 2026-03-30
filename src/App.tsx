@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Header } from '@/components/layout/Header'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ExplorePage } from '@/pages/ExplorePage'
+import { NewsPage } from '@/pages/NewsPage'
 import { useThemeStore } from '@/store/themeStore'
 
 const queryClient = new QueryClient({
@@ -27,6 +28,7 @@ function App() {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/news" element={<NewsPage />} />
           </Routes>
         </div>
       </BrowserRouter>
