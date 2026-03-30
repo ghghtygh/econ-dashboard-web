@@ -6,7 +6,14 @@ import { IndicatorCard } from '@/components/dashboard/IndicatorCard'
 import { CorrelationHeatmap } from '@/components/dashboard/CorrelationHeatmap'
 import { HistoricalComparison } from '@/components/dashboard/HistoricalComparison'
 import { AIPanel } from '@/components/dashboard/AIPanel'
-import { NewsTimeline } from '@/components/dashboard/NewsTimeline'
+import { MacroIndicatorPanel } from '@/components/dashboard/MacroIndicatorPanel'
+import { BondSpreadWidget } from '@/components/dashboard/BondSpreadWidget'
+import { CommodityWidget } from '@/components/dashboard/CommodityWidget'
+import { MarketSentimentWidget } from '@/components/dashboard/MarketSentimentWidget'
+import { ChartOverlay } from '@/components/dashboard/ChartOverlay'
+import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
+import { AlertPanel } from '@/components/dashboard/AlertPanel'
+import { NewsFeedWidget } from '@/components/dashboard/NewsFeedWidget'
 import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
 import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
 import { IndicatorCardSkeleton } from '@/components/ui/Skeleton'
@@ -157,8 +164,44 @@ export function DashboardPage() {
         {/* Divider */}
         <hr className="section-divider" />
 
-        {/* Bottom 3-column Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-12">
+        {/* Market Sentiment & Additional Indices (#22) */}
+        <section className="mb-8 pb-8 border-b border-border-dim">
+          <MarketSentimentWidget
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Macro Indicators (#19) */}
+        <section className="mb-8 pb-8 border-b border-border-dim">
+          <MacroIndicatorPanel
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Bond & Commodity side by side (#20, #21) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8 pb-8 border-b border-border-dim">
+          <BondSpreadWidget
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+          <CommodityWidget
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Chart Overlay Comparison (#23) */}
+        <section className="mb-8 pb-8 border-b border-border-dim">
+          <ChartOverlay
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
+        </section>
+
+        {/* Bottom 3-column Grid: Correlation + AI + News */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8 pb-8 border-b border-border-dim">
           {/* Left: Correlation Heatmap */}
           <CorrelationHeatmap
             indicators={filteredIndicators.slice(0, 5)}
@@ -176,12 +219,21 @@ export function DashboardPage() {
             allIndicators={indicators}
           />
 
-          {/* Right: News Timeline */}
-          <NewsTimeline />
+          {/* Right: News Feed Widget (#27) */}
+          <NewsFeedWidget />
+        </section>
+
+        {/* Calendar & Alerts side by side (#25, #26) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8 pb-8 border-b border-border-dim">
+          <EconomicCalendar />
+          <AlertPanel
+            indicators={indicators ?? []}
+            dataMap={allData ?? {}}
+          />
         </section>
 
         {/* Historical Comparison */}
-        <section className="mb-8">
+        <section className="mb-8 pb-8 border-b border-border-dim">
           <HistoricalComparison
             indicators={filteredIndicators}
             dataMap={allData ?? {}}
