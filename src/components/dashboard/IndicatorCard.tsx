@@ -17,31 +17,35 @@ export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardPro
 
   const isPositive = changePercent > 0
   const isNegative = changePercent < 0
+  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
 
   return (
-    <div className="rounded-xl border border-border-dim bg-surface p-4 hover:border-border-mid transition-colors">
+    <div
+      className="rounded-2xl border border-border-dim bg-surface p-4 hover:border-border-mid transition-all"
+      style={{ boxShadow: 'var(--th-card-shadow)' }}
+    >
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-xs text-muted uppercase tracking-wide">{indicator.category}</p>
+            <p className="text-[11px] text-muted font-medium uppercase tracking-wide">{indicator.category}</p>
             <InfoTooltip>
-              <IndicatorTooltipContent {...getIndicatorDescription(indicator.symbol, indicator.category)} />
+              <IndicatorTooltipContent {...desc} />
             </InfoTooltip>
           </div>
-          <h3 className="text-sm font-medium text-body mt-0.5">{indicator.name}</h3>
+          <h3 className="text-sm font-semibold text-heading mt-0.5">{indicator.name}</h3>
         </div>
-        <span className="text-xs text-faint font-mono">{indicator.symbol}</span>
+        <span className="text-[10px] text-faint font-mono bg-elevated px-1.5 py-0.5 rounded">{indicator.symbol}</span>
       </div>
 
       {latest ? (
         <div>
-          <p className="text-2xl font-bold text-heading">
+          <p className="text-2xl font-bold text-heading tracking-tight">
             {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            <span className="text-sm font-normal text-muted ml-1">{indicator.unit}</span>
+            <span className="text-xs font-normal text-muted ml-1">{indicator.unit}</span>
           </p>
-          <div className={cn('flex items-center gap-1 mt-1 text-sm', {
-            'text-green-400': isPositive,
-            'text-red-400': isNegative,
+          <div className={cn('flex items-center gap-1 mt-1.5 text-sm font-medium', {
+            'text-emerald-600 dark:text-emerald-400': isPositive,
+            'text-red-600 dark:text-red-400': isNegative,
             'text-muted': !isPositive && !isNegative,
           })}>
             {isPositive ? <TrendingUp size={14} /> : isNegative ? <TrendingDown size={14} /> : <Minus size={14} />}

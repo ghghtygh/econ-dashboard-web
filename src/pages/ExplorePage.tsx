@@ -97,13 +97,13 @@ export function ExplorePage() {
       {/* Search + Category Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="지표명 또는 심볼로 검색..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-dim bg-surface text-body text-sm placeholder:text-faint focus:outline-none focus:border-blue-400/50 transition-colors"
+            className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-border-dim bg-surface text-body text-sm placeholder:text-faint focus:outline-none focus:border-blue-400/50 transition-colors"
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -140,6 +140,7 @@ export function ExplorePage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><Search size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">검색 결과가 없습니다</p>
           <p className="text-faint text-xs mt-1">다른 키워드나 카테고리를 선택해보세요</p>
         </div>

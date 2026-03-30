@@ -12,12 +12,12 @@ interface MarketCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  STOCK: '#378ADD',
-  FOREX: '#E24B4A',
-  CRYPTO: '#EF9F27',
-  MACRO: '#7F77DD',
-  BOND: '#1D9E75',
-  COMMODITY: '#EF9F27',
+  STOCK: '#2563eb',
+  FOREX: '#dc2626',
+  CRYPTO: '#f59e0b',
+  MACRO: '#7c3aed',
+  BOND: '#059669',
+  COMMODITY: '#ea580c',
 }
 
 export function MarketCard({ indicator, series, isSelected, onClick }: MarketCardProps) {
@@ -31,7 +31,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
 
   const changeAbs = latest && prev ? latest.value - prev.value : 0
   const isUp = changePercent >= 0
-  const color = CATEGORY_COLORS[indicator.category] ?? '#378ADD'
+  const color = CATEGORY_COLORS[indicator.category] ?? '#2563eb'
 
   const sparkPoints = useMemo(() => {
     if (series.length < 2) return ''
@@ -48,46 +48,52 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
       .join(' ')
   }, [series])
 
+  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
+
   return (
     <div className="relative" onClick={onClick}>
       <div
         className={cn(
-          'rounded-xl border bg-surface p-4 sm:p-5 cursor-pointer transition-colors',
-          isSelected ? 'border-blue-400/60' : 'border-border-dim hover:border-border-mid',
+          'rounded-2xl border bg-surface p-5 cursor-pointer transition-all',
+          isSelected
+            ? 'border-accent ring-2 ring-accent/20'
+            : 'border-border-dim hover:border-border-mid',
         )}
+        style={{ boxShadow: 'var(--th-card-shadow)' }}
       >
         {/* Badge */}
         <span
           className={cn(
-            'absolute top-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full font-medium',
+            'absolute top-3 right-3 text-[11px] px-2.5 py-0.5 rounded-full font-semibold',
             isUp
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+              : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400',
           )}
         >
           {isUp ? '+' : ''}{changePercent.toFixed(1)}%
         </span>
 
         {/* Category & Name */}
-        <div className="flex items-center gap-1">
-          <p className="text-[10px] text-faint uppercase tracking-wide">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+          <p className="text-[11px] text-muted font-medium uppercase tracking-wide">
             {indicator.category} · {indicator.symbol}
           </p>
           <InfoTooltip>
-            <IndicatorTooltipContent {...getIndicatorDescription(indicator.symbol, indicator.category)} />
+            <IndicatorTooltipContent {...desc} />
           </InfoTooltip>
         </div>
-        <h3 className="text-[13px] font-medium text-heading mt-0.5 mb-2">
+        <h3 className="text-sm font-semibold text-heading mt-1.5 mb-3">
           {indicator.name}
         </h3>
 
         {/* Value */}
         {latest ? (
           <>
-            <p className="text-xl font-medium text-heading">
+            <p className="text-2xl font-bold text-heading tracking-tight">
               {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-muted mt-0.5">
+            <p className={cn('text-xs mt-1 font-medium', isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
               {changeAbs >= 0 ? '+' : ''}{changeAbs.toFixed(1)} 오늘
             </p>
           </>
@@ -97,12 +103,14 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
 
         {/* Sparkline */}
         {sparkPoints && (
-          <svg className="mt-2.5 w-full h-8" viewBox="0 0 100 32" preserveAspectRatio="none">
+          <svg className="mt-3 w-full h-8" viewBox="0 0 100 32" preserveAspectRatio="none">
             <polyline
               points={sparkPoints}
               fill="none"
               stroke={color}
-              strokeWidth="1.5"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         )}

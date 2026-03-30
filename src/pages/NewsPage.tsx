@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ExternalLink, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ExternalLink, Clock, User, ChevronLeft, ChevronRight, AlertCircle, Newspaper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNewsList } from '@/hooks/useNews'
 import type { NewsCategory } from '@/types/news'
@@ -83,11 +83,13 @@ export function NewsPage() {
         </div>
       ) : isError ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><AlertCircle size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">뉴스를 불러올 수 없습니다</p>
           <p className="text-faint text-xs mt-1">API 연결을 확인해주세요</p>
         </div>
       ) : articles.length === 0 ? (
         <div className="text-center py-16">
+          <div className="flex justify-center mb-3"><Newspaper size={40} className="text-faint" /></div>
           <p className="text-muted text-sm">뉴스가 없습니다</p>
           <p className="text-faint text-xs mt-1">다른 카테고리를 선택해보세요</p>
         </div>
