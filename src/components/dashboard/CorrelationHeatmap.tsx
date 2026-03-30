@@ -1,5 +1,7 @@
 import { Fragment, useMemo, useState } from 'react'
+import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useIndicatorSeries, type DateRange } from '@/hooks/useIndicators'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface CorrelationHeatmapProps {
@@ -9,12 +11,12 @@ interface CorrelationHeatmapProps {
   onSelect?: (id: number) => void
 }
 
-/**
- * 가격 원본(level)이 아니라 일별 수익률(daily returns)로 피어슨 상관계수를 계산합니다.
- * 가격 수준은 대부분 우상향이라 원본끼리 비교하면 거의 모든 조합이 양의 상관으로 나옵니다.
- * 수익률 = (오늘 가격 - 어제 가격) / 어제 가격 으로 변환 후 비교해야
- * "같이 오르고 같이 내리는가"를 정확히 측정할 수 있습니다.
- */
+const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: '1M', label: '1개월' },
+  { value: '3M', label: '3개월' },
+  { value: '1Y', label: '1년' },
+]
+
 function toReturns(values: number[]): number[] {
   const returns: number[] = []
   for (let i = 1; i < values.length; i++) {
@@ -24,10 +26,6 @@ function toReturns(values: number[]): number[] {
   return returns
 }
 
-/**
- * 날짜 기반으로 두 시계열을 매칭합니다.
- * 같은 날짜에 데이터가 있는 포인트만 추출하여 정확한 비교를 보장합니다.
- */
 function alignByDate(
   aData: IndicatorData[],
   bData: IndicatorData[],
@@ -62,7 +60,6 @@ function pearson(a: number[], b: number[]): number {
   return denom === 0 ? 0 : cov / denom
 }
 
-/** 표본 수 기반 신뢰도 판정 */
 function getConfidence(sampleCount: number): { label: string; color: string } {
   if (sampleCount >= 60) return { label: '신뢰도 높음', color: '#1D9E75' }
   if (sampleCount >= 20) return { label: '참고용', color: '#EF9F27' }
@@ -86,11 +83,64 @@ function getRelationDescription(nameA: string, nameB: string, corr: number): str
   return `${nameA}과(와) ${nameB}는 ${strength} ${dir}으로 움직이는 경향이 있습니다.`
 }
 
+/**
+ * 연속 색상 그라데이션: -1(빨강) ~ 0(중립) ~ +1(파랑)
+ * 대각선(자기 자신)은 별도 처리
+ */
+function getCorrColor(val: number, isDiagonal: boolean): { bg: string; text: string } {
+  if (isDiagonal) return { bg: 'var(--corr-strong)', text: 'var(--corr-strong-text)' }
+
+  const abs = Math.abs(val)
+  const alpha = 0.15 + abs * 0.55 // 0.15 ~ 0.70
+
+  if (val >= 0) {
+    return {
+      bg: `rgba(55, 138, 221, ${alpha})`,   // blue
+      text: abs > 0.4 ? '#bfdbfe' : 'var(--corr-weak-text)',
+    }
+  }
+  return {
+    bg: `rgba(226, 75, 74, ${alpha})`,     // red
+    text: abs > 0.4 ? '#fecaca' : '#E24B4A',
+  }
+}
+
 type ViewMode = 'matrix' | 'bar'
 
+const MAX_SELECTABLE = 8
+
 export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }: CorrelationHeatmapProps) {
-  const items = indicators.slice(0, 5)
   const [viewMode, setViewMode] = useState<ViewMode>('bar')
+  const [range, setRange] = useState<DateRange>('1M')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [selectorOpen, setSelectorOpen] = useState(false)
+
+  // 선택된 지표가 없으면 상위 5개 기본 표시
+  const activeIds = selectedIds.length > 0
+    ? selectedIds
+    : indicators.slice(0, 5).map((i) => i.id)
+  const items = indicators.filter((i) => activeIds.includes(i.id))
+
+  // 기간별 데이터 fetch (기본 1M은 부모에서 받은 dataMap 사용)
+  const { data: rangeData } = useIndicatorSeries(
+    range !== '1M' ? activeIds : [],
+    range,
+  )
+  const effectiveData = range === '1M' ? dataMap : (rangeData ?? dataMap)
+
+  const toggleIndicator = (id: number) => {
+    setSelectedIds((prev) => {
+      if (prev.length === 0) {
+        // 초기: 기본 목록에서 시작
+        const defaults = indicators.slice(0, 5).map((i) => i.id)
+        if (defaults.includes(id)) return defaults.filter((d) => d !== id)
+        return [...defaults, id].slice(0, MAX_SELECTABLE)
+      }
+      if (prev.includes(id)) return prev.filter((d) => d !== id)
+      if (prev.length >= MAX_SELECTABLE) return prev
+      return [...prev, id]
+    })
+  }
 
   const { matrix, sampleCounts } = useMemo(() => {
     const mat: number[][] = []
@@ -98,16 +148,13 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
     for (let i = 0; i < items.length; i++) {
       const row: number[] = []
       const countRow: number[] = []
-      const aData = dataMap[items[i].id] ?? []
+      const aData = effectiveData[items[i].id] ?? []
       for (let j = 0; j < items.length; j++) {
         if (i === j) { row.push(1); countRow.push(0); continue }
-        const bData = dataMap[items[j].id] ?? []
-        // 1) 날짜 기준으로 두 시계열 매칭
+        const bData = effectiveData[items[j].id] ?? []
         const { aValues, bValues } = alignByDate(aData, bData)
-        // 2) 가격 → 일별 수익률로 변환
         const aReturns = toReturns(aValues)
         const bReturns = toReturns(bValues)
-        // 3) 수익률 간 피어슨 상관계수
         row.push(pearson(aReturns, bReturns))
         countRow.push(aReturns.length)
       }
@@ -115,9 +162,8 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
       counts.push(countRow)
     }
     return { matrix: mat, sampleCounts: counts }
-  }, [items, dataMap])
+  }, [items, effectiveData])
 
-  // Selected indicator's correlations with others (sorted by abs value)
   const selectedCorrelations = useMemo(() => {
     if (selectedId == null) return null
     const idx = items.findIndex((i) => i.id === selectedId)
@@ -171,6 +217,71 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
           </button>
         </div>
       </div>
+
+      {/* Period selector + Indicator selector */}
+      <div className="flex items-center gap-2 mb-3">
+        {/* Period tabs */}
+        <div className="flex gap-0.5">
+          {RANGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setRange(opt.value)}
+              className={cn(
+                'text-[10px] px-2 py-0.5 rounded-full border transition-colors',
+                range === opt.value
+                  ? 'bg-elevated text-heading border-border-mid'
+                  : 'border-border-dim text-faint hover:text-muted hover:border-border-mid',
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Indicator selector dropdown */}
+        <div className="relative ml-auto">
+          <button
+            onClick={() => setSelectorOpen(!selectorOpen)}
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border border-border-dim text-muted hover:text-heading hover:border-border-mid transition-colors"
+          >
+            지표 {activeIds.length}개
+            {selectorOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+          </button>
+
+          {selectorOpen && (
+            <div className="absolute right-0 top-full mt-1 z-40 w-52 max-h-56 overflow-y-auto rounded-lg border border-border-mid bg-surface shadow-lg animate-fadeIn">
+              {indicators.map((ind) => {
+                const checked = activeIds.includes(ind.id)
+                const disabled = !checked && activeIds.length >= MAX_SELECTABLE
+                return (
+                  <button
+                    key={ind.id}
+                    onClick={() => toggleIndicator(ind.id)}
+                    disabled={disabled}
+                    className={cn(
+                      'w-full flex items-center gap-2 px-3 py-1.5 text-left text-[11px] transition-colors',
+                      checked ? 'text-heading' : 'text-muted',
+                      disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-elevated cursor-pointer',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0',
+                        checked ? 'bg-blue-600 border-blue-600' : 'border-border-mid',
+                      )}
+                    >
+                      {checked && <Check size={10} className="text-white" />}
+                    </div>
+                    <span className="truncate">{ind.name}</span>
+                    <span className="ml-auto text-[9px] text-faint">{ind.category}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
       <p className="text-[11px] text-muted mb-3">
         {selectedName
           ? `${selectedName}과(와) 다른 지표의 상관관계`
@@ -194,14 +305,12 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                     className="group cursor-pointer rounded-lg p-2 hover:bg-elevated transition-colors"
                     onClick={() => onSelect?.(ind.id)}
                   >
-                    {/* Name + value row */}
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[12px] text-heading font-medium">{shortName(ind.name)}</span>
                       <span className="text-[11px] font-mono" style={{ color: strength.color }}>
                         {corr >= 0 ? '+' : ''}{corr.toFixed(2)}
                       </span>
                     </div>
-                    {/* Bar */}
                     <div className="h-2 rounded-full bg-elevated overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
@@ -212,7 +321,6 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                         }}
                       />
                     </div>
-                    {/* Strength + confidence */}
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-[10px] text-faint">{strength.text}</p>
                       <p className="text-[9px]" style={{ color: confidence.color }}>
@@ -222,7 +330,6 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                   </div>
                 )
               })}
-              {/* Relationship description */}
               {selectedCorrelations.length > 0 && (
                 <div className="mt-auto pt-2 border-t border-border-dim">
                   <p className="text-[11px] text-muted leading-relaxed">
@@ -233,13 +340,12 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                     )}
                   </p>
                   <p className="text-[10px] text-faint mt-1">
-                    * 일별 수익률 기반 피어슨 상관계수 (가격 수준이 아닌 변화율 비교)
+                    * 일별 수익률 기반 피어슨 상관계수 ({RANGE_OPTIONS.find((o) => o.value === range)?.label} 기준)
                   </p>
                 </div>
               )}
             </>
           ) : (
-            /* No selection: show clickable indicator list */
             <div className="flex flex-col gap-1">
               {items.map((ind) => (
                 <button
@@ -269,8 +375,20 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
           )}
         </div>
       ) : (
-        /* ── Matrix View ── */
+        /* ── Matrix View (gradient heatmap) ── */
         <div className="flex-1 min-h-0 overflow-auto">
+          {/* Color legend */}
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[9px] text-faint">-1</span>
+            <div
+              className="flex-1 h-2 rounded-full"
+              style={{
+                background: 'linear-gradient(to right, rgba(226,75,74,0.7), rgba(226,75,74,0.15), rgba(148,163,184,0.15), rgba(55,138,221,0.15), rgba(55,138,221,0.7))',
+              }}
+            />
+            <span className="text-[9px] text-faint">+1</span>
+          </div>
+
           <div
             className="grid gap-[3px] text-[10px]"
             style={{
@@ -307,25 +425,7 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                 {matrix[i]?.map((val, j) => {
                   const isHighlighted =
                     selectedId != null && (items[i].id === selectedId || items[j].id === selectedId)
-                  const abs = Math.abs(val)
-                  // Color: positive = blue, negative = red/orange, diagonal = accent
-                  let bg: string
-                  let textColor: string
-                  if (i === j) {
-                    bg = 'var(--corr-strong)'
-                    textColor = 'var(--corr-strong-text)'
-                  } else if (val >= 0) {
-                    bg = abs > 0.5 ? 'var(--corr-mid)' : abs > 0.2 ? 'var(--corr-weak)' : 'var(--corr-none)'
-                    textColor = abs > 0.5 ? 'var(--corr-mid-text)' : abs > 0.2 ? 'var(--corr-weak-text)' : 'var(--corr-none-text)'
-                  } else {
-                    // Negative correlations use warm tones
-                    bg = abs > 0.5
-                      ? 'rgba(226,75,74,0.25)'
-                      : abs > 0.2 ? 'rgba(226,75,74,0.12)' : 'var(--corr-none)'
-                    textColor = abs > 0.5
-                      ? '#E24B4A'
-                      : abs > 0.2 ? '#E24B4A' : 'var(--corr-none-text)'
-                  }
+                  const { bg, text } = getCorrColor(val, i === j)
                   return (
                     <div
                       key={`cell-${i}-${j}`}
@@ -333,7 +433,7 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                         'h-7 rounded flex items-center justify-center text-[10px] font-medium transition-opacity cursor-pointer',
                         !isHighlighted && selectedId != null && 'opacity-30',
                       )}
-                      style={{ background: bg, color: textColor }}
+                      style={{ background: bg, color: text }}
                       title={`${shortName(items[i].name)} ↔ ${shortName(items[j].name)}: ${val.toFixed(2)}`}
                       onClick={() => onSelect?.(items[j].id)}
                     >
