@@ -206,6 +206,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
       </ResponsiveGridLayout>
       {editingWidget && (
         <WidgetEditor
+          key={editingWidget.id}
           widget={editingWidget}
           indicator={editingIndicator}
           open={!!editingWidgetId}

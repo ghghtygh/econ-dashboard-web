@@ -1,5 +1,5 @@
 import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts'
-import { formatPrice } from '@/components/charts/chartUtils'
+import { formatPrice } from '@/components/charts/chartFormatters'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import type { IndicatorData } from '@/types/indicator'

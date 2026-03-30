@@ -162,7 +162,10 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
     return ((latest.value - prev.value) / prev.value) * 100
   }, [latest, prev])
 
-  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
+  const desc = useMemo(
+    () => getIndicatorDescription(indicator.symbol, indicator.category),
+    [indicator.symbol, indicator.category],
+  )
   const { thresholds, interpretation, learnMore } = desc
 
   const currentSeverity = useMemo(() => {

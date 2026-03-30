@@ -194,7 +194,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
     )
 
     addRule({
-      id: `rule-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: crypto.randomUUID(),
       indicatorId: matchedIndicator?.id ?? 0,
       indicatorName: matchedIndicator?.name ?? preset.indicatorName,
       condition: preset.condition,
@@ -455,7 +455,7 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
     if (!indicator || !threshold) return
 
     onSave({
-      id: `rule-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: crypto.randomUUID(),
       indicatorId: indicator.id,
       indicatorName: indicator.name,
       condition,

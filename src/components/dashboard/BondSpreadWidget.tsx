@@ -52,7 +52,10 @@ export function BondSpreadWidget({ indicators, dataMap }: BondSpreadWidgetProps)
   const korea10YIndicator = findBySymbol(bondIndicators, 'KR10Y')
 
   // 시계열 데이터
-  const spreadSeries = spreadIndicator ? (dataMap[spreadIndicator.id] ?? []) : []
+  const spreadSeries = useMemo(
+    () => (spreadIndicator ? (dataMap[spreadIndicator.id] ?? []) : []),
+    [spreadIndicator, dataMap],
+  )
 
   // 최신 값
   const spreadValue = spreadIndicator ? getLatestValue(dataMap[spreadIndicator.id] ?? []) : null

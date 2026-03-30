@@ -17,6 +17,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   MACRO: '거시경제',
 }
 
+function computeSparkPoints(values: { value: number }[]): string {
+  if (values.length < 2) return ''
+  const last12 = values.slice(-12)
+  const min = Math.min(...last12.map((d) => d.value))
+  const max = Math.max(...last12.map((d) => d.value))
+  const range = max - min || 1
+  return last12
+    .map((d, i) => {
+      const x = (i / (last12.length - 1)) * 120
+      const y = 36 - ((d.value - min) / range) * 30
+      return `${x},${y}`
+    })
+    .join(' ')
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
   STOCK: '#378ADD',
   FOREX: '#E24B4A',
@@ -60,7 +75,7 @@ export function ExplorePage() {
   const handleAddWidget = (indicatorId: number, name: string) => {
     if (widgetIndicatorIds.has(indicatorId)) return
     const widget: DashboardWidget = {
-      id: `widget-${indicatorId}-${Date.now()}`,
+      id: crypto.randomUUID(),
       indicatorId,
       chartType: 'line',
       position: { x: 0, y: Infinity, w: 4, h: 3 },
@@ -144,20 +159,7 @@ export function ExplorePage() {
             const desc = getIndicatorDescription(indicator.symbol, indicator.category)
 
             // Mini sparkline
-            const sparkPoints = useMemo(() => {
-              if (series.length < 2) return ''
-              const last12 = series.slice(-12)
-              const min = Math.min(...last12.map((d) => d.value))
-              const max = Math.max(...last12.map((d) => d.value))
-              const range = max - min || 1
-              return last12
-                .map((d, i) => {
-                  const x = (i / (last12.length - 1)) * 120
-                  const y = 36 - ((d.value - min) / range) * 30
-                  return `${x},${y}`
-                })
-                .join(' ')
-            }, [series])
+            const sparkPoints = computeSparkPoints(series)
 
             return (
               <div
