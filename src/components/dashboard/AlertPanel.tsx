@@ -215,7 +215,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <Bell size={16} className="text-amber-500" />
-            <h3 className="text-sm font-semibold text-heading">알림 &amp; 경보</h3>
+            <h3 className="text-base font-semibold text-heading">알림 &amp; 경보</h3>
             {unreadCount > 0 && (
               <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-red-500 text-white">
                 {unreadCount}

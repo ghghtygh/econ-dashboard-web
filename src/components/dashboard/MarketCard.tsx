@@ -53,7 +53,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
     <div onClick={onClick} className="cursor-pointer">
       <div
         className={cn(
-          'rounded-lg border p-4 transition-all',
+          'rounded-lg border p-5 transition-all',
           isSelected
             ? 'border-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-500/20'
             : 'border-border-dim hover:border-border-mid',
@@ -64,7 +64,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-            <p className="text-xs text-muted font-medium">
+            <p className="text-sm text-muted font-medium">
               {indicator.symbol}
             </p>
             <InfoTooltip>
@@ -73,7 +73,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
           </div>
           <span
             className={cn(
-              'text-xs font-medium px-2 py-0.5 rounded-full',
+              'text-sm font-medium px-2.5 py-1 rounded-full',
               isUp
                 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                 : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
@@ -84,11 +84,11 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
         </div>
 
         {/* Name */}
-        <p className="text-sm text-muted mb-1 truncate">{indicator.name}</p>
+        <p className="text-base text-muted mb-2 truncate">{indicator.name}</p>
 
         {/* Metric */}
         {latest ? (
-          <p className="text-2xl font-semibold text-heading tracking-tight">
+          <p className="text-3xl font-semibold text-heading tracking-tight">
             {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
         ) : (

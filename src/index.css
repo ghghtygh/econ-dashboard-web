@@ -103,7 +103,7 @@ body {
 .dash-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: 2rem 1.5rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -111,22 +111,22 @@ body {
 
 @media (min-width: 768px) {
   .dash-container {
-    padding: 2rem 1.5rem 4rem;
+    padding: 2.5rem 2rem 4rem;
   }
 }
 
 @media (min-width: 1024px) {
   .dash-container {
-    padding: 2rem 2rem 4rem;
+    padding: 2.5rem 2.5rem 4rem;
   }
 }
 
 .section-label {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--th-heading);
-  letter-spacing: -0.01em;
-  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
 }
 
 /* ── Section divider ── */
