@@ -7,7 +7,8 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { formatChartData, formatPrice, ChartTooltip } from '@/components/charts/chartUtils'
+import { formatChartData, formatPrice } from '@/components/charts/chartFormatters'
+import { ChartTooltip } from '@/components/charts/chartUtils'
 import type { IndicatorData } from '@/types/indicator'
 
 interface AreaChartProps {

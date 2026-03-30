@@ -109,7 +109,7 @@ function getSuggestions(indicator?: Indicator): ChipSuggestion[] {
   ]
 }
 
-export function AIPanel({ selectedIndicator, series, allIndicators: _allIndicators }: AIPanelProps) {
+export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'ai'; text: string }>>([])
   const [isLoading, setIsLoading] = useState(false)

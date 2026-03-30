@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BarChart3, LineChartIcon, AreaChartIcon, Hash, CandlestickChart } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -42,13 +42,6 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
   const updateWidget = useDashboardStore((s) => s.updateWidget)
 
   const { data: previewData } = useIndicatorData(widget.indicatorId)
-
-  useEffect(() => {
-    setTitle(widget.title ?? '')
-    setChartType(widget.chartType)
-    setDateRange(widget.dateRange ?? '1M')
-    setColor(widget.color ?? COLORS[0])
-  }, [widget])
 
   const handleSave = () => {
     updateWidget(widget.id, { title: title || undefined, chartType, dateRange, color })
