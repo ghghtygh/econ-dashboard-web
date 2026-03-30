@@ -11,7 +11,7 @@ import {
 } from 'recharts'
 import { History, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useIndicatorSeries, type DateRange } from '@/hooks/useIndicators'
+import { useIndicatorSeries } from '@/hooks/useIndicators'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface HistoricalComparisonProps {

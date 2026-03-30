@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Plus, Check, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Search, Plus, Check, TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
