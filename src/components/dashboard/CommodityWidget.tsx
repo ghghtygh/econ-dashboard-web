@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
-import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface CommodityWidgetProps {
@@ -59,8 +58,6 @@ function CommodityCard({
   series: IndicatorData[]
   groupColor: string
 }) {
-  const [expanded, setExpanded] = useState(false)
-
   const latest = series.length > 0 ? series[series.length - 1] : undefined
   const prev = series.length > 1 ? series[series.length - 2] : undefined
 
@@ -70,8 +67,6 @@ function CommodityCard({
   }, [latest, prev])
 
   const isUp = changePercent >= 0
-  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
-  const isCopper = indicator.symbol === 'HG=F'
 
   return (
     <div
@@ -79,7 +74,6 @@ function CommodityCard({
         'rounded-lg border bg-surface p-4 cursor-pointer transition-colors',
         'border-border-dim hover:border-border-mid',
       )}
-      onClick={() => setExpanded((v) => !v)}
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
@@ -119,35 +113,6 @@ function CommodityCard({
         <Sparkline series={series} color={groupColor} />
       </div>
 
-      {/* Dr. Copper callout */}
-      {isCopper && (
-        <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
-          <p className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
-            Dr. Copper
-          </p>
-          <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">
-            구리는 경제의 청진기로 불리며, 글로벌 경기 방향의 선행 지표로 활용됩니다.
-          </p>
-        </div>
-      )}
-
-      {/* Expanded: interpretation & learnMore */}
-      {expanded && (desc.interpretation || desc.learnMore) && (
-        <div className="mt-3 pt-3 border-t border-border-dim space-y-2 animate-fadeIn">
-          {desc.interpretation && (
-            <div>
-              <p className="text-[10px] text-faint uppercase tracking-wide mb-0.5">해석</p>
-              <p className="text-xs text-body leading-relaxed">{desc.interpretation}</p>
-            </div>
-          )}
-          {desc.learnMore && (
-            <div>
-              <p className="text-[10px] text-faint uppercase tracking-wide mb-0.5">더 알아보기</p>
-              <p className="text-xs text-muted leading-relaxed">{desc.learnMore}</p>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
@@ -163,10 +128,7 @@ export function CommodityWidget({ indicators, dataMap }: CommodityWidgetProps) {
   return (
     <section>
       {/* Section header */}
-      <h2 className="text-lg font-semibold text-heading">원자재 시장</h2>
-      <p className="text-sm text-muted mt-1 mb-5">
-        에너지·금속·농산물 — 인플레이션과 글로벌 수요 신호
-      </p>
+      <h2 className="text-lg font-semibold text-heading mb-5">원자재 시장</h2>
 
       {/* Sub-groups */}
       <div className="space-y-6">

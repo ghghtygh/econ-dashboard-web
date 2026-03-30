@@ -23,9 +23,9 @@ interface HistoricalComparisonProps {
 
 /** 사전 정의 위기 시점 */
 const CRISIS_PRESETS = [
-  { id: '2008', label: '2008 금융위기', startDate: '2007-10-01', description: '서브프라임 모기지 → 리먼 파산 → 글로벌 금융위기' },
-  { id: '2020', label: '2020 코로나', startDate: '2020-01-01', description: 'COVID-19 팬데믹 → 경기침체 → 초저금리' },
-  { id: '2022', label: '2022 긴축', startDate: '2022-01-01', description: '인플레이션 급등 → 급격한 금리 인상 사이클' },
+  { id: '2008', label: '2008 금융위기', startDate: '2007-10-01', description: '' },
+  { id: '2020', label: '2020 코로나', startDate: '2020-01-01', description: '' },
+  { id: '2022', label: '2022 긴축', startDate: '2022-01-01', description: '' },
 ] as const
 
 const COLORS = ['#378ADD', '#EF9F27', '#E24B4A', '#1D9E75']
@@ -142,8 +142,7 @@ export function HistoricalComparison({ indicators, dataMap, selectedId, onSelect
         <div className="flex items-center gap-2">
           <History size={16} className="text-muted" />
           <div>
-            <h3 className="text-base font-semibold text-heading">이력 비교 모드</h3>
-            <p className="text-[11px] text-muted mt-0.5">과거 위기 시점과 현재를 정규화하여 비교</p>
+            <h3 className="text-base font-semibold text-heading">이력 비교</h3>
           </div>
         </div>
       </div>
@@ -254,29 +253,10 @@ export function HistoricalComparison({ indicators, dataMap, selectedId, onSelect
         </div>
       ) : (
         <div className="h-64 flex items-center justify-center">
-          <p className="text-faint text-xs">지표를 선택하면 비교 차트가 표시됩니다</p>
+          <p className="text-faint text-xs">지표를 선택하세요</p>
         </div>
       )}
 
-      {/* Legend description */}
-      <div className="mt-3 pt-3 border-t border-border-dim">
-        <p className="text-[10px] text-faint leading-relaxed">
-          * 각 기간의 시작 시점을 100으로 정규화하여 비교합니다. 실선은 현재, 점선은 과거 위기 시점입니다.
-        </p>
-        {selectedCrises.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {selectedCrises.map((id) => {
-              const preset = CRISIS_PRESETS.find((p) => p.id === id)
-              if (!preset) return null
-              return (
-                <span key={id} className="text-[10px] text-muted">
-                  <span className="font-medium">{preset.label}</span>: {preset.description}
-                </span>
-              )
-            })}
-          </div>
-        )}
-      </div>
     </div>
   )
 }

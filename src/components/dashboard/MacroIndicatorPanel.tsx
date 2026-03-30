@@ -106,17 +106,9 @@ export function MacroIndicatorPanel({ indicators, dataMap }: MacroIndicatorPanel
       <section>
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-heading">거시경제 지표</h2>
-          <p className="text-xs text-muted mt-0.5">
-            핵심 경제 건강 지표 — 클릭하면 학습 정보를 볼 수 있습니다
-          </p>
         </div>
         <div className="rounded-lg border border-border-dim bg-surface p-8 text-center">
-          <p className="text-muted text-sm">
-            거시경제 지표 데이터가 아직 없습니다.
-          </p>
-          <p className="text-faint text-xs mt-1">
-            CPI, 실업률, PCE 등의 데이터가 수집되면 여기에 표시됩니다.
-          </p>
+          <p className="text-muted text-sm">데이터 없음</p>
         </div>
       </section>
     )
@@ -126,9 +118,6 @@ export function MacroIndicatorPanel({ indicators, dataMap }: MacroIndicatorPanel
     <section>
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-heading">거시경제 지표</h2>
-        <p className="text-xs text-muted mt-0.5">
-          핵심 경제 건강 지표 — 클릭하면 학습 정보를 볼 수 있습니다
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -166,7 +155,7 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
     () => getIndicatorDescription(indicator.symbol, indicator.category),
     [indicator.symbol, indicator.category],
   )
-  const { thresholds, interpretation, learnMore } = desc
+  const { thresholds } = desc
 
   const currentSeverity = useMemo(() => {
     if (!latest || !thresholds || thresholds.length === 0) return undefined
@@ -285,85 +274,29 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
           </div>
         )}
 
-        {/* Brief interpretation (always visible) */}
-        {interpretation && (
-          <p className="text-[11px] text-muted mt-2 leading-relaxed line-clamp-2">
-            {interpretation}
-          </p>
-        )}
+        {/* Brief interpretation removed for minimalism */}
       </div>
 
-      {/* Expanded learning content */}
-      {isExpanded && (
+      {/* Expanded: thresholds only */}
+      {isExpanded && thresholds && thresholds.length > 0 && (
         <div
-          className="border-t border-border-dim px-4 sm:px-5 py-4 space-y-3 animate-fadeIn"
+          className="border-t border-border-dim px-4 sm:px-5 py-4 animate-fadeIn"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Definition */}
-          <div>
-            <p className="text-[11px] font-medium text-heading mb-0.5">정의</p>
-            <p className="text-xs text-body leading-relaxed">{desc.definition}</p>
-          </div>
-
-          {/* Importance */}
-          <div>
-            <p className="text-[11px] font-medium text-heading mb-0.5">왜 중요한가</p>
-            <p className="text-xs text-body leading-relaxed">{desc.importance}</p>
-          </div>
-
-          {/* Full interpretation */}
-          {interpretation && (
-            <div>
-              <p className="text-[11px] font-medium text-heading mb-0.5">해석 가이드</p>
-              <p className="text-xs text-muted leading-relaxed">{interpretation}</p>
-            </div>
-          )}
-
-          {/* Thresholds detail */}
-          {thresholds && thresholds.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium text-heading mb-1">주요 기준값</p>
-              <div className="space-y-1">
-                {thresholds.map((t) => (
-                  <div key={t.level} className="flex items-center gap-2">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: SEVERITY_COLORS[t.severity] }}
-                    />
-                    <span className="font-mono text-[11px] text-heading w-12 shrink-0">
-                      {t.level}
-                    </span>
-                    <span className="text-[11px] text-muted">{t.label}</span>
-                  </div>
-                ))}
+          <div className="space-y-1">
+            {thresholds.map((t) => (
+              <div key={t.level} className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: SEVERITY_COLORS[t.severity] }}
+                />
+                <span className="font-mono text-[11px] text-heading w-12 shrink-0">
+                  {t.level}
+                </span>
+                <span className="text-[11px] text-muted">{t.label}</span>
               </div>
-            </div>
-          )}
-
-          {/* Related indicators */}
-          {desc.related.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium text-heading mb-1">관련 지표</p>
-              <div className="flex flex-wrap gap-1">
-                {desc.related.map((r) => (
-                  <span
-                    key={r}
-                    className="px-1.5 py-0.5 rounded bg-elevated text-muted text-[10px]"
-                  >
-                    {r}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Learn more */}
-          {learnMore && (
-            <div className="pt-2 border-t border-border-dim">
-              <p className="text-[11px] font-medium text-heading mb-0.5">학습 팁</p>
-              <p className="text-[11px] text-faint leading-relaxed">{learnMore}</p>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
     </div>

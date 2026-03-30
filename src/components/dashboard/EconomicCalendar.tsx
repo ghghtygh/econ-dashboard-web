@@ -408,10 +408,6 @@ export function EconomicCalendar() {
       {/* Section title */}
       <div className="mb-4">
         <h3 className="text-base font-semibold text-heading">경제 캘린더</h3>
-        <p className="text-xs text-muted mt-0.5">
-          주요 경제 이벤트와 발표 일정 — 시장을 움직이는 이벤트를 미리
-          파악하세요
-        </p>
       </div>
 
       {/* Toolbar */}
