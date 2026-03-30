@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
-import { Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIndicatorSeries, type DateRange } from '@/hooks/useIndicators'
 import type { Indicator, IndicatorData } from '@/types/indicator'
@@ -73,14 +73,6 @@ function getStrengthLabel(val: number): { text: string; color: string } {
   if (abs > 0.5) return { text: `${dir}의 상관`, color: val >= 0 ? '#378ADD' : '#EF9F27' }
   if (abs > 0.2) return { text: `약한 ${dir}의 상관`, color: '#94a3b8' }
   return { text: '거의 무관', color: '#64748b' }
-}
-
-function getRelationDescription(nameA: string, nameB: string, corr: number): string {
-  const abs = Math.abs(corr)
-  if (abs < 0.2) return `${nameA}와 ${nameB}는 뚜렷한 상관관계가 없습니다.`
-  const dir = corr > 0 ? '같은 방향' : '반대 방향'
-  const strength = abs > 0.7 ? '강하게' : '다소'
-  return `${nameA}과(와) ${nameB}는 ${strength} ${dir}으로 움직이는 경향이 있습니다.`
 }
 
 /**
@@ -282,14 +274,14 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
         </div>
       </div>
 
-      <p className="text-[11px] text-muted mb-3">
-        {selectedName
-          ? `${selectedName}과(와) 다른 지표의 상관관계`
-          : '지표를 클릭하면 관계가 시각화됩니다'}
-      </p>
+      {selectedName && (
+        <p className="text-[11px] text-muted mb-3">
+          {selectedName}
+        </p>
+      )}
 
       {items.length === 0 ? (
-        <p className="text-faint text-xs text-center py-4">데이터를 불러오는 중...</p>
+        <div className="flex justify-center py-4"><Loader2 size={16} className="animate-spin text-faint" /></div>
       ) : viewMode === 'bar' ? (
         /* ── Bar Chart View ── */
         <div className="flex-1 flex flex-col gap-1.5 min-h-0 overflow-y-auto">
@@ -330,20 +322,6 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
                   </div>
                 )
               })}
-              {selectedCorrelations.length > 0 && (
-                <div className="mt-auto pt-2 border-t border-border-dim">
-                  <p className="text-[11px] text-muted leading-relaxed">
-                    {getRelationDescription(
-                      selectedName ?? '',
-                      selectedCorrelations[0].indicator.name,
-                      selectedCorrelations[0].corr,
-                    )}
-                  </p>
-                  <p className="text-[10px] text-faint mt-1">
-                    * 일별 수익률 기반 피어슨 상관계수 ({RANGE_OPTIONS.find((o) => o.value === range)?.label} 기준)
-                  </p>
-                </div>
-              )}
             </>
           ) : (
             <div className="flex flex-col gap-1">

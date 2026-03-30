@@ -19,7 +19,6 @@ import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
 import { IndicatorCardSkeleton } from '@/components/ui/Skeleton'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
-import { useDashboardStore } from '@/store/dashboardStore'
 import type { IndicatorCategory } from '@/types/indicator'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -39,7 +38,6 @@ export function DashboardPage() {
   const [showAllIndicators, setShowAllIndicators] = useState(false)
   const queryClient = useQueryClient()
   const { data: indicators, isLoading, isError, error } = useIndicators()
-  const widgets = useDashboardStore((s) => s.widgets)
 
   const indicatorIds = indicators?.map((i) => i.id) ?? []
   const { data: allData } = useIndicatorSeries(indicatorIds, '1M')
@@ -66,7 +64,6 @@ export function DashboardPage() {
       <main className="dash-container">
         {/* Top Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6">
-          <h1 className="text-2xl font-bold text-heading tracking-tight">경제 지표 대시보드</h1>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setSelectedCategory(null)}
@@ -93,15 +90,14 @@ export function DashboardPage() {
               <p className="text-red-700 dark:text-red-300 text-sm font-medium">API 연결에 실패했습니다</p>
               <p className="text-red-500/70 dark:text-red-400/60 text-xs mt-0.5">{(error as Error)?.message}</p>
             </div>
-            <button onClick={handleRefresh} className="px-5 py-2.5 bg-white dark:bg-elevated text-body rounded-lg text-sm font-medium hover:bg-elevated dark:hover:bg-hover shrink-0 border border-border-dim">
-              다시 시도
+            <button onClick={handleRefresh} className="p-2.5 bg-white dark:bg-elevated text-body rounded-lg hover:bg-elevated dark:hover:bg-hover shrink-0 border border-border-dim" title="다시 시도">
+              <RefreshCw size={14} />
             </button>
           </div>
         )}
 
         {/* Market Grid - Top 4 cards with sparklines */}
         <section className="mb-12">
-          <h2 className="section-label">실시간 마켓</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {isLoading
               ? Array.from({ length: 4 }).map((_, i) => <IndicatorCardSkeleton key={i} />)
@@ -159,9 +155,6 @@ export function DashboardPage() {
             )}
           </section>
         )}
-
-        {/* Divider */}
-        <hr className="section-divider" />
 
         {/* Market Sentiment & Additional Indices (#22) */}
         <section className="mb-12">
@@ -245,15 +238,10 @@ export function DashboardPage() {
           />
         </section>
 
-        {/* Divider */}
-        <hr className="section-divider" />
-
         {/* Widget Section (existing) */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="section-label !mb-0">
-              위젯 ({widgets.length})
-            </h2>
+            <h2 className="text-sm font-semibold text-heading">위젯</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setAddModalOpen(true)}

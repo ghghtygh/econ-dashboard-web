@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp, Activity } from 'lucide-react'
+import { useMemo } from 'react'
+import { Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 interface MarketSentimentWidgetProps {
@@ -158,17 +157,11 @@ function IndexRow({
   latest,
   prev,
   series,
-  note,
-  expanded,
-  onToggle,
 }: {
   indicator: Indicator | undefined
   latest: IndicatorData | undefined
   prev: IndicatorData | undefined
   series: IndicatorData[]
-  note: string
-  expanded: boolean
-  onToggle: () => void
 }) {
   const changePercent = useMemo(() => {
     if (!latest || !prev || prev.value === 0) return latest?.change ?? 0
@@ -176,21 +169,16 @@ function IndexRow({
   }, [latest, prev])
 
   const isUp = changePercent >= 0
-  const desc = indicator ? getIndicatorDescription(indicator.symbol, indicator.category) : undefined
-
   return (
     <div className="border-b border-border-dim last:border-b-0">
-      <button
-        type="button"
-        className="w-full flex items-center gap-3 py-3 px-1 text-left hover:bg-hover/50 transition-colors rounded"
-        onClick={onToggle}
+      <div
+        className="w-full flex items-center gap-3 py-3 px-1"
       >
         {/* 이름 */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-heading truncate">
             {indicator?.name ?? '--'}
           </p>
-          <p className="text-[10px] text-faint">{note}</p>
         </div>
 
         {/* 스파크라인 */}
@@ -213,29 +201,7 @@ function IndexRow({
           )}
         </div>
 
-        {/* 토글 */}
-        {expanded ? (
-          <ChevronUp size={14} className="text-faint shrink-0" />
-        ) : (
-          <ChevronDown size={14} className="text-faint shrink-0" />
-        )}
-      </button>
-
-      {/* 확장 영역: 해석 & 학습 */}
-      {expanded && desc && (
-        <div className="px-2 pb-3 space-y-1.5 animate-fadeIn">
-          {desc.interpretation && (
-            <p className="text-xs text-muted leading-relaxed">
-              <span className="font-medium text-heading">해석:</span> {desc.interpretation}
-            </p>
-          )}
-          {desc.learnMore && (
-            <p className="text-[11px] text-faint leading-relaxed">
-              {desc.learnMore}
-            </p>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -250,18 +216,7 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
   const dow = useIndicatorBySymbol(indicators, dataMap, '^DJI')
   const russell = useIndicatorBySymbol(indicators, dataMap, '^RUT')
 
-  const [expandedVix, setExpandedVix] = useState(false)
-  const [expandedFg, setExpandedFg] = useState(false)
-  const [expandedIndices, setExpandedIndices] = useState<Record<string, boolean>>({})
-
-  const vixDesc = getIndicatorDescription('^VIX', 'STOCK')
-  const fgDesc = getIndicatorDescription('FEAR_GREED', 'STOCK')
-
   const vixColor = vix.latest ? getVixColor(vix.latest.value) : null
-
-  const toggleIndex = (symbol: string) => {
-    setExpandedIndices((prev) => ({ ...prev, [symbol]: !prev[symbol] }))
-  }
 
   return (
     <section>
@@ -270,7 +225,6 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
         <Activity size={16} className="text-muted" />
         <h2 className="text-base font-semibold text-heading">시장 심리 & 추가 지수</h2>
       </div>
-      <p className="text-xs text-muted mb-4">투자 심리와 시장 폭을 한눈에</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── 심리 지표 섹션 ── */}
@@ -279,20 +233,9 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
 
           {/* VIX */}
           <div>
-            <button
-              type="button"
-              className="w-full text-left"
-              onClick={() => setExpandedVix(!expandedVix)}
-            >
+            <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-heading">VIX 공포 지수</p>
-                  {expandedVix ? (
-                    <ChevronUp size={13} className="text-faint" />
-                  ) : (
-                    <ChevronDown size={13} className="text-faint" />
-                  )}
-                </div>
+                <p className="text-sm font-medium text-heading">VIX 공포 지수</p>
                 {vix.latest && vixColor && (
                   <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', vixColor.bg, vixColor.text)}>
                     {vixColor.label}
@@ -326,33 +269,7 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
               </div>
 
               {!vix.latest && <p className="text-sm text-faint">--</p>}
-            </button>
-
-            {/* VIX 확장 */}
-            {expandedVix && (
-              <div className="mt-2 space-y-1.5 animate-fadeIn">
-                {vixDesc.interpretation && (
-                  <p className="text-xs text-muted leading-relaxed">
-                    <span className="font-medium text-heading">해석:</span> {vixDesc.interpretation}
-                  </p>
-                )}
-                {vixDesc.learnMore && (
-                  <p className="text-[11px] text-faint leading-relaxed">{vixDesc.learnMore}</p>
-                )}
-                {vixDesc.thresholds && (
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {vixDesc.thresholds.map((t) => (
-                      <span
-                        key={t.level}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-elevated text-muted"
-                      >
-                        {t.level}: {t.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            </div>
           </div>
 
           {/* 구분선 */}
@@ -360,20 +277,7 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
 
           {/* Fear & Greed Index */}
           <div>
-            <button
-              type="button"
-              className="w-full text-left"
-              onClick={() => setExpandedFg(!expandedFg)}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <p className="text-sm font-medium text-heading">Fear & Greed Index</p>
-                {expandedFg ? (
-                  <ChevronUp size={13} className="text-faint" />
-                ) : (
-                  <ChevronDown size={13} className="text-faint" />
-                )}
-              </div>
-            </button>
+            <p className="text-sm font-medium text-heading mb-3">Fear & Greed Index</p>
 
             {fearGreed.latest ? (
               <SentimentGauge value={fearGreed.latest.value} />
@@ -384,32 +288,6 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
               </div>
             )}
 
-            {/* 버핏 명언 */}
-            {fgDesc.interpretation && (
-              <p className="text-[11px] text-muted text-center mt-3 italic leading-relaxed">
-                "{fgDesc.interpretation}"
-              </p>
-            )}
-
-            {/* F&G 확장 */}
-            {expandedFg && (
-              <div className="mt-3 space-y-1.5 animate-fadeIn">
-                {fgDesc.learnMore && (
-                  <p className="text-[11px] text-faint leading-relaxed">{fgDesc.learnMore}</p>
-                )}
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {FG_ZONES.map((z) => (
-                    <span
-                      key={z.label}
-                      className="text-[10px] px-1.5 py-0.5 rounded font-medium text-white"
-                      style={{ backgroundColor: z.color }}
-                    >
-                      {z.min}-{z.max}: {z.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -422,27 +300,18 @@ export function MarketSentimentWidget({ indicators, dataMap }: MarketSentimentWi
             latest={kosdaq.latest}
             prev={kosdaq.prev}
             series={kosdaq.series}
-            note="중소형 성장주 · 개인투자자 바로미터"
-            expanded={!!expandedIndices['^KQ11']}
-            onToggle={() => toggleIndex('^KQ11')}
           />
           <IndexRow
             indicator={dow.indicator}
             latest={dow.latest}
             prev={dow.prev}
             series={dow.series}
-            note="미국 대형 우량주 30선 · 130년 역사"
-            expanded={!!expandedIndices['^DJI']}
-            onToggle={() => toggleIndex('^DJI')}
           />
           <IndexRow
             indicator={russell.indicator}
             latest={russell.latest}
             prev={russell.prev}
             series={russell.series}
-            note="미국 소형주 2000개 · 내수 경제 바로미터"
-            expanded={!!expandedIndices['^RUT']}
-            onToggle={() => toggleIndex('^RUT')}
           />
         </div>
       </div>

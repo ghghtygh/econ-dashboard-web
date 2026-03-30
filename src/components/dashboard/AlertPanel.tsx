@@ -227,9 +227,6 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
             규칙 추가
           </Button>
         </div>
-        <p className="text-[11px] text-muted">
-          지표 임계값을 설정하고 시장 변화를 놓치지 마세요
-        </p>
       </div>
 
       {/* 활성 규칙 목록 */}

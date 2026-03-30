@@ -93,9 +93,6 @@ export function BondSpreadWidget({ indicators, dataMap }: BondSpreadWidgetProps)
       {/* Section Header */}
       <div className="mb-5">
         <h2 className="text-base font-semibold text-heading">채권 시장</h2>
-        <p className="text-[11px] text-muted mt-0.5">
-          금리와 수익률 곡선 — 경기 전망의 핵심 신호
-        </p>
       </div>
 
       {/* ── 장단기 금리차 메인 영역 ── */}
@@ -171,37 +168,6 @@ export function BondSpreadWidget({ indicators, dataMap }: BondSpreadWidgetProps)
           </div>
         )}
 
-        {/* 경고 / 정상 메시지 */}
-        {spreadValue !== null && (
-          <div
-            className={cn(
-              'rounded-lg px-4 py-3 text-[12px] leading-relaxed',
-              isInverted
-                ? 'bg-red-50 border border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800/40 dark:text-red-300'
-                : 'bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-300',
-            )}
-          >
-            {isInverted ? (
-              <>
-                <p className="font-semibold mb-1">
-                  수익률 곡선 역전 — 경기 침체 선행 신호
-                </p>
-                <p className="text-[11px] opacity-90">
-                  단기 금리가 장기 금리보다 높은 상태로, 시장이 향후 경기 둔화와 금리 인하를 예상하고 있음을 의미합니다.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="font-semibold mb-1">
-                  정상적 수익률 곡선 — 경기 확장 신호
-                </p>
-                <p className="text-[11px] opacity-90">
-                  장기 금리가 단기 금리보다 높은 정상적 상태로, 경제 성장과 적절한 인플레이션 기대를 반영합니다.
-                </p>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ── 스프레드 시계열 차트 ── */}
@@ -356,46 +322,12 @@ export function BondSpreadWidget({ indicators, dataMap }: BondSpreadWidgetProps)
                 ) : (
                   <p className="text-faint text-sm">데이터 없음</p>
                 )}
-                {desc.interpretation && (
-                  <p className="text-[10px] text-muted mt-1.5 leading-relaxed line-clamp-2">
-                    {desc.interpretation}
-                  </p>
-                )}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* ── 학습 섹션 ── */}
-      <div className="border-t border-border-dim pt-4">
-        <p className="text-[11px] text-muted mb-2 uppercase tracking-wide">학습 가이드</p>
-        <div className="rounded-lg bg-elevated p-4 space-y-3">
-          <div>
-            <p className="text-[12px] font-medium text-heading mb-1">수익률 곡선 역전이란?</p>
-            <p className="text-[11px] text-muted leading-relaxed">
-              정상적인 채권 시장에서는 장기 채권(10년)의 수익률이 단기 채권(2년)보다 높습니다.
-              투자자가 더 오랜 기간 자금을 묶어두는 대가로 더 높은 수익률을 요구하기 때문입니다.
-              이 관계가 뒤집히면(역전), 시장이 미래 경기 침체를 예상하고 있다는 강력한 신호입니다.
-            </p>
-          </div>
-          <div>
-            <p className="text-[12px] font-medium text-heading mb-1">왜 중요한가?</p>
-            <p className="text-[11px] text-muted leading-relaxed">
-              1960년대 이후 모든 미국 경기 침체 전에 역전이 발생했습니다.
-              역전 후 실제 경기 침체까지는 평균 12~18개월이 소요되며,
-              이 기간 동안 주식 시장은 오히려 상승하는 경우도 있어 타이밍에 주의가 필요합니다.
-            </p>
-          </div>
-          <div>
-            <p className="text-[12px] font-medium text-heading mb-1">연관 지표 살펴보기</p>
-            <p className="text-[11px] text-muted leading-relaxed">
-              장단기 금리차와 함께 Fed 기준금리, CPI(물가), 실업률을 종합적으로 살펴보면
-              경기 사이클의 현재 위치를 더 정확하게 파악할 수 있습니다.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

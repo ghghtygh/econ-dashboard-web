@@ -27,15 +27,6 @@ const CATEGORY_COLORS: Record<
   COMMODITY: { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', darkBg: 'rgba(245,158,11,0.15)', darkText: '#FDE68A' },
 }
 
-const RELATED_INDICATORS: Record<NewsCategory, string> = {
-  STOCK: 'S&P 500, KOSPI, NASDAQ',
-  FOREX: 'USD/KRW, EUR/USD, DXY',
-  CRYPTO: 'BTC, ETH, 김치 프리미엄',
-  MACRO: 'CPI, Fed Funds Rate, GDP',
-  BOND: '미국 10년물, 한국 3년물, 장단기 스프레드',
-  COMMODITY: 'WTI, 금, 구리',
-}
-
 const ALL_CATEGORIES: NewsCategory[] = ['STOCK', 'FOREX', 'CRYPTO', 'MACRO', 'BOND', 'COMMODITY']
 
 const MOCK_NEWS: NewsArticle[] = [
@@ -174,10 +165,6 @@ export function NewsFeedWidget() {
         ))}
       </div>
 
-      {/* API fallback notice */}
-      {!hasApiData && !isLoading && (
-        <p className="text-[10px] text-faint mb-2">API 연결 대기 중 — 샘플 데이터 표시</p>
-      )}
 
       {/* News list */}
       <div className="flex-1 min-h-0 overflow-y-auto">
@@ -189,7 +176,6 @@ export function NewsFeedWidget() {
             const tagBg = isDark && colors ? colors.darkBg : colors?.bg ?? '#f1f5f9'
             const tagText = isDark && colors ? colors.darkText : colors?.text ?? '#334155'
             const dotColor = colors?.dot ?? '#94a3b8'
-            const relatedHint = RELATED_INDICATORS[article.category]
 
             return (
               <div
@@ -233,12 +219,6 @@ export function NewsFeedWidget() {
                     <span>{formatTimeAgo(article.publishedAt)}</span>
                   </div>
 
-                  {/* Related indicators hint */}
-                  {relatedHint && (
-                    <p className="text-[10px] text-faint mt-1">
-                      관련 지표: {relatedHint}
-                    </p>
-                  )}
                 </div>
               </div>
             )

@@ -16,7 +16,7 @@ interface ChipSuggestion {
 
 function generateInsight(indicator?: Indicator, series?: IndicatorData[]): string {
   if (!indicator || !series || series.length < 2) {
-    return '좌측 마켓 카드에서 지표를 클릭하면 해당 지표에 대한 AI 해설이 여기에 표시됩니다.'
+    return '지표를 선택하세요'
   }
 
   const latest = series[series.length - 1]
@@ -137,7 +137,7 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
     setTimeout(() => {
       setChatHistory((prev) => [
         ...prev,
-        { role: 'ai', text: `"${prompt}"에 대한 답변을 준비하고 있습니다. 실제 Claude API가 연동되면 여기에 분석 결과가 표시됩니다.` },
+        { role: 'ai', text: `분석 준비 중입니다. API 연동 후 결과가 표시됩니다.` },
       ])
       setIsLoading(false)
     }, 1000)

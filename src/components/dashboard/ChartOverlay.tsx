@@ -36,29 +36,25 @@ const PRESET_COMPARISONS: PresetComparison[] = [
     id: 'cpi-rate',
     label: 'CPI vs 기준금리',
     keywords: ['CPI', '기준금리'],
-    explanation:
-      '물가(CPI)가 상승하면 중앙은행은 인플레이션을 억제하기 위해 기준금리를 인상합니다. 금리 인상은 시차를 두고 물가 안정으로 이어지며, 이 두 지표의 시차 관계를 관찰하면 통화정책의 효과를 가늠할 수 있습니다.',
+    explanation: '',
   },
   {
     id: 'vix-sp500',
     label: 'VIX vs S&P 500',
     keywords: ['VIX', 'S&P 500'],
-    explanation:
-      'VIX(공포 지수)와 S&P 500은 대표적인 역상관 관계를 보입니다. 시장이 급락하면 옵션 내재변동성이 치솟아 VIX가 급등하고, 시장이 안정되면 VIX는 하락합니다. VIX 30 이상은 극도의 공포, 15 이하는 안도를 나타냅니다.',
+    explanation: '',
   },
   {
     id: 'usdkrw-kospi',
     label: '달러/원 vs KOSPI',
     keywords: ['USD/KRW', 'KOSPI'],
-    explanation:
-      '원화 약세(환율 상승)와 KOSPI는 역상관 경향이 있습니다. 외국인 투자자가 한국 주식을 매도하면 원화가 약세를 보이고 KOSPI가 하락합니다. 반대로 외국인 매수 유입 시 원화 강세와 주가 상승이 동시에 나타납니다.',
+    explanation: '',
   },
   {
     id: 'gold-bond',
     label: '금 vs 10년 국채',
     keywords: ['Gold', '10Y'],
-    explanation:
-      '금과 미국 10년 국채 수익률은 역상관 관계가 많습니다. 국채 금리 상승은 이자 없는 금의 기회비용을 높여 금 가격을 압박합니다. 반면 금리 하락이나 불확실성 증가 시 안전자산인 금에 자금이 유입됩니다.',
+    explanation: '',
   },
 ]
 
@@ -240,8 +236,6 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
     return results
   }, [aligned, selectedIds, indicators])
 
-  const currentPreset = PRESET_COMPARISONS.find((p) => p.id === activePreset)
-
   return (
     <div className="rounded-lg border border-border-dim bg-surface p-5">
       {/* Header */}
@@ -249,10 +243,7 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-muted" />
           <div>
-            <h3 className="text-base font-semibold text-heading">지표 비교 오버레이</h3>
-            <p className="text-[11px] text-muted mt-0.5">
-              다중 지표를 겹쳐 비교하고 상관관계를 발견하세요
-            </p>
+            <h3 className="text-base font-semibold text-heading">지표 비교</h3>
           </div>
         </div>
 
@@ -444,8 +435,8 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
         <div className="h-72 flex items-center justify-center">
           <p className="text-faint text-xs">
             {selectedIds.length < MIN_INDICATORS
-              ? '비교할 지표를 2개 이상 선택하세요'
-              : '선택한 지표의 공통 날짜 데이터가 없습니다'}
+              ? '2개 이상 선택'
+              : '공통 데이터 없음'}
           </p>
         </div>
       )}
@@ -487,29 +478,6 @@ export function ChartOverlay({ indicators, dataMap }: ChartOverlayProps) {
         </div>
       )}
 
-      {/* Educational panel */}
-      {currentPreset && (
-        <div className="mt-3 pt-3 border-t border-border-dim animate-fadeIn">
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-elevated">
-            <span className="text-[13px] mt-0.5">💡</span>
-            <div>
-              <h4 className="text-[11px] font-medium text-heading mb-1">
-                {currentPreset.label} — 관계 해설
-              </h4>
-              <p className="text-[11px] text-muted leading-relaxed">
-                {currentPreset.explanation}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Footer note */}
-      <div className="mt-3 pt-3 border-t border-border-dim">
-        <p className="text-[10px] text-faint leading-relaxed">
-          * 정규화 모드에서는 각 지표의 첫 번째 값을 100으로 놓고 비교합니다. 원래 값 모드에서는 좌측 Y축에 첫 번째 지표, 우측 Y축에 두 번째 지표를 표시합니다.
-        </p>
-      </div>
     </div>
   )
 }
