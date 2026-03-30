@@ -35,7 +35,7 @@ export function Header() {
 
   return (
     <header className="border-b border-border-dim bg-surface/90 backdrop-blur-md sticky top-0 z-50" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="max-w-screen-2xl mx-auto px-6 h-14 flex items-center gap-4">
+      <div className="max-w-screen-2xl mx-auto px-3 md:px-6 h-14 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
             <BarChart2 className="text-white" size={18} />
@@ -44,7 +44,7 @@ export function Header() {
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-0.5 ml-6">
+        <nav className="flex items-center gap-0.5 ml-2 md:ml-6">
           {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path
             return (
@@ -52,14 +52,14 @@ export function Header() {
                 key={path}
                 to={path}
                 className={cn(
-                  'flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all',
+                  'flex items-center gap-1.5 px-2.5 md:px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all',
                   active
                     ? 'bg-accent-soft text-accent'
                     : 'text-muted hover:text-heading hover:bg-elevated',
                 )}
               >
-                <Icon size={15} />
-                {label}
+                <Icon size={16} />
+                <span className="hidden md:inline">{label}</span>
               </Link>
             )
           })}

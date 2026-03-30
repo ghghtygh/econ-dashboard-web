@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
@@ -153,13 +153,22 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
         </span>
       </div>
 
-      {/* Main Insight */}
-      <div className="text-[13px] text-body leading-relaxed mb-3 flex-shrink-0">
-        {renderBoldText(insight)}
-      </div>
+      {/* Main Insight / Empty State */}
+      {!selectedIndicator && chatHistory.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
+          <Sparkles size={32} className="text-indigo-400/50 mb-3" />
+          <p className="text-[13px] text-muted leading-relaxed max-w-[240px]">
+            {renderBoldText(insight)}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="text-[13px] text-body leading-relaxed mb-3 flex-shrink-0">
+            {renderBoldText(insight)}
+          </div>
 
-      {/* Chat History */}
-      {chatHistory.length > 0 && (
+          {/* Chat History */}
+          {chatHistory.length > 0 && (
         <div className="flex-1 min-h-0 overflow-y-auto space-y-2 mb-3 border-t border-border-dim pt-3">
           {chatHistory.map((msg, i) => (
             <div
@@ -181,6 +190,8 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       {/* Suggestion Chips */}

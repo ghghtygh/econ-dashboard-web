@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
-import { X, GripVertical, Settings } from 'lucide-react'
+import { X, GripVertical, Settings, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
@@ -169,6 +169,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   if (widgets.length === 0) {
     return (
       <div ref={containerRef} className="rounded-xl border border-dashed border-border-dim p-12 text-center">
+        <div className="flex justify-center mb-3"><LayoutGrid size={40} className="text-faint" /></div>
         <p className="text-faint">위젯을 추가하여 대시보드를 구성하세요</p>
       </div>
     )

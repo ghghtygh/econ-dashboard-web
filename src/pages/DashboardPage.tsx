@@ -192,7 +192,7 @@ export function DashboardPage() {
         </section>
 
         {/* Chart Overlay Comparison (#23) */}
-        <section className="mb-10">
+        <section className="hidden lg:block mb-10">
           <ChartOverlay
             indicators={indicators ?? []}
             dataMap={allData ?? {}}
@@ -202,14 +202,16 @@ export function DashboardPage() {
         {/* Bottom 3-column Grid: Correlation + AI + News */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
           {/* Left: Correlation Heatmap */}
-          <CorrelationHeatmap
-            indicators={filteredIndicators.slice(0, 5)}
-            dataMap={allData ?? {}}
-            selectedId={selectedIndicatorId}
-            onSelect={(id) =>
-              setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
-            }
-          />
+          <div className="hidden lg:block">
+            <CorrelationHeatmap
+              indicators={filteredIndicators.slice(0, 5)}
+              dataMap={allData ?? {}}
+              selectedId={selectedIndicatorId}
+              onSelect={(id) =>
+                setSelectedIndicatorId(selectedIndicatorId === id ? undefined : id)
+              }
+            />
+          </div>
 
           {/* Center: AI Panel */}
           <AIPanel
@@ -232,7 +234,7 @@ export function DashboardPage() {
         </section>
 
         {/* Historical Comparison */}
-        <section className="mb-10">
+        <section className="hidden lg:block mb-10">
           <HistoricalComparison
             indicators={filteredIndicators}
             dataMap={allData ?? {}}
