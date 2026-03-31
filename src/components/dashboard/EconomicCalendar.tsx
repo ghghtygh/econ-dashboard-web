@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, List, Clock, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, List, Clock, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ECONOMIC_EVENTS, EVENT_CATEGORY_COLORS, IMPORTANCE_LABELS } from '@/data/economicCalendar'
+import { useCalendarEvents } from '@/hooks/useCalendar'
 import type { EconomicEvent, EventImportance } from '@/types/calendar'
 
 type ViewMode = 'monthly' | 'list'
@@ -114,8 +115,10 @@ function EventDetail({
 
 function MonthlyView({
   importanceFilter,
+  events: externalEvents,
 }: {
   importanceFilter: ImportanceFilter
+  events: EconomicEvent[]
 }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -125,10 +128,10 @@ function MonthlyView({
 
   const filteredEvents = useMemo(
     () =>
-      ECONOMIC_EVENTS.filter(
+      externalEvents.filter(
         (e) => importanceFilter === 'all' || e.importance === importanceFilter,
       ),
-    [importanceFilter],
+    [importanceFilter, externalEvents],
   )
 
   const firstDayOfWeek = new Date(year, month, 1).getDay()
@@ -288,8 +291,10 @@ function MonthlyView({
 
 function ListView({
   importanceFilter,
+  events: externalEvents,
 }: {
   importanceFilter: ImportanceFilter
+  events: EconomicEvent[]
 }) {
   const [showPast, setShowPast] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -297,14 +302,14 @@ function ListView({
   const todayStr = new Date().toISOString().slice(0, 10)
 
   const events = useMemo(() => {
-    let list = ECONOMIC_EVENTS.filter(
+    let list = externalEvents.filter(
       (e) => importanceFilter === 'all' || e.importance === importanceFilter,
     )
     if (!showPast) {
       list = list.filter((e) => e.date >= todayStr)
     }
     return list.sort((a, b) => a.date.localeCompare(b.date))
-  }, [importanceFilter, showPast, todayStr])
+  }, [importanceFilter, showPast, todayStr, externalEvents])
 
   return (
     <div>
@@ -398,16 +403,43 @@ function ListView({
 
 // ── Main Component ──
 
+function normalizeApiEvent(ev: Record<string, unknown>): EconomicEvent {
+  const eventDate = String(ev.eventDate ?? '')
+  return {
+    id: String(ev.id),
+    title: String(ev.title ?? ''),
+    date: eventDate.slice(0, 10),
+    time: eventDate.length > 10 ? eventDate.slice(11, 16) : undefined,
+    importance: (String(ev.importance ?? 'medium').toLowerCase()) as EventImportance,
+    category: String(ev.country ?? ev.category ?? ''),
+    description: String(ev.description ?? ''),
+    actual: ev.actual ? String(ev.actual) : undefined,
+    forecast: ev.forecast ? String(ev.forecast) : undefined,
+    previous: ev.previous ? String(ev.previous) : undefined,
+    status: eventDate.slice(0, 10) < new Date().toISOString().slice(0, 10) ? 'completed' : 'upcoming',
+  }
+}
+
 export function EconomicCalendar() {
   const [view, setView] = useState<ViewMode>('monthly')
   const [importanceFilter, setImportanceFilter] =
     useState<ImportanceFilter>('all')
 
+  const { data: apiEvents, isLoading } = useCalendarEvents()
+
+  const events = useMemo(() => {
+    if (apiEvents && Array.isArray(apiEvents) && apiEvents.length > 0) {
+      return apiEvents.map(ev => normalizeApiEvent(ev as unknown as Record<string, unknown>))
+    }
+    return ECONOMIC_EVENTS
+  }, [apiEvents])
+
   return (
     <section className="rounded-lg border border-border-dim bg-surface p-5">
       {/* Section title */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold text-heading">경제 캘린더</h3>
+        {isLoading && <Loader2 size={14} className="animate-spin text-muted" />}
       </div>
 
       {/* Toolbar */}
@@ -467,9 +499,9 @@ export function EconomicCalendar() {
 
       {/* Content */}
       {view === 'monthly' ? (
-        <MonthlyView importanceFilter={importanceFilter} />
+        <MonthlyView importanceFilter={importanceFilter} events={events} />
       ) : (
-        <ListView importanceFilter={importanceFilter} />
+        <ListView importanceFilter={importanceFilter} events={events} />
       )}
     </section>
   )

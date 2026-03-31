@@ -25,6 +25,22 @@ export const newsApi = {
   getById: (id: string) => api.get(`/news/${id}`),
 }
 
+export const calendarApi = {
+  getEvents: (from?: string, to?: string, importance?: string) =>
+    api.get('/calendar', { params: { from, to, importance } }),
+  getUpcoming: (page = 0, size = 20) =>
+    api.get('/calendar/upcoming', { params: { page, size } }),
+  getById: (id: string) => api.get(`/calendar/${id}`),
+}
+
+export const alertApi = {
+  getRules: (userId: string) => api.get('/alerts/rules', { params: { userId } }),
+  createRule: (rule: { userId: string; indicatorId: number; conditionType: string; threshold: number }) =>
+    api.post('/alerts/rules', rule),
+  getHistory: (userId: string, page = 0, size = 20) =>
+    api.get('/alerts', { params: { userId, page, size } }),
+}
+
 export const dashboardApi = {
   getWidgets: () => api.get('/dashboard/widgets'),
   saveWidgets: (widgets: unknown[]) => api.post('/dashboard/widgets', widgets),

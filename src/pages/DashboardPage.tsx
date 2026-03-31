@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
+import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
+import { EventCountdown } from '@/components/dashboard/EventCountdown'
+import { AlertBanner } from '@/components/dashboard/AlertBanner'
+import { NewsPage } from '@/pages/NewsPage'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 
 // ── Time Periods ─────────────────────────────────────────────────────
@@ -275,10 +279,15 @@ export function DashboardPage() {
 
         {/* Main */}
         <main style={{ flex: 1, overflow: 'auto', padding: '28px 32px', maxWidth: 1440 }}>
+          {/* Alert Banner */}
+          <AlertBanner />
+
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', color: '#0F172A', marginBottom: 5 }}>Market Overview</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', color: '#0F172A', marginBottom: 5 }}>
+                {navSel === 'news' ? 'News Feed' : navSel === 'overview' ? 'Market Overview' : navItems.find(n => n.id === navSel)?.label ?? 'Market Overview'}
+              </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#94A3B8', fontSize: 13 }}>
                 <span className="dot-live" />
                 <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 500, color: '#64748B' }}>{fmt(time)}</span>
@@ -287,6 +296,12 @@ export function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* News Feed page */}
+          {navSel === 'news' ? (
+            <NewsPage />
+          ) : (
+          <>
 
           {/* Global Period Bar */}
           <div style={{
@@ -457,6 +472,15 @@ export function DashboardPage() {
               <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 32 }}>No data available</div>
             )}
           </div>
+
+          {/* Economic Calendar & Countdown Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 12, marginTop: 20 }}>
+            <EconomicCalendar />
+            <EventCountdown />
+          </div>
+
+          </>
+          )}
 
           {/* Footer */}
           <div style={{ marginTop: 28, padding: '14px 0', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between' }}>
