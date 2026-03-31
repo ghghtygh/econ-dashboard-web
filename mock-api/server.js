@@ -352,7 +352,36 @@ app.put('/api/dashboard/widgets/:id', (req, res) => {
   res.json(ok(widgets[idx !== -1 ? idx : widgets.length - 1]))
 })
 
+// ── Startup env validation ────────────────────────────────────────────────────
+
+function validateEnv() {
+  const APP_ENV = process.env.APP_ENV || 'local'
+  const VALID_ENVS = ['local', 'development', 'staging', 'production']
+
+  if (!VALID_ENVS.includes(APP_ENV)) {
+    console.error(`[ERROR] APP_ENV="${APP_ENV}" is not a valid value. Expected one of: ${VALID_ENVS.join(', ')}`)
+    process.exit(1)
+  }
+
+  const PORT_NUM = Number(process.env.PORT || 8080)
+  if (!Number.isInteger(PORT_NUM) || PORT_NUM < 1 || PORT_NUM > 65535) {
+    console.error(`[ERROR] PORT="${process.env.PORT}" is not a valid port number.`)
+    process.exit(1)
+  }
+
+  if (APP_ENV === 'production' || APP_ENV === 'staging') {
+    const missing = []
+    if (!process.env.FRED_API_KEY)          missing.push('FRED_API_KEY')
+    if (!process.env.ALPHA_VANTAGE_API_KEY) missing.push('ALPHA_VANTAGE_API_KEY')
+    if (missing.length > 0) {
+      console.warn(`[WARN] Running in ${APP_ENV} without API keys: ${missing.join(', ')} — falling back to mock data`)
+    }
+  }
+}
+
 // ── Start ─────────────────────────────────────────────────────────────────────
+
+validateEnv()
 
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
