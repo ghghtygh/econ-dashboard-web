@@ -7,7 +7,7 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "3000:5173"
+      - "4000:5173"
     environment:
       - VITE_APP_ENV=development
       - API_TARGET=http://api:8080
@@ -21,7 +21,7 @@ services:
       context: ./mock-api
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8083:8080"
     environment:
       - APP_ENV=development
       - FRED_API_KEY=${FRED_API_KEY:-}
