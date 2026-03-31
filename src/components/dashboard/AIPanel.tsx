@@ -14,51 +14,101 @@ interface ChipSuggestion {
   prompt: string
 }
 
+function mean(values: number[]): number {
+  return values.reduce((s, v) => s + v, 0) / values.length
+}
+
+function stddev(values: number[]): number {
+  const m = mean(values)
+  return Math.sqrt(values.reduce((s, v) => s + (v - m) ** 2, 0) / values.length)
+}
+
+function detectTrend(values: number[]): 'strong_up' | 'up' | 'flat' | 'down' | 'strong_down' {
+  if (values.length < 5) return 'flat'
+  const recent = values.slice(-5)
+  let rises = 0
+  for (let i = 1; i < recent.length; i++) {
+    if (recent[i] > recent[i - 1]) rises++
+  }
+  const totalChange = ((recent[recent.length - 1] - recent[0]) / recent[0]) * 100
+  if (rises >= 4 && totalChange > 2) return 'strong_up'
+  if (rises >= 3) return 'up'
+  if (rises <= 1 && totalChange < -2) return 'strong_down'
+  if (rises <= 1) return 'down'
+  return 'flat'
+}
+
+const TREND_LABEL: Record<string, string> = {
+  strong_up: '강한 상승 추세',
+  up: '완만한 상승 추세',
+  flat: '횡보',
+  down: '완만한 하락 추세',
+  strong_down: '강한 하락 추세',
+}
+
+const UNIT_LABEL: Record<string, string> = {
+  STOCK: '지수',
+  FOREX: '환율',
+  COMMODITY: '가격',
+  BOND: '금리',
+  CRYPTO: '가격',
+  MACRO: '지표',
+}
+
 function generateInsight(indicator?: Indicator, series?: IndicatorData[]): string {
   if (!indicator || !series || series.length < 2) {
-    return '지표를 선택하세요'
+    return '지표를 선택하면 실제 데이터 기반 분석을 제공합니다.'
   }
 
+  const values = series.map((d) => d.value)
   const latest = series[series.length - 1]
   const prev = series[series.length - 2]
-  const change = ((latest.value - prev.value) / prev.value) * 100
-  const direction = change >= 0 ? '상승' : '하락'
-  const absChange = Math.abs(change).toFixed(1)
+  const dayChange = ((latest.value - prev.value) / prev.value) * 100
+  const direction = dayChange >= 0 ? '상승' : '하락'
+  const absChange = Math.abs(dayChange).toFixed(2)
+  const unitLabel = UNIT_LABEL[indicator.category] ?? '값'
 
-  const insights: Record<string, string> = {
-    STOCK: `**${indicator.name}**이(가) 전일 대비 ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '투자 심리가 개선되고 있으며, 거래량 동반 상승 시 추세 지속 가능성이 높습니다.'
-        : '차익 실현 매물이 출회되고 있으며, 지지선 확인이 필요한 구간입니다.'
-    }`,
-    FOREX: `**${indicator.name}** 환율이 ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '달러 강세 구간에서는 수입 물가 상승 압력이 커지고, 원자재 가격에도 영향을 줍니다.'
-        : '달러 약세 구간에서는 금·원자재 가격이 함께 오르는 경향이 있습니다. 수출주에는 부담이 될 수 있습니다.'
-    }`,
-    COMMODITY: `**${indicator.name}** 가격이 ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '안전자산 수요 증가 또는 인플레이션 헤지 수요가 반영된 것으로 보입니다.'
-        : '리스크 선호 심리가 회복되면서 안전자산에서 자금이 이탈하고 있습니다.'
-    }`,
-    BOND: `**${indicator.name}** 금리가 ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '금리 상승은 채권 가격 하락을 의미하며, 성장주에 부담이 됩니다.'
-        : '금리 하락은 유동성 완화 기대를 반영하며, 주식 시장에 호재로 작용할 수 있습니다.'
-    }`,
-    CRYPTO: `**${indicator.name}**이(가) ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '위험자산 선호 심리가 강해지고 있으며, 기관 자금 유입 여부를 주시해야 합니다.'
-        : '변동성 확대 구간에서 레버리지 청산이 동반되었을 가능성이 있습니다.'
-    }`,
-    MACRO: `**${indicator.name}** 지표가 ${absChange}% ${direction}했습니다. ${
-      change >= 0
-        ? '경기 개선 신호로 해석될 수 있으며, 향후 통화정책 방향에 영향을 줄 수 있습니다.'
-        : '경기 둔화 우려가 커지고 있으며, 방어적 포지션 전환을 고려할 시점입니다.'
-    }`,
+  const parts: string[] = []
+
+  parts.push(`**${indicator.name}** ${unitLabel}이 전일 대비 **${absChange}%** ${direction}하여 **${latest.value.toLocaleString()}${indicator.unit ? ` ${indicator.unit}` : ''}**입니다.`)
+
+  if (values.length >= 5) {
+    const trend = detectTrend(values)
+    parts.push(`최근 5일 추세: **${TREND_LABEL[trend]}**.`)
   }
 
-  return insights[indicator.category] ?? `**${indicator.name}**이(가) ${absChange}% ${direction}했습니다.`
+  if (values.length >= 20) {
+    const ma20 = mean(values.slice(-20))
+    const maRatio = ((latest.value - ma20) / ma20) * 100
+    const maDir = maRatio >= 0 ? '위' : '아래'
+    parts.push(`20일 이동평균(${ma20.toLocaleString(undefined, { maximumFractionDigits: 2 })}) 대비 **${Math.abs(maRatio).toFixed(1)}%** ${maDir}에 위치합니다.`)
+  }
+
+  if (values.length >= 10) {
+    const recentValues = values.slice(-10)
+    const vol = stddev(recentValues) / mean(recentValues) * 100
+    if (vol > 3) {
+      parts.push(`최근 10일 변동성(CV)이 ${vol.toFixed(1)}%로 **높은 편**입니다.`)
+    } else if (vol > 1.5) {
+      parts.push(`최근 10일 변동성(CV)이 ${vol.toFixed(1)}%로 보통 수준입니다.`)
+    }
+
+    const maxVal = Math.max(...recentValues)
+    const minVal = Math.min(...recentValues)
+    if (latest.value === maxVal) {
+      parts.push('현재 가격은 **10일 최고치**입니다.')
+    } else if (latest.value === minVal) {
+      parts.push('현재 가격은 **10일 최저치**입니다.')
+    }
+  }
+
+  if (values.length >= 7) {
+    const weekChange = ((latest.value - values[values.length - 6]) / values[values.length - 6]) * 100
+    const weekDir = weekChange >= 0 ? '상승' : '하락'
+    parts.push(`주간 변동: **${Math.abs(weekChange).toFixed(2)}%** ${weekDir}.`)
+  }
+
+  return parts.join(' ')
 }
 
 function getSuggestions(indicator?: Indicator): ChipSuggestion[] {
@@ -133,14 +183,11 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
     setChatInput('')
     setIsLoading(true)
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      setChatHistory((prev) => [
-        ...prev,
-        { role: 'ai', text: `분석 준비 중입니다. API 연동 후 결과가 표시됩니다.` },
-      ])
-      setIsLoading(false)
-    }, 1000)
+    setChatHistory((prev) => [
+      ...prev,
+      { role: 'ai', text: '채팅 분석 기능은 아직 준비 중입니다. 상단의 데이터 기반 분석과 추천 질문 칩을 활용해주세요.' },
+    ])
+    setIsLoading(false)
   }
 
   return (
@@ -149,7 +196,7 @@ export function AIPanel({ selectedIndicator, series }: AIPanelProps) {
       <div className="mb-3">
         <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-          AI 해설
+          시장 분석
         </span>
       </div>
 
