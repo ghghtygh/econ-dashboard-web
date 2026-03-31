@@ -10,6 +10,7 @@ import { FearGreedSection } from '@/components/dashboard/FearGreedSection'
 import { IndicatorTableSection } from '@/components/dashboard/IndicatorTableSection'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { useNewsList } from '@/hooks/useNews'
+import { useThemeStore } from '@/store/themeStore'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◫' },
@@ -45,6 +46,7 @@ function formatTimeAgo(dateStr: string): string {
 export function DashboardPage() {
   const [time, setTime] = useState(new Date())
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [navSel, setNavSel] = useState('overview')
   const [globalPeriod, setGlobalPeriod] = useState<PeriodId>('1M')
   const [localIndices, setLocalIndices] = useState<PeriodId | null>(null)
@@ -52,6 +54,8 @@ export function DashboardPage() {
   const [localCommod, setLocalCommod] = useState<PeriodId | null>(null)
   const [localStocks, setLocalStocks] = useState<PeriodId | null>(null)
   const [stockTab, setStockTab] = useState('STOCK')
+
+  const { theme, toggleTheme } = useThemeStore()
 
   const effectivePeriod = useCallback((local: PeriodId | null) => local || globalPeriod, [globalPeriod])
 
@@ -71,7 +75,6 @@ export function DashboardPage() {
 
   const hasLocalOverrides = !!(localIndices || localCrypto || localCommod || localStocks)
 
-  // News data for the news view
   const [newsPage, setNewsPage] = useState(0)
   const { data: newsData, isLoading: newsLoading } = useNewsList(undefined, newsPage)
   const newsArticles = newsData?.content ?? []
@@ -81,6 +84,11 @@ export function DashboardPage() {
     const id = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
+
+  const handleNav = (id: string) => {
+    setNavSel(id)
+    setMobileOpen(false)
+  }
 
   const fmt = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
   const fmtDate = (d: Date) => d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
@@ -99,13 +107,12 @@ export function DashboardPage() {
                 onReset={() => setLocalIndices(null)}
               />
             </ErrorBoundary>
-            {/* Detailed indices table */}
             <ErrorBoundary>
-              <div className="card" style={{ marginTop: 12 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 14 }}>All Index Indicators</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 80px 80px 70px', padding: '0 0 8px', gap: 8, borderBottom: '1px solid #E2E8F0' }}>
+              <div className="card" style={{ marginTop: 12, padding: 20 }}>
+                <h3 className="db-table-header">All Index Indicators</h3>
+                <div className="db-table-head">
                   {['Name', 'Value', 'Change', 'Trend', 'Unit'].map((h, i) => (
-                    <span key={h} style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', textAlign: i > 0 ? 'right' : 'left' }}>
+                    <span key={h} className="db-table-th" style={{ textAlign: i > 0 ? 'right' : 'left' }}>
                       {h}
                     </span>
                   ))}
@@ -113,24 +120,24 @@ export function DashboardPage() {
                 {[...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].map((item, i) => {
                   const sparkData = item.series.map(d => d.value)
                   return (
-                    <div key={item.indicator.id} className="stock-row" style={{ gridTemplateColumns: '1fr 100px 80px 80px 70px', animation: 'fadeUp 0.3s ease both', animationDelay: `${0.1 + i * 0.03}s` }}>
+                    <div key={item.indicator.id} className="stock-row" style={{ animation: 'fadeUp 0.3s ease both', animationDelay: `${0.1 + i * 0.03}s` }}>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{item.indicator.name}</div>
-                        <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>{item.indicator.symbol}</div>
+                        <div className="db-name">{item.indicator.name}</div>
+                        <div className="db-symbol">{item.indicator.symbol}</div>
                       </div>
-                      <div style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, color: '#0F172A' }}>
+                      <div className="db-value">
                         {item.latest ? fmtNum(item.latest.value) : '--'}
                       </div>
-                      <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: chgColor(item.change) }}>{chgText(item.change)}</div>
+                      <div className="db-change" style={{ color: chgColor(item.change) }}>{chgText(item.change)}</div>
                       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Sparkline data={sparkData} color={chgColor(item.change)} width={60} height={18} />
                       </div>
-                      <div style={{ textAlign: 'right', fontSize: 11, color: '#94A3B8' }}>{item.indicator.unit}</div>
+                      <div className="db-unit">{item.indicator.unit}</div>
                     </div>
                   )
                 })}
                 {[...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].length === 0 && (
-                  <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 32 }}>Loading indicators...</div>
+                  <div className="db-empty">Loading indicators...</div>
                 )}
               </div>
             </ErrorBoundary>
@@ -150,21 +157,21 @@ export function DashboardPage() {
               onReset={() => setLocalStocks(null)}
             />
             {stockIndicators.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginTop: 16 }}>
+              <div className="db-card-grid" style={{ marginTop: 16 }}>
                 {stockIndicators.map((item, i) => {
                   const sparkData = item.series.map(d => d.value)
                   return (
                     <div key={item.indicator.id} className="card" style={{ padding: 16, animationDelay: `${i * 0.05}s` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: '#1E293B' }}>{item.indicator.name}</div>
-                          <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>{item.indicator.symbol}</div>
+                          <div className="db-name">{item.indicator.name}</div>
+                          <div className="db-symbol">{item.indicator.symbol}</div>
                         </div>
-                        <span className="badge" style={{ background: item.change >= 0 ? '#F0FDF4' : '#FEF2F2', color: chgColor(item.change) }}>
+                        <span className="badge" style={{ background: item.change >= 0 ? 'var(--th-positive-bg)' : 'var(--th-negative-bg)', color: chgColor(item.change) }}>
                           {chgText(item.change)}
                         </span>
                       </div>
-                      <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A', letterSpacing: '-0.02em', marginBottom: 8 }}>
+                      <div className="db-big-value">
                         {item.latest ? fmtNum(item.latest.value) : '--'}
                       </div>
                       <Sparkline data={sparkData} color={chgColor(item.change)} width={240} height={32} />
@@ -179,9 +186,9 @@ export function DashboardPage() {
       case 'crypto':
         return (
           <ErrorBoundary>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            <div className="db-card-grid">
               {cryptoIndicators.length === 0 ? (
-                <div className="card" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 40 }}>No crypto data available</div>
+                <div className="card db-empty" style={{ gridColumn: '1/-1' }}>No crypto data available</div>
               ) : cryptoIndicators.map((c, i) => {
                 const sparkData = c.series.map(d => d.value)
                 return (
@@ -197,18 +204,18 @@ export function DashboardPage() {
                         {CATEGORY_ICONS.CRYPTO}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>{c.indicator.name}</div>
-                        <div style={{ fontSize: 11, color: '#94A3B8' }}>{c.indicator.symbol}</div>
+                        <div className="db-name">{c.indicator.name}</div>
+                        <div className="db-symbol">{c.indicator.symbol}</div>
                       </div>
-                      <span className="badge" style={{ background: c.change >= 0 ? '#F0FDF4' : '#FEF2F2', color: chgColor(c.change) }}>
+                      <span className="badge" style={{ background: c.change >= 0 ? 'var(--th-positive-bg)' : 'var(--th-negative-bg)', color: chgColor(c.change) }}>
                         {chgText(c.change)}
                       </span>
                     </div>
-                    <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A', letterSpacing: '-0.02em', marginBottom: 10 }}>
+                    <div className="db-big-value">
                       {c.latest ? fmtNum(c.latest.value) : '--'}
                     </div>
                     <Sparkline data={sparkData} color={chgColor(c.change)} width={240} height={36} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11, color: '#94A3B8' }}>
+                    <div className="db-meta">
                       <span>{c.indicator.unit}</span>
                       <span>데이터 {c.series.length}개</span>
                     </div>
@@ -222,9 +229,9 @@ export function DashboardPage() {
       case 'commodities':
         return (
           <ErrorBoundary>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+            <div className="db-card-grid db-card-grid--wide">
               {commodityIndicators.length === 0 ? (
-                <div className="card" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 40 }}>No commodity data available</div>
+                <div className="card db-empty" style={{ gridColumn: '1/-1' }}>No commodity data available</div>
               ) : commodityIndicators.map((c, i) => {
                 const sparkData = c.series.map(d => d.value)
                 return (
@@ -240,18 +247,18 @@ export function DashboardPage() {
                         {CATEGORY_ICONS.COMMODITY}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>{c.indicator.name}</div>
-                        <div style={{ fontSize: 11, color: '#94A3B8' }}>{c.indicator.unit}</div>
+                        <div className="db-name">{c.indicator.name}</div>
+                        <div className="db-symbol">{c.indicator.unit}</div>
                       </div>
-                      <span className="badge" style={{ background: c.change >= 0 ? '#F0FDF4' : '#FEF2F2', color: chgColor(c.change) }}>
+                      <span className="badge" style={{ background: c.change >= 0 ? 'var(--th-positive-bg)' : 'var(--th-negative-bg)', color: chgColor(c.change) }}>
                         {chgText(c.change)}
                       </span>
                     </div>
-                    <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A', letterSpacing: '-0.02em', marginBottom: 10 }}>
+                    <div className="db-big-value">
                       {c.latest ? fmtNum(c.latest.value) : '--'}
                     </div>
                     <Sparkline data={sparkData} color={chgColor(c.change)} width={260} height={36} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11, color: '#94A3B8' }}>
+                    <div className="db-meta">
                       <span>{c.indicator.symbol}</span>
                       <span>데이터 {c.series.length}개</span>
                     </div>
@@ -266,16 +273,16 @@ export function DashboardPage() {
         return (
           <ErrorBoundary>
             {newsLoading ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div className="db-card-grid db-card-grid--wide">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="card" style={{ height: 160, animation: 'pulse 1.5s ease infinite' }} />
                 ))}
               </div>
             ) : newsArticles.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 40 }}>뉴스가 없습니다</div>
+              <div className="card db-empty">뉴스가 없습니다</div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
+                <div className="db-card-grid db-card-grid--wide">
                   {newsArticles.map((article, i) => (
                     <a
                       key={article.id}
@@ -292,16 +299,16 @@ export function DashboardPage() {
                         }}>
                           {article.category}
                         </span>
-                        <span style={{ fontSize: 10, color: '#94A3B8' }}>{formatTimeAgo(article.publishedAt)}</span>
+                        <span className="db-symbol">{formatTimeAgo(article.publishedAt)}</span>
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#1E293B', marginBottom: 6, lineHeight: 1.4 }}>{article.title}</div>
+                      <div className="db-name" style={{ marginBottom: 6, lineHeight: 1.4, fontSize: 14 }}>{article.title}</div>
                       {article.summary && (
-                        <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
+                        <div className="db-article-summary">
                           {article.summary}
                         </div>
                       )}
                       {article.source && (
-                        <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 8, borderTop: '1px solid #F1F5F9', paddingTop: 8 }}>
+                        <div className="db-article-source">
                           {article.source}
                         </div>
                       )}
@@ -309,17 +316,17 @@ export function DashboardPage() {
                   ))}
                 </div>
                 {newsTotalPages > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+                  <div className="db-pagination">
                     <button
                       onClick={() => setNewsPage(p => Math.max(0, p - 1))}
                       disabled={newsPage === 0}
-                      style={{ fontSize: 12, padding: '6px 14px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', color: newsPage === 0 ? '#CBD5E1' : '#475569', cursor: newsPage === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+                      className="db-page-btn"
                     >이전</button>
-                    <span style={{ fontSize: 12, color: '#64748B', display: 'flex', alignItems: 'center' }}>{newsPage + 1} / {newsTotalPages}</span>
+                    <span className="db-page-info">{newsPage + 1} / {newsTotalPages}</span>
                     <button
                       onClick={() => setNewsPage(p => Math.min(newsTotalPages - 1, p + 1))}
                       disabled={newsPage >= newsTotalPages - 1}
-                      style={{ fontSize: 12, padding: '6px 14px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', color: newsPage >= newsTotalPages - 1 ? '#CBD5E1' : '#475569', cursor: newsPage >= newsTotalPages - 1 ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+                      className="db-page-btn"
                     >다음</button>
                   </div>
                 )}
@@ -331,7 +338,6 @@ export function DashboardPage() {
       default: // overview
         return (
           <>
-            {/* Global Indices */}
             <ErrorBoundary>
               <GlobalIndicesSection
                 topIndices={topIndices}
@@ -342,8 +348,7 @@ export function DashboardPage() {
               />
             </ErrorBoundary>
 
-            {/* Middle Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 200px', gap: 12, marginBottom: 20 }}>
+            <div className="db-overview-mid">
               <ErrorBoundary>
                 <CommoditiesSection
                   commodityIndicators={commodityIndicators}
@@ -367,7 +372,6 @@ export function DashboardPage() {
               </ErrorBoundary>
             </div>
 
-            {/* Indicator Table */}
             <ErrorBoundary>
               <IndicatorTableSection
                 groups={groups}
@@ -385,116 +389,98 @@ export function DashboardPage() {
   }
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #F8FAFC; color: #0F172A; font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-        .card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 20px; animation: fadeUp 0.4s ease both; box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: box-shadow 0.2s, border-color 0.2s; }
-        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-color: #CBD5E1; }
-        .badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
-        .stock-row { display: grid; grid-template-columns: 1fr 100px 80px 70px; align-items: center; padding: 9px 0; border-bottom: 1px solid #F1F5F9; gap: 8px; transition: background 0.12s; cursor: default; }
-        .stock-row:hover { background: #F8FAFC; margin: 0 -12px; padding: 9px 12px; border-radius: 6px; }
-        .stock-row:last-child { border-bottom: none; }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.12s; font-size: 13px; color: #94A3B8; border: 1px solid transparent; font-weight: 500; }
-        .nav-item:hover { background: #F1F5F9; color: #475569; }
-        .nav-item.on { background: #EEF2FF; color: #4F46E5; border-color: #C7D2FE; }
-        .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #16A34A; animation: pulse 2s ease infinite; display: inline-block; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
-      `}</style>
+    <div className="db-layout">
+      {/* Mobile header */}
+      <header className="db-mobile-header">
+        <button className="db-hamburger" onClick={() => setMobileOpen(true)} aria-label="메뉴 열기">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div className="db-mobile-logo">
+          <div className="db-logo-icon">M</div>
+          <span className="db-logo-text">Market Pulse</span>
+        </div>
+        <button className="db-theme-toggle" onClick={toggleTheme} aria-label="테마 전환">
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+      </header>
 
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
-        {/* Sidebar */}
-        <aside style={{
-          width: collapsed ? 56 : 224, flexShrink: 0, background: '#FFFFFF',
-          borderRight: '1px solid #E2E8F0', padding: collapsed ? '20px 8px' : '20px 14px',
-          display: 'flex', flexDirection: 'column', transition: 'width 0.25s ease', overflow: 'hidden',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, minHeight: 32, paddingLeft: 2 }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: 'linear-gradient(135deg, #4F46E5, #818CF8)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(79,70,229,0.25)',
-            }}>M</div>
-            {!collapsed && <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.03em', whiteSpace: 'nowrap', color: '#0F172A' }}>Market Pulse</span>}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-            {NAV_ITEMS.map(item => (
-              <div
-                key={item.id}
-                className={`nav-item ${navSel === item.id ? 'on' : ''}`}
-                onClick={() => setNavSel(item.id)}
-                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
-              >
-                <span style={{ fontSize: 14, flexShrink: 0, width: 20, textAlign: 'center', opacity: 0.7 }}>{item.icon}</span>
-                {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
-              </div>
-            ))}
-          </div>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="db-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`db-sidebar ${collapsed ? 'db-sidebar--collapsed' : ''} ${mobileOpen ? 'db-sidebar--open' : ''}`}>
+        <div className="db-sidebar-logo">
+          <div className="db-logo-icon">M</div>
+          {!collapsed && <span className="db-logo-text">Market Pulse</span>}
+        </div>
+        <nav className="db-sidebar-nav">
+          {NAV_ITEMS.map(item => (
+            <div
+              key={item.id}
+              className={`nav-item ${navSel === item.id ? 'on' : ''}`}
+              onClick={() => handleNav(item.id)}
+              style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              <span className="db-nav-icon">{item.icon}</span>
+              {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
+            </div>
+          ))}
+        </nav>
+        <div className="db-sidebar-footer">
+          <button className="db-theme-toggle-sidebar" onClick={toggleTheme}>
+            <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+            {!collapsed && <span>{theme === 'dark' ? '라이트 모드' : '다크 모드'}</span>}
+          </button>
           <button
+            className="db-collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
-            style={{
-              background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: '7px',
-              color: '#94A3B8', cursor: 'pointer', fontSize: 12, marginTop: 8, fontFamily: 'inherit',
-            }}
           >{collapsed ? '→' : '← Collapse'}</button>
-        </aside>
+        </div>
+      </aside>
 
-        {/* Main */}
-        <main style={{ flex: 1, overflow: 'auto', padding: '28px 32px', maxWidth: 1440 }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-            <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', color: '#0F172A', marginBottom: 5 }}>{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#94A3B8', fontSize: 13 }}>
-                <span className="dot-live" />
-                <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 500, color: '#64748B' }}>{fmt(time)}</span>
-                <span style={{ color: '#CBD5E1' }}>·</span>
-                <span>{fmtDate(time)}</span>
-              </div>
+      {/* Main */}
+      <main className="db-main">
+        <div className="db-header">
+          <div>
+            <h1 className="db-title">{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>
+            <div className="db-time-row">
+              <span className="dot-live" />
+              <span className="db-clock">{fmt(time)}</span>
+              <span className="db-time-sep">·</span>
+              <span>{fmtDate(time)}</span>
             </div>
           </div>
+        </div>
 
-          {/* Global Period Bar (hidden on news page) */}
-          {navSel !== 'news' && (
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20,
-              padding: '10px 16px', background: '#FFFFFF', border: '1px solid #E2E8F0',
-              borderRadius: 10, boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Period</span>
-                <span style={{ fontSize: 10, color: '#94A3B8' }}>— applies to all sections</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <PeriodPills active={globalPeriod} onChange={setGlobalPeriod} size="md" />
-                {hasLocalOverrides && (
-                  <button
-                    onClick={() => { setLocalIndices(null); setLocalCrypto(null); setLocalCommod(null); setLocalStocks(null) }}
-                    style={{ fontSize: 11, color: '#4F46E5', background: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
-                  >
-                    Reset all overrides
-                  </button>
-                )}
-              </div>
+        {navSel !== 'news' && (
+          <div className="db-period-bar">
+            <div className="db-period-label">
+              <span style={{ fontSize: 12, fontWeight: 600 }}>Period</span>
+              <span className="db-period-sub">— applies to all sections</span>
             </div>
-          )}
-
-          {renderContent()}
-
-          {/* Footer */}
-          <div style={{ marginTop: 28, padding: '14px 0', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 11, color: '#94A3B8' }}>Market Pulse Dashboard — Data from API</span>
-            <span style={{ fontSize: 11, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>Last refreshed: {fmt(time)}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <PeriodPills active={globalPeriod} onChange={setGlobalPeriod} size="md" />
+              {hasLocalOverrides && (
+                <button
+                  className="db-reset-btn"
+                  onClick={() => { setLocalIndices(null); setLocalCrypto(null); setLocalCommod(null); setLocalStocks(null) }}
+                >
+                  Reset all overrides
+                </button>
+              )}
+            </div>
           </div>
-        </main>
-      </div>
-    </>
+        )}
+
+        {renderContent()}
+
+        <div className="db-footer">
+          <span>Market Pulse Dashboard — Data from API</span>
+          <span className="db-clock">Last refreshed: {fmt(time)}</span>
+        </div>
+      </main>
+    </div>
   )
 }
