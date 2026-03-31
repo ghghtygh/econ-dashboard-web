@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, List, Clock, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatCalendarDate, formatShortDate, formatEventDate, getLocale } from '@/lib/dateUtils'
 import { ECONOMIC_EVENTS, EVENT_CATEGORY_COLORS, IMPORTANCE_LABELS } from '@/data/economicCalendar'
 import { useCalendarEvents } from '@/hooks/useCalendar'
 import type { EconomicEvent, EventImportance } from '@/types/calendar'
@@ -10,10 +11,6 @@ type ImportanceFilter = 'all' | 'high' | 'medium'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
-}
 
 function isSameDay(dateStr: string, year: number, month: number, day: number): boolean {
   const d = new Date(dateStr + 'T00:00:00')
@@ -92,7 +89,7 @@ function EventDetail({
       <div className="flex flex-wrap items-center gap-2 mb-3 text-xs text-muted">
         <span className="flex items-center gap-1">
           <Calendar size={12} />
-          {formatDate(event.date)}
+          {formatCalendarDate(event.date)}
         </span>
         {event.time && (
           <span className="flex items-center gap-1">
@@ -356,10 +353,7 @@ function ListView({
                   {/* Date column */}
                   <div className="shrink-0 w-16 text-center">
                     <div className="text-[11px] text-faint">
-                      {new Date(ev.date + 'T00:00:00').toLocaleDateString(
-                        'ko-KR',
-                        { month: 'short', day: 'numeric' },
-                      )}
+                      {formatShortDate(new Date(ev.date + 'T00:00:00'))}
                     </div>
                     {ev.time && (
                       <div className="text-[10px] text-faint">{ev.time}</div>

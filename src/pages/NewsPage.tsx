@@ -1,17 +1,19 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ExternalLink, Clock, User, ChevronLeft, ChevronRight, AlertCircle, Newspaper } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatTimeAgo } from '@/lib/dateUtils'
 import { useNewsList } from '@/hooks/useNews'
 import type { NewsCategory } from '@/types/news'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  ALL: '전체',
-  STOCK: '주식',
-  FOREX: '외환',
-  COMMODITY: '원자재',
-  BOND: '채권',
-  CRYPTO: '암호화폐',
-  MACRO: '거시경제',
+const CATEGORY_KEYS: Record<string, string> = {
+  ALL: 'news.categories.all',
+  STOCK: 'news.categories.stock',
+  FOREX: 'news.categories.forex',
+  COMMODITY: 'news.categories.commodity',
+  BOND: 'news.categories.bond',
+  CRYPTO: 'news.categories.crypto',
+  MACRO: 'news.categories.macro',
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
@@ -25,20 +27,9 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; darkBg: string
 
 const ALL_CATEGORIES: NewsCategory[] = ['STOCK', 'FOREX', 'CRYPTO', 'MACRO', 'BOND', 'COMMODITY']
 
-function formatTimeAgo(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 60) return `${diffMin}분 전`
-  const diffHour = Math.floor(diffMin / 60)
-  if (diffHour < 24) return `${diffHour}시간 전`
-  const diffDay = Math.floor(diffHour / 24)
-  if (diffDay < 7) return `${diffDay}일 전`
-  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
-}
 
 export function NewsPage() {
+  const { t } = useTranslation()
   const [category, setCategory] = useState<NewsCategory | undefined>()
   const [page, setPage] = useState(0)
   const { data, isLoading, isError } = useNewsList(category, page)
@@ -51,8 +42,8 @@ export function NewsPage() {
     <main className="dash-container">
       {/* Header */}
       <div className="pb-6 mb-6 border-b border-border-dim">
-        <h1 className="text-lg font-semibold text-heading mb-1">경제 뉴스</h1>
-        <p className="text-sm text-muted">카테고리별 경제 뉴스를 확인하세요</p>
+        <h1 className="text-lg font-semibold text-heading mb-1">{t('news.title')}</h1>
+        <p className="text-sm text-muted">{t('news.description')}</p>
       </div>
 
       {/* Category Filter */}
@@ -61,7 +52,7 @@ export function NewsPage() {
           onClick={() => { setCategory(undefined); setPage(0) }}
           className={tabClass(!category)}
         >
-          {CATEGORY_LABELS.ALL}
+          {t(CATEGORY_KEYS.ALL)}
         </button>
         {ALL_CATEGORIES.map((cat) => (
           <button
@@ -69,7 +60,7 @@ export function NewsPage() {
             onClick={() => { setCategory(cat); setPage(0) }}
             className={tabClass(category === cat)}
           >
-            {CATEGORY_LABELS[cat] ?? cat}
+            {t(CATEGORY_KEYS[cat] ?? cat)}
           </button>
         ))}
       </div>
@@ -84,14 +75,14 @@ export function NewsPage() {
       ) : isError ? (
         <div className="text-center py-16">
           <div className="flex justify-center mb-3"><AlertCircle size={40} className="text-faint" /></div>
-          <p className="text-muted text-sm">뉴스를 불러올 수 없습니다</p>
-          <p className="text-faint text-xs mt-1">API 연결을 확인해주세요</p>
+          <p className="text-muted text-sm">{t('news.loadError')}</p>
+          <p className="text-faint text-xs mt-1">{t('news.checkApi')}</p>
         </div>
       ) : articles.length === 0 ? (
         <div className="text-center py-16">
           <div className="flex justify-center mb-3"><Newspaper size={40} className="text-faint" /></div>
-          <p className="text-muted text-sm">뉴스가 없습니다</p>
-          <p className="text-faint text-xs mt-1">다른 카테고리를 선택해보세요</p>
+          <p className="text-muted text-sm">{t('news.noNews')}</p>
+          <p className="text-faint text-xs mt-1">{t('news.tryOther')}</p>
         </div>
       ) : (
         <>
@@ -115,7 +106,7 @@ export function NewsPage() {
                       className="text-[10px] font-medium px-2 py-0.5 rounded"
                       style={{ background: tagBg, color: tagText }}
                     >
-                      {CATEGORY_LABELS[article.category] ?? article.category}
+                      {t(CATEGORY_KEYS[article.category] ?? article.category)}
                     </span>
                     <ExternalLink size={12} className="text-faint group-hover:text-muted transition-colors" />
                   </div>
@@ -136,7 +127,7 @@ export function NewsPage() {
                   <div className="flex items-center gap-3 mt-auto pt-3 border-t border-border-dim text-[10px] text-faint">
                     <span className="flex items-center gap-1">
                       <Clock size={10} />
-                      {formatTimeAgo(article.publishedAt)}
+                      {formatTimeAgo(article.publishedAt, t)}
                     </span>
                     {article.source && (
                       <span className="flex items-center gap-1">
@@ -164,7 +155,7 @@ export function NewsPage() {
                 )}
               >
                 <ChevronLeft size={14} />
-                이전
+                {t('news.prev')}
               </button>
               <span className="text-xs text-muted">
                 {page + 1} / {totalPages}
@@ -179,7 +170,7 @@ export function NewsPage() {
                     : 'border-border-dim text-muted hover:text-heading hover:border-border-mid',
                 )}
               >
-                다음
+                {t('news.next')}
                 <ChevronRight size={14} />
               </button>
             </div>

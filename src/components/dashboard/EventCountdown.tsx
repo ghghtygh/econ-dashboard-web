@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Clock, Calendar, ChevronRight } from 'lucide-react'
+import { formatEventDate } from '@/lib/dateUtils'
 import { ECONOMIC_EVENTS, EVENT_CATEGORY_COLORS, IMPORTANCE_LABELS } from '@/data/economicCalendar'
 import { useUpcomingEvents } from '@/hooks/useCalendar'
 import type { EconomicEvent, EventImportance } from '@/types/calendar'
@@ -62,6 +64,7 @@ function CountdownSeparator() {
 }
 
 export function EventCountdown() {
+  useTranslation()
   const [, setTick] = useState(0)
   const { data: apiData } = useUpcomingEvents(0, 5)
 
@@ -137,7 +140,7 @@ export function EventCountdown() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8 }}>
           <Clock size={11} style={{ color: '#94A3B8' }} />
           <span style={{ fontSize: 11, color: '#64748B' }}>
-            {new Date(nextEvent.date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+            {formatEventDate(new Date(nextEvent.date + 'T00:00:00'))}
             {nextEvent.time && ` ${nextEvent.time} KST`}
           </span>
         </div>

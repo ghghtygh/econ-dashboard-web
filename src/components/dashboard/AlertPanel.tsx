@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Bell,
   Plus,
@@ -10,6 +11,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatTimeAgo } from '@/lib/dateUtils'
 import { useAlertStore } from '@/store/alertStore'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -26,37 +28,29 @@ interface AlertPanelProps {
 
 /* ── Constants ── */
 
-const SEVERITY_CONFIG: Record<AlertSeverity, { label: string; color: string; bg: string; icon: typeof Info }> = {
-  info: {
-    label: '정보',
-    color: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    icon: Info,
-  },
-  warning: {
-    label: '주의',
-    color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    icon: AlertTriangle,
-  },
-  danger: {
-    label: '위험',
-    color: 'text-red-600 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
-    icon: AlertOctagon,
-  },
+function useSeverityConfig() {
+  const { t } = useTranslation()
+  return {
+    info: {
+      label: t('alerts.severityInfo'),
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      icon: Info,
+    },
+    warning: {
+      label: t('alerts.severityWarning'),
+      color: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-100 dark:bg-amber-900/30',
+      icon: AlertTriangle,
+    },
+    danger: {
+      label: t('alerts.severityDanger'),
+      color: 'text-red-600 dark:text-red-400',
+      bg: 'bg-red-100 dark:bg-red-900/30',
+      icon: AlertOctagon,
+    },
+  } as Record<AlertSeverity, { label: string; color: string; bg: string; icon: typeof Info }>
 }
-
-const CONDITION_OPTIONS = [
-  { value: 'above', label: '이상 (≥)' },
-  { value: 'below', label: '이하 (≤)' },
-]
-
-const SEVERITY_OPTIONS: { value: AlertSeverity; label: string }[] = [
-  { value: 'info', label: '정보 (Info)' },
-  { value: 'warning', label: '주의 (Warning)' },
-  { value: 'danger', label: '위험 (Danger)' },
-]
 
 interface PresetRule {
   indicatorName: string
@@ -109,22 +103,12 @@ function getLatestValue(data: IndicatorData[] | undefined): number | null {
   return data[data.length - 1].value
 }
 
-function formatTime(isoString: string): string {
-  const date = new Date(isoString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-
-  if (diffMin < 1) return '방금 전'
-  if (diffMin < 60) return `${diffMin}분 전`
-  const diffHour = Math.floor(diffMin / 60)
-  if (diffHour < 24) return `${diffHour}시간 전`
-  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
-}
 
 /* ── Component ── */
 
 export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
+  const { t } = useTranslation()
+  const SEVERITY_CONFIG = useSeverityConfig()
   const {
     rules,
     notifications,
@@ -172,7 +156,6 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
         })
       }
 
-      // 조건이 해제되면 다시 트리거 가능하도록 초기화
       if (!conditionMet && triggeredRef.current.has(rule.id)) {
         triggeredRef.current.delete(rule.id)
       }
@@ -215,7 +198,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <Bell size={16} className="text-amber-500" />
-            <h3 className="text-base font-semibold text-heading">알림 &amp; 경보</h3>
+            <h3 className="text-base font-semibold text-heading">{t('alerts.title')}</h3>
             {unreadCount > 0 && (
               <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-red-500 text-white">
                 {unreadCount}
@@ -224,7 +207,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
           </div>
           <Button variant="ghost" size="sm" onClick={() => setModalOpen(true)}>
             <Plus size={14} />
-            규칙 추가
+            {t('alerts.addRule')}
           </Button>
         </div>
       </div>
@@ -232,7 +215,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
       {/* 활성 규칙 목록 */}
       {rules.length > 0 && (
         <div className="mb-4">
-          <span className="section-label">활성 규칙</span>
+          <span className="section-label">{t('alerts.activeRules')}</span>
           <div className="space-y-2">
             {rules.map((rule) => {
               const sev = SEVERITY_CONFIG[rule.severity]
@@ -298,7 +281,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
       {/* 최근 알림 */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="section-label mb-0">최근 알림</span>
+          <span className="section-label mb-0">{t('alerts.recentAlerts')}</span>
           {notifications.length > 0 && (
             <div className="flex gap-2">
               {unreadCount > 0 && (
@@ -306,14 +289,14 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
                   onClick={markAllAsRead}
                   className="text-[10px] text-muted hover:text-heading transition-colors"
                 >
-                  모두 읽음
+                  {t('alerts.markAllRead')}
                 </button>
               )}
               <button
                 onClick={clearNotifications}
                 className="text-[10px] text-muted hover:text-red-400 transition-colors"
               >
-                전체 삭제
+                {t('alerts.clearAll')}
               </button>
             </div>
           )}
@@ -322,7 +305,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <CheckCircle2 size={24} className="text-faint mb-2" />
-            <p className="text-xs text-muted">아직 발생한 알림이 없습니다</p>
+            <p className="text-xs text-muted">{t('alerts.noAlerts')}</p>
           </div>
         ) : (
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -352,7 +335,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
                       {notif.message}
                     </p>
                     <p className="text-[10px] text-faint mt-0.5">
-                      {notif.indicatorName} · 현재 {notif.value.toLocaleString()} · {formatTime(notif.triggeredAt)}
+                      {notif.indicatorName} · {t('alerts.current')} {notif.value.toLocaleString()} · {formatTimeAgo(notif.triggeredAt, t)}
                     </p>
                   </div>
                   {!notif.read && (
@@ -369,7 +352,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
       <div>
         <div className="flex items-center gap-1.5 mb-2">
           <Lightbulb size={13} className="text-amber-500" />
-          <span className="section-label mb-0">추천 알림 규칙</span>
+          <span className="section-label mb-0">{t('alerts.suggestedRules')}</span>
         </div>
         <div className="space-y-1.5">
           {PRESET_RULES.map((preset) => {
@@ -401,7 +384,7 @@ export function AlertPanel({ indicators, dataMap }: AlertPanelProps) {
                       : 'border-border-dim text-muted hover:text-heading hover:border-border-mid',
                   )}
                 >
-                  {alreadyExists ? '추가됨' : '추가'}
+                  {alreadyExists ? t('alerts.added') : t('alerts.addBtn')}
                 </button>
               </div>
             )
@@ -433,11 +416,24 @@ interface AlertRuleModalProps {
 }
 
 function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalProps) {
+  const { t } = useTranslation()
+  const SEVERITY_CONFIG = useSeverityConfig()
   const [indicatorId, setIndicatorId] = useState('')
   const [condition, setCondition] = useState<AlertCondition>('above')
   const [threshold, setThreshold] = useState('')
   const [severity, setSeverity] = useState<AlertSeverity>('warning')
   const [message, setMessage] = useState('')
+
+  const CONDITION_OPTIONS = [
+    { value: 'above', label: t('alerts.conditionGte') },
+    { value: 'below', label: t('alerts.conditionLte') },
+  ]
+
+  const SEVERITY_OPTIONS: { value: AlertSeverity; label: string }[] = [
+    { value: 'info', label: t('alerts.severityInfoFull') },
+    { value: 'warning', label: t('alerts.severityWarningFull') },
+    { value: 'danger', label: t('alerts.severityDangerFull') },
+  ]
 
   const reset = () => {
     setIndicatorId('')
@@ -451,6 +447,10 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
     const indicator = indicators.find((i) => String(i.id) === indicatorId)
     if (!indicator || !threshold) return
 
+    const conditionLabel = condition === 'above' || condition === 'cross_above'
+      ? t('alerts.conditionAbove')
+      : t('alerts.conditionBelow')
+
     onSave({
       id: crypto.randomUUID(),
       indicatorId: indicator.id,
@@ -460,7 +460,7 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
       severity,
       message:
         message.trim() ||
-        `${indicator.name}이(가) ${condition === 'above' || condition === 'cross_above' ? '이상' : '이하'} ${Number(threshold).toLocaleString()} 조건을 충족했습니다.`,
+        t('alerts.conditionMetMsg', { name: indicator.name, condition: conditionLabel, threshold: Number(threshold).toLocaleString() }),
       enabled: true,
       createdAt: new Date().toISOString(),
     })
@@ -483,33 +483,33 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <ModalHeader onClose={handleClose}>알림 규칙 추가</ModalHeader>
+      <ModalHeader onClose={handleClose}>{t('alerts.addAlertRule')}</ModalHeader>
       <ModalBody className="space-y-4">
         {/* 지표 선택 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">지표 선택</label>
+          <label className="block text-xs text-muted mb-1.5">{t('alerts.selectIndicator')}</label>
           <Dropdown
             options={indicatorOptions}
             value={indicatorId}
             onChange={setIndicatorId}
-            placeholder="지표를 선택하세요"
+            placeholder={t('alerts.selectIndicatorPlaceholder')}
           />
         </div>
 
         {/* 조건 선택 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">조건</label>
+          <label className="block text-xs text-muted mb-1.5">{t('alerts.condition')}</label>
           <Dropdown
             options={CONDITION_OPTIONS}
             value={condition}
             onChange={(v) => setCondition(v as AlertCondition)}
-            placeholder="조건 선택"
+            placeholder={t('alerts.conditionPlaceholder')}
           />
         </div>
 
         {/* 임계값 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">임계값</label>
+          <label className="block text-xs text-muted mb-1.5">{t('alerts.threshold')}</label>
           <input
             type="number"
             value={threshold}
@@ -521,7 +521,7 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
 
         {/* 심각도 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">심각도</label>
+          <label className="block text-xs text-muted mb-1.5">{t('alerts.severity')}</label>
           <div className="grid grid-cols-3 gap-2">
             {SEVERITY_OPTIONS.map((opt) => {
               const config = SEVERITY_CONFIG[opt.value]
@@ -546,28 +546,28 @@ function AlertRuleModal({ open, onClose, indicators, onSave }: AlertRuleModalPro
           {/* 색상 미리보기 */}
           <div className={cn('flex items-center gap-1.5 mt-2 text-[11px] px-2 py-1 rounded', sevConfig.bg, sevConfig.color)}>
             {(() => { const SevIcon = sevConfig.icon; return <SevIcon size={12} /> })()}
-            미리보기: {selectedIndicator?.name ?? '지표'} {condition === 'above' ? '≥' : '≤'} {threshold || '?'}
+            {t('alerts.preview')} {selectedIndicator?.name ?? t('alerts.defaultIndicator')} {condition === 'above' ? '≥' : '≤'} {threshold || '?'}
           </div>
         </div>
 
         {/* 메시지 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">알림 메시지 (선택)</label>
+          <label className="block text-xs text-muted mb-1.5">{t('alerts.message')}</label>
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="예: VIX가 급등했습니다. 시장 변동성에 주의하세요."
+            placeholder={t('alerts.messagePlaceholder')}
             className="w-full rounded-lg border border-border-mid bg-elevated px-3 py-2 text-sm text-body placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
         </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" size="sm" onClick={handleClose}>
-          취소
+          {t('common.cancel')}
         </Button>
         <Button size="sm" onClick={handleSave} disabled={!indicatorId || !threshold}>
-          저장
+          {t('common.save')}
         </Button>
       </ModalFooter>
     </Modal>

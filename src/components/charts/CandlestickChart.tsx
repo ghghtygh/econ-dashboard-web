@@ -1,7 +1,6 @@
 import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts'
 import { formatPrice } from '@/components/charts/chartFormatters'
-import { format } from 'date-fns'
-import { ko } from 'date-fns/locale'
+import { formatChartFullDate, formatChartShortDate } from '@/lib/dateUtils'
 import type { IndicatorData } from '@/types/indicator'
 
 interface CandlestickChartProps {
@@ -64,8 +63,8 @@ export function CandlestickChart({ data }: CandlestickChartProps) {
       const low = d.low!
       const isUp = close >= open
       return {
-        shortDate: format(new Date(d.date), 'MM/dd'),
-        date: format(new Date(d.date), 'yyyy.MM.dd (EEE)', { locale: ko }),
+        shortDate: formatChartShortDate(new Date(d.date)),
+        date: formatChartFullDate(new Date(d.date)),
         open,
         close,
         high,
