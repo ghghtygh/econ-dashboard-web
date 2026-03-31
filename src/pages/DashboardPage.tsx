@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
 import { EventCountdown } from '@/components/dashboard/EventCountdown'
@@ -18,13 +18,19 @@ const PERIODS = [
 type PeriodId = (typeof PERIODS)[number]['id']
 
 // ── Sparkline ────────────────────────────────────────────────────────
-function Sparkline({ data, color = '#6366F1', width = 80, height = 28 }: { data: number[]; color?: string; width?: number; height?: number }) {
-  if (!data || data.length < 2) return null
-  const min = Math.min(...data)
-  const max = Math.max(...data)
-  const range = max - min || 1
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`).join(' ')
-  const uid = `sp${color.replace(/[^a-zA-Z0-9]/g, '')}${width}${height}`
+const Sparkline = memo(function Sparkline({ data, color = '#6366F1', width = 80, height = 28 }: { data: number[]; color?: string; width?: number; height?: number }) {
+  const { pts, uid } = useMemo(() => {
+    if (!data || data.length < 2) return { pts: '', uid: '' }
+    const min = Math.min(...data)
+    const max = Math.max(...data)
+    const range = max - min || 1
+    return {
+      pts: data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`).join(' '),
+      uid: `sp${color.replace(/[^a-zA-Z0-9]/g, '')}${width}${height}`,
+    }
+  }, [data, color, width, height])
+
+  if (!pts) return null
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
       <defs>
@@ -37,7 +43,7 @@ function Sparkline({ data, color = '#6366F1', width = 80, height = 28 }: { data:
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   )
-}
+})
 
 // ── MiniBar ──────────────────────────────────────────────────────────
 function MiniBar({ value, max = 100 }: { value: number; max?: number }) {
@@ -185,7 +191,7 @@ export function DashboardPage() {
   const indicatorIds = indicators?.map(i => i.id) ?? []
   const { data: allData } = useIndicatorSeries(indicatorIds, globalPeriod as '1D' | '1W' | '1M' | '3M' | '1Y')
 
-  const groups = groupIndicators(indicators ?? [], allData ?? {})
+  const groups = useMemo(() => groupIndicators(indicators ?? [], allData ?? {}), [indicators, allData])
 
   // Derive display data from API
   const stockIndicators = groups['STOCK'] ?? []

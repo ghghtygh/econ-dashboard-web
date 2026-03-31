@@ -97,14 +97,21 @@ function useContainerWidth(ref: React.RefObject<HTMLDivElement | null>) {
   const [width, setWidth] = useState(1200)
   useEffect(() => {
     if (!ref.current) return
+    let rafId: number
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setWidth(entry.contentRect.width)
-      }
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        for (const entry of entries) {
+          setWidth(entry.contentRect.width)
+        }
+      })
     })
     observer.observe(ref.current)
     setWidth(ref.current.offsetWidth)
-    return () => observer.disconnect()
+    return () => {
+      cancelAnimationFrame(rafId)
+      observer.disconnect()
+    }
   }, [ref])
   return width
 }

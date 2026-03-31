@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback, memo, startTransition } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus, Check, TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
-import type { IndicatorCategory, DashboardWidget } from '@/types/indicator'
+import type { Indicator, IndicatorCategory, IndicatorData, DashboardWidget } from '@/types/indicator'
 
 const CATEGORY_LABELS: Record<string, string> = {
   ALL: '전체',
@@ -32,6 +33,77 @@ function computeSparkPoints(values: { value: number }[]): string {
     .join(' ')
 }
 
+// ── Memoized Indicator Card ─────────────────────────────────────────
+const ExploreIndicatorCard = memo(function ExploreIndicatorCard({
+  indicator, series, isAdded, onAdd,
+}: {
+  indicator: Indicator
+  series: IndicatorData[]
+  isAdded: boolean
+  onAdd: (id: number, name: string) => void
+}) {
+  const latest = series.length > 0 ? series[series.length - 1] : undefined
+  const prev = series.length > 1 ? series[series.length - 2] : undefined
+  const changePercent = latest && prev && prev.value !== 0
+    ? ((latest.value - prev.value) / prev.value) * 100 : 0
+  const isUp = changePercent >= 0
+  const color = CATEGORY_COLORS[indicator.category] ?? '#378ADD'
+  const desc = getIndicatorDescription(indicator.symbol, indicator.category)
+  const sparkPoints = useMemo(() => computeSparkPoints(series), [series])
+
+  return (
+    <div className="rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+          <span className="text-[10px] text-faint uppercase tracking-wide">{indicator.category}</span>
+          <InfoTooltip><IndicatorTooltipContent {...desc} /></InfoTooltip>
+        </div>
+        <span className="text-[10px] text-faint font-mono">{indicator.symbol}</span>
+      </div>
+      <h3 className="text-sm font-medium text-heading mb-1">{indicator.name}</h3>
+      <p className="text-xs text-muted line-clamp-2 mb-3">{desc.definition}</p>
+      <div className="flex items-end justify-between mt-auto">
+        <div>
+          {latest ? (
+            <>
+              <p className="text-lg font-medium text-heading">
+                {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                <span className="text-xs text-muted ml-1">{indicator.unit}</span>
+              </p>
+              <div className={cn('flex items-center gap-0.5 text-xs', {
+                'text-green-400': isUp, 'text-red-400': !isUp,
+              })}>
+                {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                <span>{isUp ? '+' : ''}{changePercent.toFixed(2)}%</span>
+              </div>
+            </>
+          ) : (
+            <p className="text-faint text-sm">데이터 없음</p>
+          )}
+        </div>
+        {sparkPoints && (
+          <svg className="w-28 h-9" viewBox="0 0 120 40" preserveAspectRatio="none">
+            <polyline points={sparkPoints} fill="none" stroke={color} strokeWidth="1.5" opacity={0.6} />
+          </svg>
+        )}
+      </div>
+      <button
+        onClick={() => onAdd(indicator.id, indicator.name)}
+        disabled={isAdded}
+        className={cn(
+          'mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors',
+          isAdded
+            ? 'bg-elevated text-muted cursor-default'
+            : 'bg-blue-600 text-white hover:bg-blue-500 cursor-pointer',
+        )}
+      >
+        {isAdded ? (<><Check size={13} />대시보드에 추가됨</>) : (<><Plus size={13} />대시보드에 추가</>)}
+      </button>
+    </div>
+  )
+})
+
 const CATEGORY_COLORS: Record<string, string> = {
   STOCK: '#378ADD',
   FOREX: '#E24B4A',
@@ -43,10 +115,21 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function ExplorePage() {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [category, setCategory] = useState<IndicatorCategory | null>(null)
   const { data: indicators, isLoading } = useIndicators()
   const widgets = useDashboardStore((s) => s.widgets)
   const addWidget = useDashboardStore((s) => s.addWidget)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearch(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      startTransition(() => setDebouncedSearch(value))
+    }, 200)
+  }, [])
 
   const indicatorIds = indicators?.map((i) => i.id) ?? []
   const { data: allData } = useIndicatorSeries(indicatorIds, '1M')
@@ -54,8 +137,8 @@ export function ExplorePage() {
   const filtered = useMemo(() => {
     let list = indicators ?? []
     if (category) list = list.filter((i) => i.category === category)
-    if (search.trim()) {
-      const q = search.toLowerCase()
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase()
       list = list.filter(
         (i) =>
           i.name.toLowerCase().includes(q) ||
@@ -63,16 +146,33 @@ export function ExplorePage() {
       )
     }
     return list
-  }, [indicators, category, search])
+  }, [indicators, category, debouncedSearch])
 
   const categories = useMemo(
     () => [...new Set(indicators?.map((i) => i.category) ?? [])] as IndicatorCategory[],
     [indicators],
   )
 
-  const widgetIndicatorIds = new Set(widgets.map((w) => w.indicatorId))
+  const parentRef = useRef<HTMLDivElement>(null)
+  const widgetIndicatorIds = useMemo(() => new Set(widgets.map((w) => w.indicatorId)), [widgets])
 
-  const handleAddWidget = (indicatorId: number, name: string) => {
+  // Group filtered items into rows of 3 for virtual scrolling
+  const rows = useMemo(() => {
+    const result: Indicator[][] = []
+    for (let i = 0; i < filtered.length; i += 3) {
+      result.push(filtered.slice(i, i + 3))
+    }
+    return result
+  }, [filtered])
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 280,
+    overscan: 3,
+  })
+
+  const handleAddWidget = useCallback((indicatorId: number, name: string) => {
     if (widgetIndicatorIds.has(indicatorId)) return
     const widget: DashboardWidget = {
       id: crypto.randomUUID(),
@@ -84,7 +184,7 @@ export function ExplorePage() {
       dateRange: '1M',
     }
     addWidget(widget)
-  }
+  }, [widgetIndicatorIds, addWidget])
 
   return (
     <main className="dash-container">
@@ -101,7 +201,7 @@ export function ExplorePage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="지표명 또는 심볼로 검색..."
             className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-border-dim bg-surface text-body text-sm placeholder:text-faint focus:outline-none focus:border-blue-400/50 transition-colors"
           />
@@ -145,112 +245,37 @@ export function ExplorePage() {
           <p className="text-faint text-xs mt-1">다른 키워드나 카테고리를 선택해보세요</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((indicator) => {
-            const series = allData?.[indicator.id] ?? []
-            const latest = series.length > 0 ? series[series.length - 1] : undefined
-            const prev = series.length > 1 ? series[series.length - 2] : undefined
-            const changePercent =
-              latest && prev && prev.value !== 0
-                ? ((latest.value - prev.value) / prev.value) * 100
-                : 0
-            const isUp = changePercent >= 0
-            const isAdded = widgetIndicatorIds.has(indicator.id)
-            const color = CATEGORY_COLORS[indicator.category] ?? '#378ADD'
-            const desc = getIndicatorDescription(indicator.symbol, indicator.category)
-
-            // Mini sparkline
-            const sparkPoints = computeSparkPoints(series)
-
-            return (
-              <div
-                key={indicator.id}
-                className="rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-colors flex flex-col"
-              >
-                {/* Top: Category badge + tooltip */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="w-2 h-2 rounded-full"
-                      style={{ background: color }}
-                    />
-                    <span className="text-[10px] text-faint uppercase tracking-wide">
-                      {indicator.category}
-                    </span>
-                    <InfoTooltip>
-                      <IndicatorTooltipContent {...desc} />
-                    </InfoTooltip>
-                  </div>
-                  <span className="text-[10px] text-faint font-mono">{indicator.symbol}</span>
-                </div>
-
-                {/* Name */}
-                <h3 className="text-sm font-medium text-heading mb-1">{indicator.name}</h3>
-
-                {/* Description */}
-                <p className="text-xs text-muted line-clamp-2 mb-3">{desc.definition}</p>
-
-                {/* Sparkline + Value */}
-                <div className="flex items-end justify-between mt-auto">
-                  <div>
-                    {latest ? (
-                      <>
-                        <p className="text-lg font-medium text-heading">
-                          {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                          <span className="text-xs text-muted ml-1">{indicator.unit}</span>
-                        </p>
-                        <div className={cn('flex items-center gap-0.5 text-xs', {
-                          'text-green-400': isUp,
-                          'text-red-400': !isUp,
-                        })}>
-                          {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                          <span>{isUp ? '+' : ''}{changePercent.toFixed(2)}%</span>
-                        </div>
-                      </>
-                    ) : (
-                      <p className="text-faint text-sm">데이터 없음</p>
-                    )}
-                  </div>
-
-                  {sparkPoints && (
-                    <svg className="w-28 h-9" viewBox="0 0 120 40" preserveAspectRatio="none">
-                      <polyline
-                        points={sparkPoints}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="1.5"
-                        opacity={0.6}
-                      />
-                    </svg>
-                  )}
-                </div>
-
-                {/* Add to Dashboard button */}
-                <button
-                  onClick={() => handleAddWidget(indicator.id, indicator.name)}
-                  disabled={isAdded}
-                  className={cn(
-                    'mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                    isAdded
-                      ? 'bg-elevated text-muted cursor-default'
-                      : 'bg-blue-600 text-white hover:bg-blue-500 cursor-pointer',
-                  )}
+        <div ref={parentRef} style={{ height: '70vh', overflow: 'auto' }}>
+          <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index]
+              return (
+                <div
+                  key={virtualRow.index}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
                 >
-                  {isAdded ? (
-                    <>
-                      <Check size={13} />
-                      대시보드에 추가됨
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={13} />
-                      대시보드에 추가
-                    </>
-                  )}
-                </button>
-              </div>
-            )
-          })}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                    {row.map((indicator) => (
+                      <ExploreIndicatorCard
+                        key={indicator.id}
+                        indicator={indicator}
+                        series={allData?.[indicator.id] ?? []}
+                        isAdded={widgetIndicatorIds.has(indicator.id)}
+                        onAdd={handleAddWidget}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </main>

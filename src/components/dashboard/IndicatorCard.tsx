@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
@@ -10,7 +11,7 @@ interface IndicatorCardProps {
   prevClose?: number
 }
 
-export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardProps) {
+export const IndicatorCard = memo(function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardProps) {
   const changePercent = latest && prevClose && prevClose !== 0
     ? ((latest.value - prevClose) / prevClose) * 100
     : (latest?.change ?? 0)
@@ -57,4 +58,4 @@ export function IndicatorCard({ indicator, latest, prevClose }: IndicatorCardPro
       )}
     </div>
   )
-}
+})
