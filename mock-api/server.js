@@ -16,6 +16,7 @@ import * as cache from './cache.js'
 import * as coingecko from './adapters/coingecko.js'
 import * as fred from './adapters/fred.js'
 import * as av from './adapters/alphavantage.js'
+import * as yahoo from './adapters/yahoo.js'
 
 const app = express()
 app.use(express.json())
@@ -84,6 +85,8 @@ const INDICATORS = [
   { id: 11, name: 'Silver',         symbol: 'XAG',    category: 'COMMODITY', unit: 'USD', source: 'LBMA/FRED',       description: 'Silver Spot Price (USD/oz)',   createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   { id: 12, name: 'Crude Oil (WTI)',symbol: 'WTI',    category: 'COMMODITY', unit: 'USD', source: 'NYMEX/FRED',      description: 'WTI Crude Oil Price (USD/bbl)',createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   { id: 13, name: 'Natural Gas',    symbol: 'NG',     category: 'COMMODITY', unit: 'USD', source: 'NYMEX/FRED',      description: 'Henry Hub Natural Gas (USD/MMBtu)', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 14, name: 'KOSPI',         symbol: '^KS11',  category: 'STOCK',     unit: 'pts', source: 'Yahoo Finance',    description: 'Korea Composite Stock Price Index', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 15, name: 'KOSDAQ',        symbol: '^KQ11',  category: 'STOCK',     unit: 'pts', source: 'Yahoo Finance',    description: 'Korea Securities Dealers Automated Quotation', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
 ]
 
 // Fallback mock series generators (used when real API is unavailable)
@@ -101,6 +104,8 @@ const MOCK_SERIES = {
   11: () => generateTimeSeries(11, 28.5, 1.2),
   12: () => generateTimeSeries(12, 78, 3.5),
   13: () => generateTimeSeries(13, 2.8, 0.3),
+  14: () => generateTimeSeries(14, 2620, 35),   // KOSPI ~2600pts
+  15: () => generateTimeSeries(15, 855, 18),    // KOSDAQ ~850pts
 }
 
 // ── Live data fetchers ────────────────────────────────────────────────────────
@@ -120,6 +125,18 @@ async function getSeriesData(id, from, to) {
         break
       case 3:
         if (av.isAvailable()) return av.fetchForexDaily(3, 'USD', 'KRW')
+        break
+
+      // Korean Indices – Yahoo Finance (falls back to mock on failure)
+      case 14:
+        try { return await yahoo.fetchIndexDaily(14, '^KS11') } catch (e) {
+          console.warn('[data] Yahoo Finance ^KS11 failed:', e.message, '— using mock fallback')
+        }
+        break
+      case 15:
+        try { return await yahoo.fetchIndexDaily(15, '^KQ11') } catch (e) {
+          console.warn('[data] Yahoo Finance ^KQ11 failed:', e.message, '— using mock fallback')
+        }
         break
 
       // Macro – FRED
@@ -154,6 +171,15 @@ async function getCurrentPrices() {
       for (const [id, v] of coinPrices) result.set(id, v)
     } catch (err) {
       console.warn('[data] CoinGecko price fetch failed:', err.message)
+    }
+
+    for (const [symbol, indicatorId] of [['^KS11', 14], ['^KQ11', 15]]) {
+      try {
+        const q = await yahoo.fetchLatestQuote(indicatorId, symbol)
+        if (q) result.set(indicatorId, q)
+      } catch (err) {
+        console.warn(`[data] Yahoo Finance quote ${symbol} failed:`, err.message)
+      }
     }
 
     if (av.isAvailable()) {
@@ -200,6 +226,8 @@ const NEWS = [
 // ── Alerts ────────────────────────────────────────────────────────────────────
 
 const alerts = []
+const alertRules = new Map()   // id → AlertRule
+let ruleIdSeq = 1
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -211,6 +239,7 @@ app.get('/api/health', (_req, res) => {
       coingecko:    true,
       fred:         fred.isAvailable(),
       alphaVantage: av.isAvailable(),
+      yahoo:        true,  // always on (no API key needed)
     },
   })
 })
@@ -301,6 +330,7 @@ app.get('/api/news/:id', (req, res) => {
   res.json(ok(article))
 })
 
+// Alert notifications (triggered alerts)
 app.get('/api/alerts', (_req, res) => res.json(ok(alerts)))
 app.post('/api/alerts', (req, res) => {
   const alert = { id: Date.now(), ...req.body, createdAt: new Date().toISOString() }
@@ -310,6 +340,52 @@ app.post('/api/alerts', (req, res) => {
 app.delete('/api/alerts/:id', (req, res) => {
   const idx = alerts.findIndex(a => a.id === Number(req.params.id))
   if (idx !== -1) alerts.splice(idx, 1)
+  res.json(ok(null))
+})
+
+// Alert rules CRUD
+app.get('/api/alerts/rules', (_req, res) => {
+  res.json(ok([...alertRules.values()]))
+})
+
+app.get('/api/alerts/rules/:id', (req, res) => {
+  const rule = alertRules.get(req.params.id)
+  if (!rule) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Alert rule not found' } })
+  res.json(ok(rule))
+})
+
+app.post('/api/alerts/rules', (req, res) => {
+  const { indicatorId, indicatorName, condition, threshold, severity, message, enabled } = req.body
+  if (!indicatorId || !condition || threshold == null) {
+    return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'indicatorId, condition, threshold are required' } })
+  }
+  const id = req.body.id || `rule-${ruleIdSeq++}`
+  const rule = {
+    id,
+    indicatorId,
+    indicatorName: indicatorName || '',
+    condition,
+    threshold: Number(threshold),
+    severity: severity || 'warning',
+    message: message || '',
+    enabled: enabled !== false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+  alertRules.set(id, rule)
+  res.status(201).json(ok(rule))
+})
+
+app.put('/api/alerts/rules/:id', (req, res) => {
+  const existing = alertRules.get(req.params.id)
+  if (!existing) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Alert rule not found' } })
+  const updated = { ...existing, ...req.body, id: existing.id, updatedAt: new Date().toISOString() }
+  alertRules.set(existing.id, updated)
+  res.json(ok(updated))
+})
+
+app.delete('/api/alerts/rules/:id', (req, res) => {
+  alertRules.delete(req.params.id)
   res.json(ok(null))
 })
 
@@ -390,4 +466,5 @@ app.listen(PORT, () => {
   console.log('  CoinGecko    → always on (BTC, ETH)')
   console.log(`  FRED         → ${fred.isAvailable() ? 'ACTIVE (FRED_API_KEY set)' : 'mock fallback (FRED_API_KEY not set)'}`)
   console.log(`  AlphaVantage → ${av.isAvailable()   ? 'ACTIVE (ALPHA_VANTAGE_API_KEY set)' : 'mock fallback (ALPHA_VANTAGE_API_KEY not set)'}`)
+  console.log('  Yahoo Finance → ACTIVE (no key needed) — KOSPI (^KS11), KOSDAQ (^KQ11)')
 })

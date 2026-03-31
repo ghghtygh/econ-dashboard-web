@@ -3,21 +3,13 @@ import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
+import { CATEGORY_COLORS } from '@/constants/colors'
 
 interface MarketCardProps {
   indicator: Indicator
   series: IndicatorData[]
   isSelected?: boolean
   onClick?: () => void
-}
-
-const CATEGORY_COLORS: Record<string, string> = {
-  STOCK: '#6366f1',
-  FOREX: '#ef4444',
-  CRYPTO: '#f59e0b',
-  MACRO: '#8b5cf6',
-  BOND: '#10b981',
-  COMMODITY: '#f97316',
 }
 
 export function MarketCard({ indicator, series, isSelected, onClick }: MarketCardProps) {
@@ -87,7 +79,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
         <p className="text-base text-muted mb-2 truncate">{indicator.name}</p>
 
         {/* Metric */}
-        {latest ? (
+        {latest && latest.value !== 0 ? (
           <p className="text-3xl font-semibold text-heading tracking-tight">
             {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
