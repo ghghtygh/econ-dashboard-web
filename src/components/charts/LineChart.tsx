@@ -63,10 +63,10 @@ export function LineChart({ data, title, color = '#3b82f6', unit }: LineChartPro
     })
 
   return (
-    <div className="rounded-lg border border-border-dim bg-surface p-4">
+    <div className="rounded-lg border border-border-dim bg-surface p-4" role="img" aria-label={title ? `${title} 라인 차트` : `라인 차트, 데이터 ${formatted.length}건`}>
       {title && <h3 className="text-sm font-medium text-body mb-4">{title}</h3>}
       <ResponsiveContainer width="100%" height={200}>
-        <RechartsLineChart data={formatted}>
+        <RechartsLineChart data={formatted} accessibilityLayer>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
           <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}

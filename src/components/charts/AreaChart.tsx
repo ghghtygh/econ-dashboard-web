@@ -22,7 +22,7 @@ export function AreaChart({ data, color = '#3b82f6', unit }: AreaChartProps) {
   const gradientId = `area-gradient-${color.replace('#', '')}`
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <RechartsAreaChart data={formatted}>
+      <RechartsAreaChart data={formatted} accessibilityLayer>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity={0.3} />

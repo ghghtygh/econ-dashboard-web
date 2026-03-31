@@ -91,6 +91,13 @@ export function DashboardPage() {
     setMobileOpen(false)
   }
 
+  const [lastRefresh, setLastRefresh] = useState<string>('')
+  useEffect(() => {
+    if (indicators && indicators.length > 0) {
+      setLastRefresh(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }))
+    }
+  }, [indicators])
+
   const fmt = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
   const fmtDate = (d: Date) => d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
 
@@ -391,8 +398,17 @@ export function DashboardPage() {
 
   return (
     <div className="db-layout">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-3 focus:bg-white focus:text-blue-600 focus:font-semibold focus:rounded-md focus:shadow-lg focus:top-2 focus:left-2">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-3 focus:bg-elevated focus:text-heading focus:font-semibold focus:rounded-md focus:shadow-lg focus:top-2 focus:left-2 focus:ring-2 focus:ring-blue-500"
+      >
         본문으로 건너뛰기
+      </a>
+      <a
+        href="#sidebar-nav"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-3 focus:bg-elevated focus:text-heading focus:font-semibold focus:rounded-md focus:shadow-lg focus:top-2 focus:left-48"
+      >
+        네비게이션으로 건너뛰기
       </a>
       {/* Mobile header */}
       <header className="db-mobile-header">
@@ -419,7 +435,7 @@ export function DashboardPage() {
           <div className="db-logo-icon">M</div>
           {!collapsed && <span className="db-logo-text">Market Pulse</span>}
         </div>
-        <nav className="db-sidebar-nav">
+        <nav className="db-sidebar-nav" id="sidebar-nav" aria-label="메인 네비게이션">
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
@@ -434,13 +450,14 @@ export function DashboardPage() {
           ))}
         </nav>
         <div className="db-sidebar-footer">
-          <button className="db-theme-toggle-sidebar" onClick={toggleTheme}>
-            <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <button className="db-theme-toggle-sidebar" onClick={toggleTheme} aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}>
+            <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
             {!collapsed && <span>{theme === 'dark' ? '라이트 모드' : '다크 모드'}</span>}
           </button>
           <button
             className="db-collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? '사이드바 펼치기' : '사이드바 접기'}
           >{collapsed ? '→' : '← Collapse'}</button>
         </div>
       </aside>
@@ -451,12 +468,15 @@ export function DashboardPage() {
           <div>
             <h1 className="db-title">{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>
             <div className="db-time-row">
-              <span className="dot-live" />
-              <span className="db-clock">{fmt(time)}</span>
-              <span className="db-time-sep">·</span>
+              <span className="dot-live" aria-hidden="true" />
+              <span className="db-clock" aria-label={`현재 시각 ${fmt(time)}`} role="timer">{fmt(time)}</span>
+              <span className="db-time-sep" aria-hidden="true">·</span>
               <span>{fmtDate(time)}</span>
             </div>
           </div>
+        </div>
+        <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
+          {lastRefresh && `데이터가 ${lastRefresh}에 갱신되었습니다`}
         </div>
 
         {navSel !== 'news' && (
@@ -481,10 +501,10 @@ export function DashboardPage() {
 
         {renderContent()}
 
-        <div className="db-footer">
+        <footer className="db-footer" role="contentinfo">
           <span>Market Pulse Dashboard — Data from API</span>
-          <span className="db-clock">Last refreshed: {fmt(time)}</span>
-        </div>
+          <span className="db-clock" aria-label={`최종 갱신: ${lastRefresh || fmt(time)}`}>Last refreshed: {lastRefresh || fmt(time)}</span>
+        </footer>
       </main>
     </div>
   )

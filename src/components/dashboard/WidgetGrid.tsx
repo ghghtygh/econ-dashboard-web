@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
-import { X, GripVertical, Settings, LayoutGrid } from 'lucide-react'
+import { X, GripVertical, Settings, LayoutGrid, ChevronUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
@@ -37,48 +37,77 @@ function useIsMobile() {
   return isMobile
 }
 
-function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile }: {
+function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile, onMoveUp, onMoveDown, position, total }: {
   widget: DashboardWidget
   indicator?: Indicator
   data?: import('@/types/indicator').IndicatorData[]
   isLoading: boolean
   onEdit: () => void
   isMobile: boolean
+  onMoveUp?: () => void
+  onMoveDown?: () => void
+  position?: number
+  total?: number
 }) {
   const removeWidget = useDashboardStore((s) => s.removeWidget)
   const updateWidget = useDashboardStore((s) => s.updateWidget)
   const currentRange = widget.dateRange ?? '1M'
+  const widgetName = widget.title ?? indicator?.name ?? '위젯'
 
   return (
-    <div className="h-full rounded-lg border border-border-dim bg-surface flex flex-col overflow-hidden">
+    <div
+      className="h-full rounded-lg border border-border-dim bg-surface flex flex-col overflow-hidden"
+      role="region"
+      aria-label={`${widgetName} 위젯${position != null && total != null ? ` (${position}/${total})` : ''}`}
+    >
       <div className={cn(
         "flex items-center justify-between border-b border-border-dim shrink-0",
         isMobile ? "px-4 py-3" : "px-3 py-2",
       )}>
         <div className="flex items-center gap-1.5 min-w-0">
           {!isMobile && (
-            <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
+            <>
+              <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" aria-hidden="true" />
+              <div className="flex flex-col shrink-0" role="group" aria-label="위젯 순서 변경">
+                <button
+                  onClick={onMoveUp}
+                  disabled={position === 1}
+                  className="text-faint hover:text-body disabled:opacity-30 transition-colors p-0 leading-none"
+                  aria-label={`${widgetName} 위로 이동`}
+                >
+                  <ChevronUp size={10} />
+                </button>
+                <button
+                  onClick={onMoveDown}
+                  disabled={position === total}
+                  className="text-faint hover:text-body disabled:opacity-30 transition-colors p-0 leading-none"
+                  aria-label={`${widgetName} 아래로 이동`}
+                >
+                  <ChevronDown size={10} />
+                </button>
+              </div>
+            </>
           )}
           <h3 className={cn(
             "font-medium text-body truncate",
             isMobile ? "text-sm" : "text-xs",
           )}>
-            {widget.title ?? indicator?.name ?? '위젯'}
+            {widgetName}
           </h3>
         </div>
         <div className={cn(
           "flex items-center shrink-0 ml-2",
           isMobile ? "gap-1" : "gap-1",
         )}>
-          {/* Period selector — larger touch targets on mobile */}
           <div className={cn(
             "flex items-center mr-1",
             isMobile ? "gap-1" : "gap-0.5",
-          )}>
+          )} role="group" aria-label="기간 선택">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => updateWidget(widget.id, { dateRange: opt.value })}
+                aria-pressed={currentRange === opt.value}
                 className={cn(
                   'rounded transition-colors',
                   isMobile
@@ -95,6 +124,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile }: {
           </div>
           <button
             onClick={onEdit}
+            aria-label={`${widgetName} 설정`}
             className={cn(
               "text-faint hover:text-blue-400 transition-colors",
               isMobile && "min-w-[44px] min-h-[44px] flex items-center justify-center",
@@ -104,6 +134,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile }: {
           </button>
           <button
             onClick={() => removeWidget(widget.id)}
+            aria-label={`${widgetName} 삭제`}
             className={cn(
               "text-faint hover:text-red-400 transition-colors",
               isMobile && "min-w-[44px] min-h-[44px] flex items-center justify-center",
@@ -192,6 +223,25 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
 
   const { dataByRange, isLoading } = useWidgetData(widgets)
 
+  const moveWidget = useCallback((widgetId: string, direction: 'up' | 'down') => {
+    const sorted = [...widgets].sort((a, b) => a.position.y - b.position.y || a.position.x - b.position.x)
+    const idx = sorted.findIndex((w) => w.id === widgetId)
+    if (idx < 0) return
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= sorted.length) return
+    const current = sorted[idx]
+    const swap = sorted[swapIdx]
+    updateLayouts([
+      { i: current.id, x: swap.position.x, y: swap.position.y, w: current.position.w, h: current.position.h },
+      { i: swap.id, x: current.position.x, y: current.position.y, w: swap.position.w, h: swap.position.h },
+    ])
+  }, [widgets, updateLayouts])
+
+  const sortedWidgets = useMemo(
+    () => [...widgets].sort((a, b) => a.position.y - b.position.y || a.position.x - b.position.x),
+    [widgets],
+  )
+
   const toLayoutItem = useCallback((w: DashboardWidget): LayoutItem => ({
     i: w.id, x: w.position.x, y: w.position.y, w: w.position.w, h: w.position.h,
     minW: 1, minH: 3,
@@ -219,13 +269,13 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   // Mobile: stacked list view (no drag-and-drop)
   if (isMobile) {
     return (
-      <div ref={containerRef} className="widget-grid-mobile">
-        {widgets.map((widget) => {
+      <div ref={containerRef} className="widget-grid-mobile" role="list" aria-label="대시보드 위젯 목록">
+        {sortedWidgets.map((widget, idx) => {
           const indicator = indicators.find((i) => i.id === widget.indicatorId)
           const range = widget.dateRange ?? '1M'
           const data = dataByRange[range]?.[widget.indicatorId]
           return (
-            <div key={widget.id} className="widget-grid-mobile-item">
+            <div key={widget.id} className="widget-grid-mobile-item" role="listitem">
               <WidgetItem
                 widget={widget}
                 indicator={indicator}
@@ -233,6 +283,8 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 isLoading={isLoading}
                 onEdit={() => setEditingWidgetId(widget.id)}
                 isMobile
+                position={idx + 1}
+                total={sortedWidgets.length}
               />
             </div>
           )
@@ -252,7 +304,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
 
   // Desktop/tablet: grid layout with drag-and-drop
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} role="region" aria-label="대시보드 위젯 그리드">
       <ResponsiveGridLayout
         width={containerWidth}
         layouts={layouts}
@@ -268,6 +320,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
           const indicator = indicators.find((i) => i.id === widget.indicatorId)
           const range = widget.dateRange ?? '1M'
           const data = dataByRange[range]?.[widget.indicatorId]
+          const sortedIdx = sortedWidgets.findIndex((w) => w.id === widget.id)
           return (
             <div key={widget.id}>
               <WidgetItem
@@ -277,6 +330,10 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 isLoading={isLoading}
                 onEdit={() => setEditingWidgetId(widget.id)}
                 isMobile={false}
+                onMoveUp={() => moveWidget(widget.id, 'up')}
+                onMoveDown={() => moveWidget(widget.id, 'down')}
+                position={sortedIdx + 1}
+                total={widgets.length}
               />
             </div>
           )

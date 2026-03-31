@@ -23,25 +23,36 @@ interface ChartRendererProps {
   unit?: string
 }
 
-function ChartRendererInner({ type, data, color = '#3b82f6', unit }: ChartRendererProps) {
+interface ChartRendererInnerProps extends ChartRendererProps {
+  ariaLabel?: string
+}
+
+function ChartRendererInner({ type, data, color = '#3b82f6', unit, ariaLabel }: ChartRendererInnerProps) {
   const safeData = sanitizeData(data)
   if (safeData.length === 0) {
     return <p className="text-faint text-sm text-center py-8">데이터 없음</p>
   }
 
+  const chartLabel = ariaLabel ?? `${type} 차트, 데이터 ${safeData.length}건`
+  const wrapChart = (children: React.ReactNode) => (
+    <div role="img" aria-label={chartLabel}>
+      {children}
+    </div>
+  )
+
   switch (type) {
     case 'number':
       return <NumberCard data={safeData} color={color} unit={unit} />
     case 'bar':
-      return <BarChart data={safeData} color={color} unit={unit} />
+      return wrapChart(<BarChart data={safeData} color={color} unit={unit} />)
     case 'area':
-      return <AreaChart data={safeData} color={color} unit={unit} />
+      return wrapChart(<AreaChart data={safeData} color={color} unit={unit} />)
     case 'candlestick':
-      return <CandlestickChart data={safeData} />
+      return wrapChart(<CandlestickChart data={safeData} />)
     case 'line':
     default: {
       const formatted = formatChartData(safeData)
-      return (
+      return wrapChart(
         <ResponsiveContainer width="100%" height="100%">
           <RechartsLineChart data={formatted} accessibilityLayer>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
@@ -51,7 +62,7 @@ function ChartRendererInner({ type, data, color = '#3b82f6', unit }: ChartRender
             <Tooltip content={<ChartTooltip unit={unit} color={color} />} trigger="hover" />
             <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
           </RechartsLineChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>,
       )
     }
   }

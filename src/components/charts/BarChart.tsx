@@ -21,7 +21,7 @@ export function BarChart({ data, color = '#3b82f6', unit }: BarChartProps) {
   const formatted = formatChartData(data)
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <RechartsBarChart data={formatted}>
+      <RechartsBarChart data={formatted} accessibilityLayer>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
         <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
