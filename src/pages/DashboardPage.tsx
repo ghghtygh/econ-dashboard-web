@@ -1,5 +1,6 @@
 import { useState, useCallback, lazy, Suspense } from 'react'
 import { useDashboardData } from '@/hooks/useDashboardData'
+import { useIndicators } from '@/hooks/useIndicators'
 import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
 import { EventCountdown } from '@/components/dashboard/EventCountdown'
 import { DashboardHeader, DashboardFooter } from '@/components/dashboard/DashboardHeader'
@@ -8,6 +9,8 @@ import { CommoditySection } from '@/components/dashboard/CommoditySection'
 import { CryptoSection } from '@/components/dashboard/CryptoSection'
 import { FearGreedSection } from '@/components/dashboard/FearGreedSection'
 import { IndicatorTable } from '@/components/dashboard/IndicatorTable'
+import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
+import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
 import { PeriodPills } from '@/components/dashboard/PeriodPills'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { PeriodId } from '@/components/dashboard/constants'
@@ -18,6 +21,7 @@ const NewsPage = lazy(() =>
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◫' },
+  { id: 'my-dashboard', label: 'My Dashboard', icon: '▦' },
   { id: 'indices', label: 'Indices', icon: '◩' },
   { id: 'stocks', label: 'Stocks', icon: '◧' },
   { id: 'crypto', label: 'Crypto', icon: '◈' },
@@ -34,11 +38,13 @@ export function DashboardPage() {
   const [localCommod, setLocalCommod] = useState<PeriodId | null>(null)
   const [localStocks, setLocalStocks] = useState<PeriodId | null>(null)
   const [stockTab, setStockTab] = useState('kr')
+  const [addWidgetOpen, setAddWidgetOpen] = useState(false)
 
   const effectivePeriod = useCallback((local: PeriodId | null) => local || globalPeriod, [globalPeriod])
 
   const { groups, stockIndicators, cryptoIndicators, commodityIndicators, macroIndicators, forexIndicators, bondIndicators } =
     useDashboardData(globalPeriod)
+  const { data: allIndicators = [] } = useIndicators()
 
   const topIndices = [...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].slice(0, 6)
 
@@ -115,6 +121,26 @@ export function DashboardPage() {
             <Suspense fallback={<div className="py-10 text-center text-slate-400">Loading…</div>}>
               <NewsPage />
             </Suspense>
+          ) : navSel === 'my-dashboard' ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-slate-500">위젯을 추가하여 나만의 대시보드를 구성하세요</p>
+                <button
+                  onClick={() => setAddWidgetOpen(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
+                >
+                  + 위젯 추가
+                </button>
+              </div>
+              <ErrorBoundary label="위젯 그리드">
+                <WidgetGrid indicators={allIndicators} />
+              </ErrorBoundary>
+              <AddWidgetModal
+                open={addWidgetOpen}
+                onClose={() => setAddWidgetOpen(false)}
+                indicators={allIndicators}
+              />
+            </>
           ) : (
             <>
               {/* Global Period Bar */}
