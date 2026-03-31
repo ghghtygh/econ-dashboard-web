@@ -8,7 +8,8 @@ test.describe('Explore Page', () => {
 
   test('should have category filter buttons', async ({ page }) => {
     await page.goto('/explore')
-    await expect(page.getByRole('button', { name: 'ALL' })).toBeVisible()
+    // "ALL" category label is '전체' in the app
+    await expect(page.getByRole('button', { name: '전체' })).toBeVisible()
   })
 
   test('should have a search input', async ({ page }) => {

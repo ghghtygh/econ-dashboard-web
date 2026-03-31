@@ -9,12 +9,14 @@ test.describe('Dashboard Page', () => {
   test('should have period selector buttons', async ({ page }) => {
     await page.goto('/')
     for (const period of ['1D', '1W', '1M', '3M', '1Y']) {
-      await expect(page.getByRole('button', { name: period })).toBeVisible()
+      // Multiple period buttons exist per section; check at least one is visible
+      await expect(page.getByRole('button', { name: period }).first()).toBeVisible()
     }
   })
 
   test('should have collapsible sidebar navigation', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByText('Overview')).toBeVisible()
+    // Use exact match to avoid matching "Market Overview"
+    await expect(page.getByText('Overview', { exact: true })).toBeVisible()
   })
 })

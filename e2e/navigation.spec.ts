@@ -6,10 +6,10 @@ test.describe('Navigation', () => {
     await expect(page.getByText('Market Overview')).toBeVisible()
 
     await page.goto('/explore')
-    await expect(page.getByText('지표 탐색')).toBeVisible()
+    await expect(page.getByRole('heading', { name: '지표 탐색' })).toBeVisible()
 
     await page.goto('/news')
-    await expect(page.getByText('경제 뉴스')).toBeVisible()
+    await expect(page.getByRole('heading', { name: '경제 뉴스' })).toBeVisible()
   })
 
   test('should handle unknown routes gracefully', async ({ page }) => {
