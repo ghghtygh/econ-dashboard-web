@@ -70,8 +70,10 @@ export const MarketCard = memo(function MarketCard({ indicator, series, isSelect
                 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                 : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
             )}
+            role="status"
+            aria-label={`변동률 ${isUp ? '상승' : '하락'} ${changePercent.toFixed(1)}%`}
           >
-            {isUp ? '+' : ''}{changePercent.toFixed(1)}%
+            {isUp ? '▲' : '▼'} {isUp ? '+' : ''}{changePercent.toFixed(1)}%
           </span>
         </div>
 

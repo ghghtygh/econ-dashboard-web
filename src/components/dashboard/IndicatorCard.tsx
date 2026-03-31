@@ -44,12 +44,16 @@ export const IndicatorCard = memo(function IndicatorCard({ indicator, latest, pr
             {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             <span className="text-xs font-normal text-muted ml-1">{indicator.unit}</span>
           </p>
-          <div className={cn('flex items-center gap-1 mt-1.5 text-sm font-medium', {
-            'text-emerald-600 dark:text-emerald-400': isPositive,
-            'text-red-600 dark:text-red-400': isNegative,
-            'text-muted': !isPositive && !isNegative,
-          })}>
-            {isPositive ? <TrendingUp size={14} /> : isNegative ? <TrendingDown size={14} /> : <Minus size={14} />}
+          <div
+            className={cn('flex items-center gap-1 mt-1.5 text-sm font-medium', {
+              'text-emerald-600 dark:text-emerald-400': isPositive,
+              'text-red-600 dark:text-red-400': isNegative,
+              'text-muted': !isPositive && !isNegative,
+            })}
+            role="status"
+            aria-label={`변동률 ${isPositive ? '상승' : isNegative ? '하락' : '보합'} ${changePercent.toFixed(2)}%`}
+          >
+            {isPositive ? <TrendingUp size={14} aria-hidden="true" /> : isNegative ? <TrendingDown size={14} aria-hidden="true" /> : <Minus size={14} aria-hidden="true" />}
             <span>{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
           </div>
         </div>

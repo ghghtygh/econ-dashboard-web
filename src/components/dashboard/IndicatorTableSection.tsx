@@ -37,26 +37,50 @@ export function IndicatorTableSection({
           <PeriodPills active={effectivePeriod} onChange={onLocalChange} size="sm" showReset={!!localPeriod} onReset={onReset} />
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 80px 70px', padding: '0 0 8px', gap: 8, borderBottom: '1px solid #E2E8F0' }}>
-        {['Name', 'Value', 'Change', 'Unit'].map((h, i) => (
-          <span key={h} style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', textAlign: i > 0 ? 'right' : 'left' }}>
-            {h}
-          </span>
-        ))}
+      <div className="indicator-table-wrap" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table className="indicator-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
+              {['Name', 'Value', 'Change', 'Unit'].map((h, i) => (
+                <th
+                  key={h}
+                  scope="col"
+                  style={{
+                    fontSize: 10,
+                    color: '#94A3B8',
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    textAlign: i > 0 ? 'right' : 'left',
+                    padding: '0 0 8px',
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((item, i) => (
+              <tr key={item.indicator.id} className="stock-row" style={{ animation: 'fadeUp 0.3s ease both', animationDelay: `${0.5 + i * 0.03}s` }}>
+                <td style={{ padding: '8px 0' }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{item.indicator.name}</div>
+                  <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>{item.indicator.symbol}</div>
+                </td>
+                <td style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, color: '#0F172A', padding: '8px 0' }}>
+                  {item.latest ? fmtNum(item.latest.value) : '--'}
+                </td>
+                <td style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: chgColor(item.change), padding: '8px 0' }}>
+                  {chgText(item.change)}
+                </td>
+                <td style={{ textAlign: 'right', fontSize: 11, color: '#94A3B8', padding: '8px 0' }}>
+                  {item.indicator.unit}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      {rows.map((item, i) => (
-        <div key={item.indicator.id} className="stock-row" style={{ animation: 'fadeUp 0.3s ease both', animationDelay: `${0.5 + i * 0.03}s` }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{item.indicator.name}</div>
-            <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>{item.indicator.symbol}</div>
-          </div>
-          <div style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, color: '#0F172A' }}>
-            {item.latest ? fmtNum(item.latest.value) : '--'}
-          </div>
-          <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: chgColor(item.change) }}>{chgText(item.change)}</div>
-          <div style={{ textAlign: 'right', fontSize: 11, color: '#94A3B8' }}>{item.indicator.unit}</div>
-        </div>
-      ))}
       {rows.length === 0 && (
         <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: 13, padding: 32 }}>No data available</div>
       )}

@@ -25,8 +25,12 @@ export const NumberCard = memo(function NumberCard({ data, color = '#3b82f6', un
         {latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </p>
       {unit && <p className="text-sm text-muted">{unit}</p>}
-      <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-muted'}`}>
-        {isPositive ? <TrendingUp size={16} /> : isNegative ? <TrendingDown size={16} /> : <Minus size={16} />}
+      <div
+        className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-muted'}`}
+        role="status"
+        aria-label={`변동률 ${isPositive ? '상승' : isNegative ? '하락' : '보합'} ${changePercent.toFixed(2)}%`}
+      >
+        {isPositive ? <TrendingUp size={16} aria-hidden="true" /> : isNegative ? <TrendingDown size={16} aria-hidden="true" /> : <Minus size={16} aria-hidden="true" />}
         <span style={{ color }}>{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
       </div>
     </div>
