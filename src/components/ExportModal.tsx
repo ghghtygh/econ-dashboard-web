@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Download, FileText, FileJson } from 'lucide-react'
+import { Download, FileText, FileJson, FileImage } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { indicatorApi } from '@/services/api'
-import { exportIndicatorData, EXPORT_PERIOD_LABELS, getExportDateRange } from '@/lib/export'
+import { useToast } from '@/components/ui/useToast'
+import { exportIndicatorData, exportChartToPdf, EXPORT_PERIOD_LABELS, getExportDateRange } from '@/lib/export'
 import type { ExportFormat, ExportPeriod } from '@/lib/export'
 import type { ApiResponse, IndicatorData, PagedResponse } from '@/types/indicator'
 
@@ -15,19 +16,22 @@ interface ExportModalProps {
   indicatorSymbol: string
   indicatorName: string
   indicatorUnit: string
+  chartRef?: React.RefObject<HTMLElement | null>
 }
 
 const FORMAT_OPTIONS: { value: ExportFormat; label: string; icon: typeof FileText }[] = [
   { value: 'csv', label: 'CSV', icon: FileText },
   { value: 'json', label: 'JSON', icon: FileJson },
+  { value: 'pdf', label: 'PDF', icon: FileImage },
 ]
 
 const PERIODS: ExportPeriod[] = ['1M', '3M', '6M', '1Y', 'ALL']
 
-export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indicatorName, indicatorUnit }: ExportModalProps) {
+export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indicatorName, indicatorUnit, chartRef }: ExportModalProps) {
   const [format, setFormat] = useState<ExportFormat>('csv')
   const [period, setPeriod] = useState<ExportPeriod>('1M')
   const [exporting, setExporting] = useState(false)
+  const { toast } = useToast()
 
   const handleExport = async () => {
     setExporting(true)
@@ -39,10 +43,21 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
         range?.to,
       )
       const paged = (res.data as ApiResponse<PagedResponse<IndicatorData>>).data
-      exportIndicatorData(paged.content, indicatorSymbol, indicatorUnit, period, format)
+
+      if (format === 'pdf') {
+        if (!chartRef?.current) {
+          toast('차트를 찾을 수 없습니다', 'error')
+          return
+        }
+        await exportChartToPdf(chartRef.current, paged.content, indicatorName, indicatorSymbol, indicatorUnit, period)
+      } else {
+        exportIndicatorData(paged.content, indicatorSymbol, indicatorUnit, period, format)
+      }
+      toast('데이터를 내보냈습니다', 'success')
       onClose()
     } catch (err) {
       console.error('Export failed:', err)
+      toast('데이터 내보내기에 실패했습니다', 'error')
     } finally {
       setExporting(false)
     }
@@ -64,7 +79,7 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
 
         <div>
           <label className="block text-xs text-muted mb-1.5">파일 형식</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {FORMAT_OPTIONS.map((opt) => {
               const Icon = opt.icon
               return (

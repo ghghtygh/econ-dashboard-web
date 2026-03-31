@@ -79,6 +79,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
                 : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
             )}
           >
+            <span className="sr-only">{isUp ? '상승' : '하락'}</span>
             {isUp ? '+' : ''}{changePercent.toFixed(1)}%
           </span>
         </div>

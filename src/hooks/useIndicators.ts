@@ -41,13 +41,19 @@ function getDateRangeParams(range: DateRange): { from: string; to: string } {
   return { from: from.toISOString().slice(0, 10), to }
 }
 
+export interface IndicatorSeriesResult {
+  data: Record<number, IndicatorData[]>
+  failedIds: number[]
+}
+
 export function useIndicatorSeries(ids: number[], range: DateRange) {
   const { from, to } = getDateRangeParams(range)
   return useQuery({
     queryKey: ['indicatorSeries', ids, range],
-    queryFn: async () => {
-      if (ids.length === 0) return {}
+    queryFn: async (): Promise<IndicatorSeriesResult> => {
+      if (ids.length === 0) return { data: {}, failedIds: [] }
       const results: Record<number, IndicatorData[]> = {}
+      const failedIds: number[] = []
       await Promise.all(
         ids.map(async (id) => {
           try {
@@ -58,10 +64,11 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
             }
           } catch (err) {
             console.warn(`[useIndicatorSeries] Failed to fetch indicator ${id}:`, err)
+            failedIds.push(id)
           }
         })
       )
-      return results
+      return { data: results, failedIds }
     },
     enabled: ids.length > 0,
     refetchInterval: 1000 * 60 * 5,

@@ -1,6 +1,8 @@
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 import type { IndicatorData } from '@/types/indicator'
 
-export type ExportFormat = 'csv' | 'json'
+export type ExportFormat = 'csv' | 'json' | 'pdf'
 export type ExportPeriod = '1M' | '3M' | '6M' | '1Y' | 'ALL'
 
 export const EXPORT_PERIOD_LABELS: Record<ExportPeriod, string> = {
@@ -83,7 +85,61 @@ export function exportIndicatorData(
   const filename = buildFilename(symbol, period, format)
   if (format === 'csv') {
     downloadBlob(toCsv(data, unit), filename, 'text/csv;charset=utf-8;')
-  } else {
+  } else if (format === 'json') {
     downloadBlob(toJson(data, symbol, unit), filename, 'application/json;charset=utf-8;')
   }
+}
+
+export async function exportChartToPdf(
+  chartElement: HTMLElement,
+  data: IndicatorData[],
+  name: string,
+  symbol: string,
+  unit: string,
+  period: ExportPeriod,
+) {
+  const canvas = await html2canvas(chartElement, {
+    backgroundColor: '#0f1117',
+    scale: 2,
+  })
+
+  const imgData = canvas.toDataURL('image/png')
+  const pdf = new jsPDF('landscape', 'mm', 'a4')
+  const pageWidth = pdf.internal.pageSize.getWidth()
+  const pageHeight = pdf.internal.pageSize.getHeight()
+
+  // Title
+  pdf.setFontSize(16)
+  pdf.setTextColor(40, 40, 40)
+  pdf.text(`${name} (${symbol})`, 14, 18)
+
+  // Period and date
+  pdf.setFontSize(10)
+  pdf.setTextColor(120, 120, 120)
+  pdf.text(`기간: ${EXPORT_PERIOD_LABELS[period]} | 내보내기: ${new Date().toISOString().slice(0, 10)}`, 14, 26)
+
+  // Chart image
+  const imgWidth = pageWidth - 28
+  const imgHeight = (canvas.height / canvas.width) * imgWidth
+  const chartY = 32
+  const maxImgHeight = pageHeight - chartY - 40
+  const finalHeight = Math.min(imgHeight, maxImgHeight)
+  pdf.addImage(imgData, 'PNG', 14, chartY, imgWidth, finalHeight)
+
+  // Data summary
+  const summaryY = chartY + finalHeight + 8
+  if (data.length > 0) {
+    const latest = data[data.length - 1]
+    const first = data[0]
+    pdf.setFontSize(9)
+    pdf.setTextColor(80, 80, 80)
+    pdf.text(`최신값: ${latest.value} ${unit}`, 14, summaryY)
+    pdf.text(`기간: ${first.date} ~ ${latest.date} (${data.length}개 데이터포인트)`, 14, summaryY + 5)
+    if (latest.change != null) {
+      pdf.text(`변동: ${latest.change > 0 ? '+' : ''}${latest.change}%`, 14, summaryY + 10)
+    }
+  }
+
+  const filename = buildFilename(symbol, period, 'pdf')
+  pdf.save(filename)
 }

@@ -49,7 +49,8 @@ export const IndicatorCard = memo(function IndicatorCard({ indicator, latest, pr
             'text-red-600 dark:text-red-400': isNegative,
             'text-muted': !isPositive && !isNegative,
           })}>
-            {isPositive ? <TrendingUp size={14} /> : isNegative ? <TrendingDown size={14} /> : <Minus size={14} />}
+            {isPositive ? <TrendingUp size={14} aria-hidden="true" /> : isNegative ? <TrendingDown size={14} aria-hidden="true" /> : <Minus size={14} aria-hidden="true" />}
+            <span className="sr-only">{isPositive ? '상승' : isNegative ? '하락' : '변동 없음'}</span>
             <span>{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
           </div>
         </div>

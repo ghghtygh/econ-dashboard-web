@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type ReactNode } from 'react'
+import { useState, useRef, useEffect, useId, type ReactNode } from 'react'
 import { Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ThresholdLevel } from '@/data/indicatorDescriptions'
@@ -11,6 +11,7 @@ interface InfoTooltipProps {
 export function InfoTooltip({ children, className }: InfoTooltipProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const tooltipId = useId()
 
   useEffect(() => {
     if (!open) return
@@ -35,12 +36,15 @@ export function InfoTooltip({ children, className }: InfoTooltipProps) {
         onMouseLeave={() => setOpen(false)}
         className="text-faint hover:text-muted transition-colors"
         aria-label="지표 설명 보기"
+        aria-describedby={open ? tooltipId : undefined}
       >
         <Info size={13} />
       </button>
 
       {open && (
         <div
+          id={tooltipId}
+          role="tooltip"
           className={cn(
             'absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2',
             'w-72 max-h-80 overflow-y-auto rounded-lg border border-border-mid bg-surface p-3 shadow-lg',
@@ -108,6 +112,7 @@ export function IndicatorTooltipContent({
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ background: SEVERITY_COLORS[t.severity] }}
+                  aria-hidden="true"
                 />
                 <span className="font-mono text-[10px] text-heading w-10 shrink-0">{t.level}</span>
                 <span className="text-[10px] text-muted">{t.label}</span>

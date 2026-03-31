@@ -48,10 +48,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                   : 'text-muted hover:bg-elevated hover:text-heading',
               )}
             >
-              <Icon size={20} />
+              <Icon size={20} aria-hidden="true" />
               {label}
               {path === '/' && unreadCount > 0 && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold text-red-700 dark:bg-red-500/20 dark:text-red-400">
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold text-red-700 dark:bg-red-500/20 dark:text-red-400" aria-label={`읽지 않은 알림 ${unreadCount}개`}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -65,8 +65,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         <button
           onClick={toggleTheme}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-[15px] font-medium text-muted hover:bg-elevated hover:text-heading transition-colors"
+          aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
         >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
           {theme === 'dark' ? '라이트 모드' : '다크 모드'}
         </button>
       </div>
@@ -98,20 +99,20 @@ export function Sidebar() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-overlay" onClick={() => setMobileOpen(false)} />
-          <div className="fixed inset-y-0 left-0 w-72 bg-surface animate-slideIn">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="네비게이션 메뉴">
+          <div className="fixed inset-0 bg-overlay" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+          <aside className="fixed inset-y-0 left-0 w-72 bg-surface animate-slideIn">
             <SidebarContent onClose={() => setMobileOpen(false)} />
-          </div>
+          </aside>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col" aria-label="사이드바">
         <div className="flex grow flex-col border-r border-border-dim bg-surface">
           <SidebarContent />
         </div>
-      </div>
+      </aside>
     </>
   )
 }

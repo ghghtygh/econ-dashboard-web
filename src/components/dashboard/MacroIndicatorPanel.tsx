@@ -195,6 +195,7 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
               <span
                 className="text-[10px] px-2 py-0.5 rounded-full font-medium text-white"
                 style={{ backgroundColor: SEVERITY_COLORS[currentSeverity.severity] }}
+                role="status"
               >
                 {SEVERITY_LABELS[currentSeverity.severity]}
               </span>
@@ -224,7 +225,8 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
                   : 'text-red-600 dark:text-red-400',
               )}
             >
-              {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              {isUp ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
+              <span className="sr-only">{isUp ? '상승' : '하락'}</span>
               {isUp ? '+' : ''}{changePercent.toFixed(2)}%
             </span>
           </div>
@@ -237,7 +239,7 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
 
         {/* Threshold bar */}
         {thresholds && thresholds.length > 0 && latest && (
-          <div className="mt-3">
+          <div className="mt-3" aria-label={`기준값 바: 현재 ${latest.value}, ${currentSeverity ? SEVERITY_LABELS[currentSeverity.severity] : '알 수 없음'} 수준`}>
             <div className="relative h-2 rounded-full bg-elevated overflow-hidden">
               {/* Gradient background */}
               <div
@@ -289,6 +291,7 @@ function MacroCard({ indicator, series, isExpanded, onToggle }: MacroCardProps) 
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ background: SEVERITY_COLORS[t.severity] }}
+                  aria-hidden="true"
                 />
                 <span className="font-mono text-[11px] text-heading w-12 shrink-0">
                   {t.level}
