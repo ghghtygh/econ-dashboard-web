@@ -7,6 +7,7 @@ import { CommoditiesSection } from '@/components/dashboard/CommoditiesSection'
 import { CryptoSection } from '@/components/dashboard/CryptoSection'
 import { FearGreedSection } from '@/components/dashboard/FearGreedSection'
 import { IndicatorTableSection } from '@/components/dashboard/IndicatorTableSection'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◫' },
@@ -155,43 +156,53 @@ export function DashboardPage() {
           </div>
 
           {/* Global Indices */}
-          <GlobalIndicesSection
-            topIndices={topIndices}
-            localPeriod={localIndices}
-            effectivePeriod={effectivePeriod(localIndices)}
-            onLocalChange={setLocalIndices}
-            onReset={() => setLocalIndices(null)}
-          />
+          <ErrorBoundary>
+            <GlobalIndicesSection
+              topIndices={topIndices}
+              localPeriod={localIndices}
+              effectivePeriod={effectivePeriod(localIndices)}
+              onLocalChange={setLocalIndices}
+              onReset={() => setLocalIndices(null)}
+            />
+          </ErrorBoundary>
 
           {/* Middle Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 200px', gap: 12, marginBottom: 20 }}>
-            <CommoditiesSection
-              commodityIndicators={commodityIndicators}
-              localPeriod={localCommod}
-              onLocalChange={setLocalCommod}
-              onReset={() => setLocalCommod(null)}
-              globalPeriod={globalPeriod}
-            />
-            <CryptoSection
-              cryptoIndicators={cryptoIndicators}
-              localPeriod={localCrypto}
-              onLocalChange={setLocalCrypto}
-              onReset={() => setLocalCrypto(null)}
-              globalPeriod={globalPeriod}
-            />
-            <FearGreedSection macroIndicators={macroIndicators} />
+            <ErrorBoundary>
+              <CommoditiesSection
+                commodityIndicators={commodityIndicators}
+                localPeriod={localCommod}
+                onLocalChange={setLocalCommod}
+                onReset={() => setLocalCommod(null)}
+                globalPeriod={globalPeriod}
+              />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <CryptoSection
+                cryptoIndicators={cryptoIndicators}
+                localPeriod={localCrypto}
+                onLocalChange={setLocalCrypto}
+                onReset={() => setLocalCrypto(null)}
+                globalPeriod={globalPeriod}
+              />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <FearGreedSection macroIndicators={macroIndicators} />
+            </ErrorBoundary>
           </div>
 
           {/* Indicator Table */}
-          <IndicatorTableSection
-            groups={groups}
-            activeTab={stockTab}
-            onTabChange={setStockTab}
-            localPeriod={localStocks}
-            effectivePeriod={effectivePeriod(localStocks)}
-            onLocalChange={setLocalStocks}
-            onReset={() => setLocalStocks(null)}
-          />
+          <ErrorBoundary>
+            <IndicatorTableSection
+              groups={groups}
+              activeTab={stockTab}
+              onTabChange={setStockTab}
+              localPeriod={localStocks}
+              effectivePeriod={effectivePeriod(localStocks)}
+              onLocalChange={setLocalStocks}
+              onReset={() => setLocalStocks(null)}
+            />
+          </ErrorBoundary>
 
           {/* Footer */}
           <div style={{ marginTop: 28, padding: '14px 0', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between' }}>

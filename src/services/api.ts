@@ -1,10 +1,21 @@
 import axios from 'axios'
+import { errorBus } from '@/lib/errorBus'
 
 const api = axios.create({
   baseURL: '/api',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
+      errorBus.emit('요청 시간이 초과되었습니다 (10s). 네트워크 상태를 확인해주세요.')
+    }
+    return Promise.reject(error)
+  },
+)
 
 export default api
 

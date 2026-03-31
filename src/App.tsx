@@ -2,7 +2,12 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { ExplorePage } from '@/pages/ExplorePage'
+import { NewsPage } from '@/pages/NewsPage'
 import { useThemeStore } from '@/store/themeStore'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { ToastProvider } from '@/components/ui/Toast'
+import { ApiErrorListener } from '@/components/ui/ApiErrorListener'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,11 +24,39 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/*" element={<DashboardPage />} />
-        </Routes>
-      </BrowserRouter>
+      <ToastProvider>
+        <ApiErrorListener />
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/explore"
+                element={
+                  <ErrorBoundary>
+                    <ExplorePage />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/news"
+                element={
+                  <ErrorBoundary>
+                    <NewsPage />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/*"
+                element={
+                  <ErrorBoundary>
+                    <DashboardPage />
+                  </ErrorBoundary>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </ToastProvider>
     </QueryClientProvider>
   )
 }

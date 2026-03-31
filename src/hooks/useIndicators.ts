@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { indicatorApi } from '@/services/api'
+import { errorBus } from '@/lib/errorBus'
 import type { ApiResponse, Indicator, IndicatorData, PagedResponse, IndicatorCategory } from '@/types/indicator'
 
 export function useIndicators(category?: IndicatorCategory) {
@@ -56,8 +57,8 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
             if (paged.content.length > 0) {
               results[id] = paged.content
             }
-          } catch (err) {
-            console.warn(`[useIndicatorSeries] Failed to fetch indicator ${id}:`, err)
+          } catch (_err) {
+            errorBus.emit(`지표 ${id} 데이터를 불러오지 못했습니다.`)
           }
         })
       )
