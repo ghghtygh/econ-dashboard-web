@@ -24,6 +24,8 @@ services:
       - "8080:8080"
     environment:
       - APP_ENV=development
+      - FRED_API_KEY=${FRED_API_KEY:-}
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY:-}
     networks:
       - app-network
 
