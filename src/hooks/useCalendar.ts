@@ -21,6 +21,7 @@ export function useCalendarEvents(from?: string, to?: string, importance?: strin
       const body = res.data as ApiResponse<EconomicEvent[]>
       return body.data ?? []
     },
+    enabled: !!from && !!to,
     refetchInterval: 1000 * 60 * 5,
   })
 }

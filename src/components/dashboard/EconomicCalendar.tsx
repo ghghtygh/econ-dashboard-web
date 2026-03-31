@@ -116,13 +116,17 @@ function EventDetail({
 function MonthlyView({
   importanceFilter,
   events: externalEvents,
+  year,
+  month,
+  onNavigate,
 }: {
   importanceFilter: ImportanceFilter
   events: EconomicEvent[]
+  year: number
+  month: number
+  onNavigate: (dir: -1 | 1) => void
 }) {
   const today = new Date()
-  const [year, setYear] = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<EconomicEvent | null>(null)
 
@@ -164,9 +168,7 @@ function MonthlyView({
   function navigate(dir: -1 | 1) {
     setSelectedDay(null)
     setSelectedEvent(null)
-    const next = new Date(year, month + dir, 1)
-    setYear(next.getFullYear())
-    setMonth(next.getMonth())
+    onNavigate(dir)
   }
 
   return (
@@ -420,12 +422,26 @@ function normalizeApiEvent(ev: Record<string, unknown>): EconomicEvent {
   }
 }
 
+function formatYmd(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export function EconomicCalendar() {
   const [view, setView] = useState<ViewMode>('monthly')
   const [importanceFilter, setImportanceFilter] =
     useState<ImportanceFilter>('all')
 
-  const { data: apiEvents, isLoading } = useCalendarEvents()
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+
+  const from = formatYmd(new Date(year, month, 1))
+  const to = formatYmd(new Date(year, month + 1, 0))
+
+  const { data: apiEvents, isLoading } = useCalendarEvents(from, to)
 
   const events = useMemo(() => {
     if (apiEvents && Array.isArray(apiEvents) && apiEvents.length > 0) {
@@ -499,7 +515,17 @@ export function EconomicCalendar() {
 
       {/* Content */}
       {view === 'monthly' ? (
-        <MonthlyView importanceFilter={importanceFilter} events={events} />
+        <MonthlyView
+          importanceFilter={importanceFilter}
+          events={events}
+          year={year}
+          month={month}
+          onNavigate={(dir) => {
+            const next = new Date(year, month + dir, 1)
+            setYear(next.getFullYear())
+            setMonth(next.getMonth())
+          }}
+        />
       ) : (
         <ListView importanceFilter={importanceFilter} events={events} />
       )}
