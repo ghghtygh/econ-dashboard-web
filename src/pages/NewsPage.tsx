@@ -197,3 +197,5 @@ function tabClass(active: boolean) {
       : 'border-border-dim text-muted hover:text-heading hover:border-border-mid'
   }`
 }
+
+export default NewsPage

@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardPage } from '@/pages/DashboardPage'
-import { ExplorePage } from '@/pages/ExplorePage'
-import { NewsPage } from '@/pages/NewsPage'
 import { useThemeStore } from '@/store/themeStore'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ApiErrorListener } from '@/components/ui/ApiErrorListener'
+import { MockDataBanner } from '@/components/ui/MockDataBanner'
+import { PageLoadingSkeleton } from '@/components/ui/PageLoadingSkeleton'
+
+const ExplorePage = lazy(() => import('@/pages/ExplorePage'))
+const NewsPage = lazy(() => import('@/pages/NewsPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +29,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <ApiErrorListener />
+        <MockDataBanner />
         <ErrorBoundary>
           <BrowserRouter>
             <Routes>
@@ -33,7 +37,9 @@ function App() {
                 path="/explore"
                 element={
                   <ErrorBoundary>
-                    <ExplorePage />
+                    <Suspense fallback={<PageLoadingSkeleton variant="explore" />}>
+                      <ExplorePage />
+                    </Suspense>
                   </ErrorBoundary>
                 }
               />
@@ -41,7 +47,9 @@ function App() {
                 path="/news"
                 element={
                   <ErrorBoundary>
-                    <NewsPage />
+                    <Suspense fallback={<PageLoadingSkeleton variant="news" />}>
+                      <NewsPage />
+                    </Suspense>
                   </ErrorBoundary>
                 }
               />
