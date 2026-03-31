@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { CardHeader, Sparkline } from './primitives'
 import { CATEGORY_COLORS, CATEGORY_ICONS, fmtNum, chgColor, chgText } from './primitives.helpers'
+import { IndicatorDetailModal } from './IndicatorDetailModal'
 import type { PeriodId, IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
@@ -11,6 +13,8 @@ interface Props {
 }
 
 export function CryptoSection({ cryptoIndicators, localPeriod, onLocalChange, onReset, globalPeriod }: Props) {
+  const [selected, setSelected] = useState<IndicatorGroupItem | null>(null)
+
   return (
     <div className="card" style={{ animationDelay: '0.35s' }}>
       <CardHeader title="Cryptocurrency" localPeriod={localPeriod} onLocalChange={onLocalChange} onReset={onReset} globalPeriod={globalPeriod} />
@@ -20,7 +24,24 @@ export function CryptoSection({ cryptoIndicators, localPeriod, onLocalChange, on
         ) : cryptoIndicators.slice(0, 4).map(c => {
           const sparkData = c.series.map(d => d.value)
           return (
-            <div key={c.indicator.id} style={{ background: '#F8FAFC', borderRadius: 10, padding: 14, border: '1px solid #E2E8F0' }}>
+            <div
+              key={c.indicator.id}
+              onClick={() => setSelected(c)}
+              style={{
+                background: '#F8FAFC', borderRadius: 10, padding: 14,
+                border: '1px solid #E2E8F0',
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = ''
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: '50%',
@@ -49,6 +70,7 @@ export function CryptoSection({ cryptoIndicators, localPeriod, onLocalChange, on
           )
         })}
       </div>
+      <IndicatorDetailModal item={selected} open={!!selected} onClose={() => setSelected(null)} />
     </div>
   )
 }

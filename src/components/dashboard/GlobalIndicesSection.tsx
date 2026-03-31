@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Sparkline, PeriodPills } from './primitives'
 import { fmtNum, chgColor, chgText } from './primitives.helpers'
+import { IndicatorDetailModal } from './IndicatorDetailModal'
 import type { PeriodId, IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
@@ -11,6 +13,8 @@ interface Props {
 }
 
 export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod, onLocalChange, onReset }: Props) {
+  const [selected, setSelected] = useState<IndicatorGroupItem | null>(null)
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -35,7 +39,25 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
         ) : topIndices.map((item, i) => {
           const sparkData = item.series.map(d => d.value)
           return (
-            <div key={item.indicator.id} className="card" style={{ padding: 16, animationDelay: `${i * 0.05}s` }}>
+            <div
+              key={item.indicator.id}
+              className="card"
+              onClick={() => setSelected(item)}
+              style={{
+                padding: 16,
+                animationDelay: `${i * 0.05}s`,
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = ''
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em' }}>{item.indicator.symbol}</span>
                 <span className="badge" style={{ background: item.change >= 0 ? '#F0FDF4' : '#FEF2F2', color: chgColor(item.change) }}>
@@ -52,6 +74,7 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
           )
         })}
       </div>
+      <IndicatorDetailModal item={selected} open={!!selected} onClose={() => setSelected(null)} />
     </>
   )
 }
