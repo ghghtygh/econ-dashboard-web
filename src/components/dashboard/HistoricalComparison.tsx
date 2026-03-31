@@ -71,7 +71,7 @@ export function HistoricalComparison({ indicators, dataMap, selectedId, onSelect
   // 1년 데이터 fetch (비교 기간 커버)
   const allIds = indicators.map((i) => i.id)
   const { data: yearData } = useIndicatorSeries(allIds, '1Y')
-  const effectiveData = yearData ?? dataMap
+  const effectiveData = yearData?.data ?? dataMap
 
   // 현재 기간 데이터 (최근 N개월)
   const currentData = useMemo(() => {

@@ -118,7 +118,7 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
     range !== '1M' ? activeIds : [],
     range,
   )
-  const effectiveData = range === '1M' ? dataMap : (rangeData ?? dataMap)
+  const effectiveData = range === '1M' ? dataMap : (rangeData?.data ?? dataMap)
 
   const toggleIndicator = (id: number) => {
     setSelectedIds((prev) => {

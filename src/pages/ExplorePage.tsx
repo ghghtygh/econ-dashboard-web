@@ -4,6 +4,7 @@ import { Search, Plus, Check, TrendingUp, TrendingDown, Download } from 'lucide-
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { ExportModal } from '@/components/ExportModal'
+import { ChartOverlay } from '@/components/dashboard/ChartOverlay'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
@@ -293,7 +294,7 @@ export function ExplorePage() {
                       <ExploreIndicatorCard
                         key={indicator.id}
                         indicator={indicator}
-                        series={allData?.[indicator.id] ?? []}
+                        series={allData?.data?.[indicator.id] ?? []}
                         isAdded={widgetIndicatorIds.has(indicator.id)}
                         onAdd={handleAddWidget}
                         onExport={handleExport}
@@ -304,6 +305,16 @@ export function ExplorePage() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* 지표 비교 섹션 */}
+      {indicators && indicators.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-border-dim">
+          <ChartOverlay
+            indicators={indicators}
+            dataMap={allData?.data ?? {}}
+          />
         </div>
       )}
     </main>
