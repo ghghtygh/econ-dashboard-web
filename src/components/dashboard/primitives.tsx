@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { PERIODS } from './primitives.helpers'
 import type { PeriodId } from './primitives.helpers'
 
@@ -14,14 +14,17 @@ export function Sparkline({
   width?: number
   height?: number
 }) {
+  const instanceId = useId()
   if (!data || data.length < 2) return null
-  const min = Math.min(...data)
-  const max = Math.max(...data)
+  const safeData = data.filter((v) => Number.isFinite(v))
+  if (safeData.length < 2) return null
+  const min = Math.min(...safeData)
+  const max = Math.max(...safeData)
   const range = max - min || 1
-  const pts = data
-    .map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`)
+  const pts = safeData
+    .map((v, i) => `${(i / (safeData.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`)
     .join(' ')
-  const uid = `sp${color.replace(/[^a-zA-Z0-9]/g, '')}${width}${height}`
+  const uid = `sp-${instanceId.replace(/:/g, '')}`
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }} role="img" aria-label="추세 차트">
       <defs>
