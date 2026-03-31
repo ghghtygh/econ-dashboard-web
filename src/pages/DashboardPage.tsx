@@ -5,9 +5,13 @@ import { PeriodPills, Sparkline } from '@/components/dashboard/primitives'
 import { groupIndicators, fmtNum, chgColor, chgText, CATEGORY_COLORS, CATEGORY_ICONS } from '@/components/dashboard/primitives.helpers'
 import type { PeriodId } from '@/components/dashboard/primitives.helpers'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import { Skeleton } from '@/components/ui/Skeleton'
+import { Skeleton, TableRowSkeleton, NewsCardSkeleton } from '@/components/ui/Skeleton'
 import { useNewsList } from '@/hooks/useNews'
 import { useThemeStore } from '@/store/themeStore'
+import { WidgetGrid } from '@/components/dashboard/WidgetGrid'
+import { AddWidgetModal } from '@/components/dashboard/AddWidgetModal'
+import { useDashboardStore } from '@/store/dashboardStore'
+import { LiveClock } from '@/components/dashboard/LiveClock'
 
 const GlobalIndicesSection = lazy(() =>
   import('@/components/dashboard/GlobalIndicesSection').then((m) => ({ default: m.GlobalIndicesSection })),
@@ -84,7 +88,6 @@ export function DashboardPage() {
   const location = useLocation()
   const navSel = PATH_TO_NAV[location.pathname] ?? 'overview'
 
-  const [time, setTime] = useState(new Date())
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [globalPeriod, setGlobalPeriod] = useState<PeriodId>('1M')
@@ -95,6 +98,15 @@ export function DashboardPage() {
   const [stockTab, setStockTab] = useState('STOCK')
 
   const { theme, toggleTheme } = useThemeStore()
+  const [addWidgetOpen, setAddWidgetOpen] = useState(false)
+  const fetchWidgetsFromServer = useDashboardStore((s) => s.fetchWidgetsFromServer)
+  const ensureDefaults = useDashboardStore((s) => s.ensureDefaults)
+  const resetToDefaults = useDashboardStore((s) => s.resetToDefaults)
+
+  useEffect(() => {
+    ensureDefaults()
+    fetchWidgetsFromServer()
+  }, [ensureDefaults, fetchWidgetsFromServer])
 
   const effectivePeriod = useCallback((local: PeriodId | null) => local || globalPeriod, [globalPeriod])
 
@@ -120,22 +132,6 @@ export function DashboardPage() {
   const newsArticles = newsData?.content ?? []
   const newsTotalPages = newsData?.totalPages ?? 0
 
-  useEffect(() => {
-    let id: ReturnType<typeof setInterval> | null = setInterval(() => setTime(new Date()), 1000)
-    const handleVisibility = () => {
-      if (document.hidden) {
-        if (id) { clearInterval(id); id = null }
-      } else {
-        setTime(new Date())
-        if (!id) id = setInterval(() => setTime(new Date()), 1000)
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => {
-      if (id) clearInterval(id)
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
-  }, [])
 
   const handleMobileClose = () => {
     setMobileOpen(false)
@@ -148,8 +144,6 @@ export function DashboardPage() {
     }
   }, [indicators])
 
-  const fmt = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-  const fmtDate = (d: Date) => d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
 
   const renderContent = () => {
     switch (navSel) {
@@ -195,7 +189,7 @@ export function DashboardPage() {
                   )
                 })}
                 {[...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].length === 0 && (
-                  <div className="db-empty" role="status" aria-live="polite">Loading indicators...</div>
+                  <TableRowSkeleton count={6} />
                 )}
               </div>
             </ErrorBoundary>
@@ -331,11 +325,7 @@ export function DashboardPage() {
         return (
           <ErrorBoundary>
             {newsLoading ? (
-              <div className="db-card-grid db-card-grid--wide" role="status" aria-live="polite" aria-label="뉴스 로딩 중">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="card" style={{ height: 160, animation: 'pulse 1.5s ease infinite' }} />
-                ))}
-              </div>
+              <NewsCardSkeleton />
             ) : newsArticles.length === 0 ? (
               <div className="card db-empty">뉴스가 없습니다</div>
             ) : (
@@ -390,6 +380,37 @@ export function DashboardPage() {
                 )}
               </>
             )}
+          </ErrorBoundary>
+        )
+
+      case 'explore':
+        return (
+          <ErrorBoundary>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-heading">My Widgets</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={resetToDefaults}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border-dim px-3 py-1.5 text-xs font-medium text-muted hover:bg-elevated transition-colors"
+                  >
+                    기본 레이아웃으로 초기화
+                  </button>
+                  <button
+                    onClick={() => setAddWidgetOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                  >
+                    + 위젯 추가
+                  </button>
+                </div>
+              </div>
+              <WidgetGrid indicators={indicators ?? []} />
+              <AddWidgetModal
+                open={addWidgetOpen}
+                onClose={() => setAddWidgetOpen(false)}
+                indicators={indicators ?? []}
+              />
+            </div>
           </ErrorBoundary>
         )
 
@@ -454,6 +475,34 @@ export function DashboardPage() {
                 onLocalChange={setLocalStocks}
                 onReset={() => setLocalStocks(null)}
               />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <div className="space-y-4" style={{ marginTop: 24 }}>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-heading">My Widgets</h2>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={resetToDefaults}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-border-dim px-3 py-1.5 text-xs font-medium text-muted hover:bg-elevated transition-colors"
+                    >
+                      기본 레이아웃으로 초기화
+                    </button>
+                    <button
+                      onClick={() => setAddWidgetOpen(true)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                    >
+                      + 위젯 추가
+                    </button>
+                  </div>
+                </div>
+                <WidgetGrid indicators={indicators ?? []} />
+                <AddWidgetModal
+                  open={addWidgetOpen}
+                  onClose={() => setAddWidgetOpen(false)}
+                  indicators={indicators ?? []}
+                />
+              </div>
             </ErrorBoundary>
           </>
         )
@@ -532,12 +581,7 @@ export function DashboardPage() {
         <div className="db-header">
           <div>
             <h1 className="db-title">{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>
-            <div className="db-time-row">
-              <span className="dot-live" aria-hidden="true" />
-              <span className="db-clock" aria-label={`현재 시각 ${fmt(time)}`} role="timer">{fmt(time)}</span>
-              <span className="db-time-sep" aria-hidden="true">·</span>
-              <span>{fmtDate(time)}</span>
-            </div>
+            <LiveClock />
           </div>
         </div>
         <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
@@ -570,7 +614,7 @@ export function DashboardPage() {
 
         <footer className="db-footer" role="contentinfo">
           <span>Market Pulse Dashboard — Data from API</span>
-          <span className="db-clock" aria-label={`최종 갱신: ${lastRefresh || fmt(time)}`}>Last refreshed: {lastRefresh || fmt(time)}</span>
+          <span className="db-clock" aria-label={`최종 갱신: ${lastRefresh || '--:--:--'}`}>Last refreshed: {lastRefresh || '--:--:--'}</span>
         </footer>
       </main>
     </div>
