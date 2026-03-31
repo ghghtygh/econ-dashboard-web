@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Plus, Check, TrendingUp, TrendingDown } from 'lucide-react'
+import { Search, Plus, Check, TrendingUp, TrendingDown, BarChart3, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
@@ -9,6 +9,9 @@ import type { IndicatorCategory, DashboardWidget } from '@/types/indicator'
 import { CATEGORY_COLORS } from '@/constants/colors'
 import { CATEGORY_LABELS } from '@/constants/categories'
 import { SyncStatusIndicator } from '@/components/dashboard/SyncStatusIndicator'
+import { HistoricalComparison } from '@/components/dashboard/HistoricalComparison'
+
+type ExploreTab = 'indicators' | 'historical'
 
 function computeSparkPoints(values: { value: number }[]): string {
   if (values.length < 2) return ''
@@ -26,8 +29,10 @@ function computeSparkPoints(values: { value: number }[]): string {
 }
 
 export function ExplorePage() {
+  const [activeTab, setActiveTab] = useState<ExploreTab>('indicators')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<IndicatorCategory | null>(null)
+  const [selectedIndicatorId, setSelectedIndicatorId] = useState<number | undefined>()
   const { data: indicators, isLoading } = useIndicators()
   const widgets = useDashboardStore((s) => s.widgets)
   const addWidget = useDashboardStore((s) => s.addWidget)
@@ -80,8 +85,59 @@ export function ExplorePage() {
           <SyncStatusIndicator />
         </div>
         <p className="text-sm text-muted">경제 지표를 검색하고 대시보드에 추가하세요</p>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 mt-4" role="tablist" aria-label="탐색 탭">
+          <button
+            role="tab"
+            aria-selected={activeTab === 'indicators'}
+            onClick={() => setActiveTab('indicators')}
+            className={cn(
+              'flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border transition-colors cursor-pointer',
+              activeTab === 'indicators'
+                ? 'bg-elevated text-heading border-border-mid font-medium'
+                : 'border-transparent text-muted hover:text-heading hover:bg-elevated/50',
+            )}
+          >
+            <BarChart3 size={14} />
+            현재 지표
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === 'historical'}
+            onClick={() => setActiveTab('historical')}
+            className={cn(
+              'flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border transition-colors cursor-pointer',
+              activeTab === 'historical'
+                ? 'bg-elevated text-heading border-border-mid font-medium'
+                : 'border-transparent text-muted hover:text-heading hover:bg-elevated/50',
+            )}
+          >
+            <History size={14} />
+            역사적 비교
+          </button>
+        </div>
       </div>
 
+      {activeTab === 'historical' ? (
+        <div role="tabpanel" aria-label="역사적 비교">
+          {isLoading ? (
+            <div className="h-96 rounded-lg border border-border-dim bg-surface animate-pulse" role="status" aria-live="polite" aria-label="로딩 중" />
+          ) : indicators && indicators.length > 0 ? (
+            <HistoricalComparison
+              indicators={indicators}
+              dataMap={allData ?? {}}
+              selectedId={selectedIndicatorId}
+              onSelect={setSelectedIndicatorId}
+            />
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-muted text-sm">지표 데이터가 없습니다</p>
+            </div>
+          )}
+        </div>
+      ) : (
+      <>
       {/* Search + Category Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
@@ -242,6 +298,8 @@ export function ExplorePage() {
             )
           })}
         </div>
+      )}
+      </>
       )}
     </main>
   )
