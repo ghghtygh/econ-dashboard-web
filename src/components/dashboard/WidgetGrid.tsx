@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
-import { X, GripVertical, Settings, LayoutGrid } from 'lucide-react'
+import { X, GripVertical, Settings, LayoutGrid, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
 import { WidgetEditor } from '@/components/dashboard/WidgetEditor'
+import { ExportModal } from '@/components/ExportModal'
 import { useDashboardStore } from '@/store/dashboardStore'
 import { useIndicatorSeries, type DateRange } from '@/hooks/useIndicators'
 import type { Indicator, DashboardWidget } from '@/types/indicator'
@@ -21,12 +22,13 @@ const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: '1Y', label: '1년' },
 ]
 
-function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
+function WidgetItem({ widget, indicator, data, isLoading, onEdit, onExport }: {
   widget: DashboardWidget
   indicator?: Indicator
   data?: import('@/types/indicator').IndicatorData[]
   isLoading: boolean
   onEdit: () => void
+  onExport: () => void
 }) {
   const removeWidget = useDashboardStore((s) => s.removeWidget)
   const updateWidget = useDashboardStore((s) => s.updateWidget)
@@ -59,6 +61,13 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
               </button>
             ))}
           </div>
+          <button
+            onClick={onExport}
+            className="text-faint hover:text-green-400 transition-colors"
+            title="데이터 내보내기"
+          >
+            <Download size={14} />
+          </button>
           <button
             onClick={onEdit}
             className="text-faint hover:text-blue-400 transition-colors"
@@ -153,6 +162,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   const widgets = useDashboardStore((s) => s.widgets)
   const updateLayouts = useDashboardStore((s) => s.updateLayouts)
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
+  const [exportIndicator, setExportIndicator] = useState<Indicator | null>(null)
   const editingWidget = widgets.find((w) => w.id === editingWidgetId)
   const editingIndicator = editingWidget ? indicators.find((i) => i.id === editingWidget.indicatorId) : undefined
 
@@ -207,6 +217,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 data={data}
                 isLoading={isLoading}
                 onEdit={() => setEditingWidgetId(widget.id)}
+                onExport={() => indicator && setExportIndicator(indicator)}
               />
             </div>
           )
@@ -219,6 +230,16 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
           indicator={editingIndicator}
           open={!!editingWidgetId}
           onClose={() => setEditingWidgetId(null)}
+        />
+      )}
+      {exportIndicator && (
+        <ExportModal
+          open={!!exportIndicator}
+          onClose={() => setExportIndicator(null)}
+          indicatorId={exportIndicator.id}
+          indicatorSymbol={exportIndicator.symbol}
+          indicatorName={exportIndicator.name}
+          indicatorUnit={exportIndicator.unit}
         />
       )}
     </div>

@@ -1,8 +1,9 @@
 import { useState, useMemo, useRef, useCallback, memo, startTransition } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Search, Plus, Check, TrendingUp, TrendingDown } from 'lucide-react'
+import { Search, Plus, Check, TrendingUp, TrendingDown, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
+import { ExportModal } from '@/components/ExportModal'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
@@ -35,12 +36,13 @@ function computeSparkPoints(values: { value: number }[]): string {
 
 // ── Memoized Indicator Card ─────────────────────────────────────────
 const ExploreIndicatorCard = memo(function ExploreIndicatorCard({
-  indicator, series, isAdded, onAdd,
+  indicator, series, isAdded, onAdd, onExport,
 }: {
   indicator: Indicator
   series: IndicatorData[]
   isAdded: boolean
   onAdd: (id: number, name: string) => void
+  onExport: (indicator: Indicator) => void
 }) {
   const latest = series.length > 0 ? series[series.length - 1] : undefined
   const prev = series.length > 1 ? series[series.length - 2] : undefined
@@ -88,18 +90,26 @@ const ExploreIndicatorCard = memo(function ExploreIndicatorCard({
           </svg>
         )}
       </div>
-      <button
-        onClick={() => onAdd(indicator.id, indicator.name)}
-        disabled={isAdded}
-        className={cn(
-          'mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors',
-          isAdded
-            ? 'bg-elevated text-muted cursor-default'
-            : 'bg-blue-600 text-white hover:bg-blue-500 cursor-pointer',
-        )}
-      >
-        {isAdded ? (<><Check size={13} />대시보드에 추가됨</>) : (<><Plus size={13} />대시보드에 추가</>)}
-      </button>
+      <div className="mt-4 flex gap-2">
+        <button
+          onClick={() => onAdd(indicator.id, indicator.name)}
+          disabled={isAdded}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors',
+            isAdded
+              ? 'bg-elevated text-muted cursor-default'
+              : 'bg-blue-600 text-white hover:bg-blue-500 cursor-pointer',
+          )}
+        >
+          {isAdded ? (<><Check size={13} />추가됨</>) : (<><Plus size={13} />대시보드에 추가</>)}
+        </button>
+        <button
+          onClick={() => onExport(indicator)}
+          className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-border-dim text-muted hover:text-heading hover:border-border-mid transition-colors cursor-pointer"
+        >
+          <Download size={13} />
+        </button>
+      </div>
     </div>
   )
 })
@@ -117,6 +127,7 @@ export function ExplorePage() {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [category, setCategory] = useState<IndicatorCategory | null>(null)
+  const [exportTarget, setExportTarget] = useState<Indicator | null>(null)
   const { data: indicators, isLoading } = useIndicators()
   const widgets = useDashboardStore((s) => s.widgets)
   const addWidget = useDashboardStore((s) => s.addWidget)
@@ -172,6 +183,10 @@ export function ExplorePage() {
     overscan: 3,
   })
 
+  const handleExport = useCallback((indicator: Indicator) => {
+    setExportTarget(indicator)
+  }, [])
+
   const handleAddWidget = useCallback((indicatorId: number, name: string) => {
     if (widgetIndicatorIds.has(indicatorId)) return
     const widget: DashboardWidget = {
@@ -188,6 +203,18 @@ export function ExplorePage() {
 
   return (
     <main className="dash-container">
+      {/* Export Modal */}
+      {exportTarget && (
+        <ExportModal
+          open={!!exportTarget}
+          onClose={() => setExportTarget(null)}
+          indicatorId={exportTarget.id}
+          indicatorSymbol={exportTarget.symbol}
+          indicatorName={exportTarget.name}
+          indicatorUnit={exportTarget.unit}
+        />
+      )}
+
       {/* Header */}
       <div className="pb-6 mb-6 border-b border-border-dim">
         <h1 className="text-lg font-semibold text-heading mb-1">지표 탐색</h1>
@@ -269,6 +296,7 @@ export function ExplorePage() {
                         series={allData?.[indicator.id] ?? []}
                         isAdded={widgetIndicatorIds.has(indicator.id)}
                         onAdd={handleAddWidget}
+                        onExport={handleExport}
                       />
                     ))}
                   </div>
