@@ -8,8 +8,8 @@ interface CandlestickChartProps {
   data: IndicatorData[]
 }
 
-const CANDLE_UP = '#22c55e'
-const CANDLE_DOWN = '#ef4444'
+const CANDLE_UP = 'var(--th-candle-up, #22c55e)'
+const CANDLE_DOWN = 'var(--th-candle-down, #ef4444)'
 
 interface CandleData {
   shortDate: string

@@ -25,6 +25,9 @@
   --th-accent-soft: #eef2ff;
   --th-positive-bg: #F0FDF4;
   --th-negative-bg: #FEF2F2;
+  /* Candlestick */
+  --th-candle-up: #22c55e;
+  --th-candle-down: #ef4444;
   /* Correlation heatmap */
   --corr-strong: #4338ca;
   --corr-strong-text: #e0e7ff;
@@ -59,6 +62,9 @@
   --th-accent-soft: rgba(99,102,241,0.1);
   --th-positive-bg: rgba(22, 163, 74, 0.12);
   --th-negative-bg: rgba(239, 68, 68, 0.12);
+  /* Candlestick */
+  --th-candle-up: #4ade80;
+  --th-candle-down: #f87171;
   /* Correlation heatmap */
   --corr-strong: #312e81;
   --corr-strong-text: #a5b4fc;

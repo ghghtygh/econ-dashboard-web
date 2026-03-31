@@ -49,12 +49,9 @@ function DetailTooltip({ active, payload, label, unit, color }: {
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div style={{
-      background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8,
-      padding: '8px 12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    }}>
-      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'DM Mono', monospace", color }}>
+    <div className="rounded-lg border border-border-mid bg-elevated px-3 py-2 shadow-lg">
+      <div className="text-xs text-muted mb-1">{label}</div>
+      <div className="text-sm font-bold font-mono" style={{ color }}>
         {formatPrice(payload[0].value)}{unit ? ` ${unit}` : ''}
       </div>
     </div>
