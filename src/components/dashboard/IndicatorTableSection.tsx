@@ -1,5 +1,6 @@
-import { Tabs, PeriodPills, CATEGORY_ICONS, fmtNum, chgColor, chgText } from './primitives'
-import type { PeriodId, IndicatorGroup } from './primitives'
+import { Tabs, PeriodPills } from './primitives'
+import { CATEGORY_ICONS, fmtNum, chgColor, chgText } from './primitives.helpers'
+import type { PeriodId, IndicatorGroup } from './primitives.helpers'
 
 interface Props {
   groups: IndicatorGroup

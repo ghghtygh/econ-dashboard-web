@@ -57,7 +57,7 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
             if (paged.content.length > 0) {
               results[id] = paged.content
             }
-          } catch (_err) {
+          } catch {
             errorBus.emit(`지표 ${id} 데이터를 불러오지 못했습니다.`)
           }
         })

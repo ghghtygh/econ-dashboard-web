@@ -1,5 +1,6 @@
-import { FearGreedGauge, MiniBar, fmtNum, chgColor } from './primitives'
-import type { IndicatorGroupItem } from './primitives'
+import { FearGreedGauge, MiniBar } from './primitives'
+import { fmtNum, chgColor } from './primitives.helpers'
+import type { IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
   macroIndicators: IndicatorGroupItem[]

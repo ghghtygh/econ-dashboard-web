@@ -1,5 +1,6 @@
-import { Sparkline, PeriodPills, fmtNum, chgColor, chgText } from './primitives'
-import type { PeriodId, IndicatorGroupItem } from './primitives'
+import { Sparkline, PeriodPills } from './primitives'
+import { fmtNum, chgColor, chgText } from './primitives.helpers'
+import type { PeriodId, IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
   topIndices: IndicatorGroupItem[]

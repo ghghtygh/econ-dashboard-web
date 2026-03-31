@@ -1,5 +1,6 @@
-import { CardHeader, CATEGORY_COLORS, CATEGORY_ICONS, fmtNum, chgColor } from './primitives'
-import type { PeriodId, IndicatorGroupItem } from './primitives'
+import { CardHeader } from './primitives'
+import { CATEGORY_COLORS, CATEGORY_ICONS, fmtNum, chgColor } from './primitives.helpers'
+import type { PeriodId, IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
   commodityIndicators: IndicatorGroupItem[]

@@ -1,5 +1,6 @@
-import { CardHeader, Sparkline, CATEGORY_COLORS, CATEGORY_ICONS, fmtNum, chgColor, chgText } from './primitives'
-import type { PeriodId, IndicatorGroupItem } from './primitives'
+import { CardHeader, Sparkline } from './primitives'
+import { CATEGORY_COLORS, CATEGORY_ICONS, fmtNum, chgColor, chgText } from './primitives.helpers'
+import type { PeriodId, IndicatorGroupItem } from './primitives.helpers'
 
 interface Props {
   cryptoIndicators: IndicatorGroupItem[]
