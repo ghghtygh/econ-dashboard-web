@@ -328,7 +328,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
         breakpoints={{ lg: 1200, md: 768, sm: 0 }}
         cols={{ lg: 12, md: 6, sm: 1 }}
         rowHeight={40}
-        margin={[12, 12] as const}
+        margin={[16, 16] as const}
         onLayoutChange={handleLayoutChange}
         dragConfig={{ enabled: true, handle: '.drag-handle' }}
         resizeConfig={{ enabled: true, handles: ['se'] }}
