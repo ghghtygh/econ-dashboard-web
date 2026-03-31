@@ -88,7 +88,7 @@ export function ExplorePage() {
   }
 
   return (
-    <main className="dash-container">
+    <main className="dash-container" id="main-content">
       {/* Header */}
       <div className="pb-6 mb-6 border-b border-border-dim">
         <h1 className="text-lg font-semibold text-heading mb-1">지표 탐색</h1>
@@ -98,8 +98,10 @@ export function ExplorePage() {
       {/* Search + Category Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-faint" aria-hidden="true" />
+          <label htmlFor="indicator-search" className="sr-only">지표명 또는 심볼로 검색</label>
           <input
+            id="indicator-search"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -134,7 +136,7 @@ export function ExplorePage() {
 
       {/* Indicator Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="status" aria-live="polite" aria-label="지표 로딩 중">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-48 rounded-lg border border-border-dim bg-surface animate-pulse" />
           ))}
@@ -186,7 +188,7 @@ export function ExplorePage() {
                 </div>
 
                 {/* Name */}
-                <h3 className="text-sm font-medium text-heading mb-1">{indicator.name}</h3>
+                <h2 className="text-sm font-medium text-heading mb-1">{indicator.name}</h2>
 
                 {/* Description */}
                 <p className="text-xs text-muted line-clamp-2 mb-3">{desc.definition}</p>
@@ -214,7 +216,7 @@ export function ExplorePage() {
                   </div>
 
                   {sparkPoints && (
-                    <svg className="w-28 h-9" viewBox="0 0 120 40" preserveAspectRatio="none">
+                    <svg className="w-28 h-9" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label={`${indicator.name} 추세 차트`}>
                       <polyline
                         points={sparkPoints}
                         fill="none"

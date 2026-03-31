@@ -110,7 +110,7 @@ export function DashboardPage() {
             </ErrorBoundary>
             <ErrorBoundary>
               <div className="card" style={{ marginTop: 12, padding: 20 }}>
-                <h3 className="db-table-header">All Index Indicators</h3>
+                <h2 className="db-table-header">All Index Indicators</h2>
                 <div className="db-table-head">
                   {['Name', 'Value', 'Change', 'Trend', 'Unit'].map((h, i) => (
                     <span key={h} className="db-table-th" style={{ textAlign: i > 0 ? 'right' : 'left' }}>
@@ -138,7 +138,7 @@ export function DashboardPage() {
                   )
                 })}
                 {[...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].length === 0 && (
-                  <div className="db-empty">Loading indicators...</div>
+                  <div className="db-empty" role="status" aria-live="polite">Loading indicators...</div>
                 )}
               </div>
             </ErrorBoundary>
@@ -274,7 +274,7 @@ export function DashboardPage() {
         return (
           <ErrorBoundary>
             {newsLoading ? (
-              <div className="db-card-grid db-card-grid--wide">
+              <div className="db-card-grid db-card-grid--wide" role="status" aria-live="polite" aria-label="뉴스 로딩 중">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="card" style={{ height: 160, animation: 'pulse 1.5s ease infinite' }} />
                 ))}
@@ -391,6 +391,9 @@ export function DashboardPage() {
 
   return (
     <div className="db-layout">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:p-3 focus:bg-white focus:text-blue-600 focus:font-semibold focus:rounded-md focus:shadow-lg focus:top-2 focus:left-2">
+        본문으로 건너뛰기
+      </a>
       {/* Mobile header */}
       <header className="db-mobile-header">
         <button className="db-hamburger" onClick={() => setMobileOpen(true)} aria-label="메뉴 열기">
@@ -418,15 +421,16 @@ export function DashboardPage() {
         </div>
         <nav className="db-sidebar-nav">
           {NAV_ITEMS.map(item => (
-            <div
+            <button
               key={item.id}
               className={`nav-item ${navSel === item.id ? 'on' : ''}`}
               onClick={() => handleNav(item.id)}
+              aria-current={navSel === item.id ? 'page' : undefined}
               style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
             >
-              <span className="db-nav-icon">{item.icon}</span>
+              <span className="db-nav-icon" aria-hidden="true">{item.icon}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
-            </div>
+            </button>
           ))}
         </nav>
         <div className="db-sidebar-footer">
@@ -442,7 +446,7 @@ export function DashboardPage() {
       </aside>
 
       {/* Main */}
-      <main className="db-main">
+      <main className="db-main" id="main-content">
         <div className="db-header">
           <div>
             <h1 className="db-title">{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>

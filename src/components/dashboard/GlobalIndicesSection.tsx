@@ -19,7 +19,7 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>Global Indices</h3>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>Global Indices</h2>
           {localPeriod && (
             <span style={{ fontSize: 9, color: '#4F46E5', background: '#EEF2FF', padding: '1px 5px', borderRadius: 3, fontWeight: 600 }}>LOCAL</span>
           )}
@@ -33,21 +33,24 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
         marginBottom: 20,
       }}>
         {topIndices.length === 0 ? (
-          <div className="card" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>
+          <div className="card" role="status" aria-live="polite" style={{ gridColumn: '1/-1', textAlign: 'center', color: '#64748B', fontSize: 13 }}>
             Loading indicators...
           </div>
         ) : topIndices.map((item, i) => {
           const sparkData = item.series.map(d => d.value)
           return (
-            <div
+            <button
               key={item.indicator.id}
               className="card"
               onClick={() => setSelected(item)}
+              aria-label={`${item.indicator.name} ${item.latest ? fmtNum(item.latest.value) : ''} ${chgText(item.change)}`}
               style={{
                 padding: 16,
                 animationDelay: `${i * 0.05}s`,
                 cursor: 'pointer',
                 transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                textAlign: 'left',
+                width: '100%',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
@@ -59,7 +62,7 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em' }}>{item.indicator.symbol}</span>
+                <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600, letterSpacing: '0.03em' }}>{item.indicator.symbol}</span>
                 <span className="badge" style={{ background: item.change >= 0 ? '#F0FDF4' : '#FEF2F2', color: chgColor(item.change) }}>
                   {chgText(item.change)}
                 </span>
@@ -70,7 +73,7 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
               <div style={{ marginTop: 10 }}>
                 <Sparkline data={sparkData} color={chgColor(item.change)} width={120} height={24} />
               </div>
-            </div>
+            </button>
           )
         })}
       </div>

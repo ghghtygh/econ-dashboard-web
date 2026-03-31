@@ -23,7 +23,7 @@ export function Sparkline({
     .join(' ')
   const uid = `sp${color.replace(/[^a-zA-Z0-9]/g, '')}${width}${height}`
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }} role="img" aria-label="추세 차트">
       <defs>
         <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity={0.12} />
@@ -69,7 +69,7 @@ export function FearGreedGauge({ value }: { value: number }) {
   const angle = (value / 100) * 180 - 90
   return (
     <div style={{ textAlign: 'center' }}>
-      <svg width="152" height="86" viewBox="0 0 152 86">
+      <svg width="152" height="86" viewBox="0 0 152 86" role="img" aria-label={`Fear & Greed 게이지: ${value}점, ${label}`}>
         <defs>
           <linearGradient id="g-arc" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#DC2626" />
@@ -90,7 +90,7 @@ export function FearGreedGauge({ value }: { value: number }) {
         <circle cx="76" cy="76" r="3.5" fill={c} />
       </svg>
       <div style={{ fontSize: 26, fontWeight: 700, color: c, marginTop: -2, fontFamily: "'DM Mono', monospace" }}>{value}</div>
-      <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: 10, color: '#64748B', marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}>{label}</div>
     </div>
   )
 }
@@ -138,7 +138,7 @@ export function PeriodPills({
           style={{
             padding: isSm ? '2px 5px' : '3px 7px',
             fontSize: isSm ? 9 : 10,
-            color: '#94A3B8', background: 'transparent', border: 'none',
+            color: '#64748B', background: 'transparent', border: 'none',
             cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1,
             borderLeft: '1px solid #E2E8F0', marginLeft: 2,
           }}
@@ -169,7 +169,7 @@ export function CardHeader({
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, minHeight: 26 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>{title}</h3>
+        <h2 style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>{title}</h2>
         {isOverridden && (
           <span style={{ fontSize: 9, color: '#4F46E5', background: '#EEF2FF', padding: '1px 5px', borderRadius: 3, fontWeight: 600, letterSpacing: '0.04em' }}>LOCAL</span>
         )}

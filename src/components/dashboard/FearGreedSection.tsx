@@ -35,9 +35,9 @@ export function FearGreedSection({ macroIndicators }: Props) {
 
   return (
     <div className="card" style={{ animationDelay: '0.4s', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <h3 style={{ fontSize: 10, fontWeight: 600, color: '#94A3B8', marginBottom: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <h2 style={{ fontSize: 10, fontWeight: 600, color: '#64748B', marginBottom: 12, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         Fear &amp; Greed Index
-      </h3>
+      </h2>
       <FearGreedGauge value={fgValue} />
       <div style={{ marginTop: 18, width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {macroIndicators.map(m => (
