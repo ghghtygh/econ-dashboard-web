@@ -309,6 +309,21 @@ body {
   opacity: 0.7;
 }
 
+.db-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+
+.db-sidebar--collapsed .db-nav-label,
+.db-sidebar--collapsed .db-logo-text {
+  display: none;
+}
+
+.db-sidebar--collapsed .nav-item {
+  justify-content: center;
+}
+
 .db-sidebar-footer {
   display: flex;
   flex-direction: column;
@@ -679,8 +694,27 @@ body {
   gap: 8px;
 }
 
-/* ── Responsive: tablet ── */
+/* ── Responsive: tablet (768px–1024px) — collapsed sidebar (icons only) ── */
 @media (max-width: 1024px) {
+  .db-sidebar {
+    width: 56px;
+    padding: 20px 8px;
+  }
+  .db-sidebar .db-logo-text,
+  .db-sidebar .db-nav-label,
+  .db-sidebar .db-theme-toggle-sidebar .db-nav-label,
+  .db-sidebar .db-collapse-btn {
+    display: none;
+  }
+  .db-sidebar .nav-item {
+    justify-content: center;
+    padding: 8px;
+  }
+  .db-main,
+  .db-layout:has(.db-sidebar) .db-main,
+  .db-layout:has(.db-sidebar--collapsed) .db-main {
+    margin-left: 56px;
+  }
   .db-overview-mid {
     grid-template-columns: 1fr 1fr;
   }
@@ -697,7 +731,7 @@ body {
   }
 }
 
-/* ── Responsive: mobile ── */
+/* ── Responsive: mobile (< 768px) — sidebar hidden, hamburger overlay ── */
 @media (max-width: 768px) {
   .db-sidebar {
     transform: translateX(-100%);
@@ -705,10 +739,22 @@ body {
     padding: 20px 14px;
     z-index: 40;
   }
+  .db-sidebar .db-logo-text,
+  .db-sidebar .db-nav-label {
+    display: inline;
+  }
+  .db-sidebar .nav-item {
+    justify-content: flex-start;
+    padding: 8px 12px;
+  }
   .db-sidebar--collapsed {
     width: 272px;
     padding: 20px 14px;
     transform: translateX(-100%);
+  }
+  .db-sidebar--collapsed .db-nav-label,
+  .db-sidebar--collapsed .db-logo-text {
+    display: inline;
   }
   .db-sidebar--open {
     transform: translateX(0);
@@ -719,7 +765,9 @@ body {
   .db-mobile-header {
     display: flex;
   }
-  .db-main {
+  .db-main,
+  .db-layout:has(.db-sidebar) .db-main,
+  .db-layout:has(.db-sidebar--collapsed) .db-main {
     margin-left: 0;
     padding: 20px 16px;
   }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { PeriodPills, Sparkline } from '@/components/dashboard/primitives'
 import { groupIndicators, fmtNum, chgColor, chgText, CATEGORY_COLORS, CATEGORY_ICONS } from '@/components/dashboard/primitives.helpers'
@@ -8,18 +9,35 @@ import { CommoditiesSection } from '@/components/dashboard/CommoditiesSection'
 import { CryptoSection } from '@/components/dashboard/CryptoSection'
 import { FearGreedSection } from '@/components/dashboard/FearGreedSection'
 import { IndicatorTableSection } from '@/components/dashboard/IndicatorTableSection'
+import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
+import { AlertPanel } from '@/components/dashboard/AlertPanel'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { useNewsList } from '@/hooks/useNews'
 import { useThemeStore } from '@/store/themeStore'
 
 const NAV_ITEMS = [
-  { id: 'overview', label: 'Overview', icon: '◫' },
-  { id: 'indices', label: 'Indices', icon: '◩' },
-  { id: 'stocks', label: 'Stocks', icon: '◧' },
-  { id: 'crypto', label: 'Crypto', icon: '◈' },
-  { id: 'commodities', label: 'Commodities', icon: '◆' },
-  { id: 'news', label: 'News Feed', icon: '◪' },
+  { id: 'overview', path: '/', label: 'Overview', icon: '◫' },
+  { id: 'indices', path: '/indices', label: 'Indices', icon: '◩' },
+  { id: 'stocks', path: '/stocks', label: 'Stocks', icon: '◧' },
+  { id: 'crypto', path: '/crypto', label: 'Crypto', icon: '◈' },
+  { id: 'commodities', path: '/commodities', label: 'Commodities', icon: '◆' },
+  { id: 'news', path: '/news', label: 'News Feed', icon: '◪' },
+  { id: 'explore', path: '/explore', label: 'Explore', icon: '◎' },
+  { id: 'calendar', path: '/calendar', label: 'Calendar', icon: '◰' },
+  { id: 'alerts', path: '/alerts', label: 'Alerts', icon: '◲' },
 ]
+
+const PATH_TO_NAV: Record<string, string> = {
+  '/': 'overview',
+  '/indices': 'indices',
+  '/stocks': 'stocks',
+  '/crypto': 'crypto',
+  '/commodities': 'commodities',
+  '/news': 'news',
+  '/explore': 'explore',
+  '/calendar': 'calendar',
+  '/alerts': 'alerts',
+}
 
 const PAGE_TITLES: Record<string, string> = {
   overview: 'Market Overview',
@@ -28,6 +46,9 @@ const PAGE_TITLES: Record<string, string> = {
   crypto: 'Cryptocurrency',
   commodities: 'Commodities',
   news: 'News Feed',
+  explore: 'Explore',
+  calendar: 'Economic Calendar',
+  alerts: 'Alerts',
 }
 
 function formatTimeAgo(dateStr: string): string {
@@ -44,10 +65,12 @@ function formatTimeAgo(dateStr: string): string {
 }
 
 export function DashboardPage() {
+  const location = useLocation()
+  const navSel = PATH_TO_NAV[location.pathname] ?? 'overview'
+
   const [time, setTime] = useState(new Date())
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [navSel, setNavSel] = useState('overview')
   const [globalPeriod, setGlobalPeriod] = useState<PeriodId>('1M')
   const [localIndices, setLocalIndices] = useState<PeriodId | null>(null)
   const [localCrypto, setLocalCrypto] = useState<PeriodId | null>(null)
@@ -86,8 +109,7 @@ export function DashboardPage() {
     return () => clearInterval(id)
   }, [])
 
-  const handleNav = (id: string) => {
-    setNavSel(id)
+  const handleMobileClose = () => {
     setMobileOpen(false)
   }
 
@@ -343,6 +365,20 @@ export function DashboardPage() {
           </ErrorBoundary>
         )
 
+      case 'calendar':
+        return (
+          <ErrorBoundary>
+            <EconomicCalendar />
+          </ErrorBoundary>
+        )
+
+      case 'alerts':
+        return (
+          <ErrorBoundary>
+            <AlertPanel indicators={indicators ?? []} dataMap={allData ?? {}} />
+          </ErrorBoundary>
+        )
+
       default: // overview
         return (
           <>
@@ -433,26 +469,27 @@ export function DashboardPage() {
       <aside className={`db-sidebar ${collapsed ? 'db-sidebar--collapsed' : ''} ${mobileOpen ? 'db-sidebar--open' : ''}`}>
         <div className="db-sidebar-logo">
           <div className="db-logo-icon">M</div>
-          {!collapsed && <span className="db-logo-text">Market Pulse</span>}
+          <span className="db-logo-text">Market Pulse</span>
         </div>
         <nav className="db-sidebar-nav" id="sidebar-nav" aria-label="메인 네비게이션">
           {NAV_ITEMS.map(item => (
-            <button
+            <Link
               key={item.id}
+              to={item.path}
               className={`nav-item ${navSel === item.id ? 'on' : ''}`}
-              onClick={() => handleNav(item.id)}
+              onClick={handleMobileClose}
               aria-current={navSel === item.id ? 'page' : undefined}
-              style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
+              style={{ textDecoration: 'none' }}
             >
               <span className="db-nav-icon" aria-hidden="true">{item.icon}</span>
-              {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
-            </button>
+              <span className="db-nav-label">{item.label}</span>
+            </Link>
           ))}
         </nav>
         <div className="db-sidebar-footer">
           <button className="db-theme-toggle-sidebar" onClick={toggleTheme} aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}>
             <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
-            {!collapsed && <span>{theme === 'dark' ? '라이트 모드' : '다크 모드'}</span>}
+            <span className="db-nav-label">{theme === 'dark' ? '라이트 모드' : '다크 모드'}</span>
           </button>
           <button
             className="db-collapse-btn"
