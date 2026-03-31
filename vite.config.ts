@@ -13,6 +13,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-charts': ['recharts', 'd3-shape', 'd3-scale', 'd3-array', 'd3-interpolate', 'd3-path', 'd3-time', 'd3-time-format'],
+          'vendor-grid': ['react-grid-layout'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

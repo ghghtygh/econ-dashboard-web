@@ -1,19 +1,35 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { PeriodPills, Sparkline } from '@/components/dashboard/primitives'
 import { groupIndicators, fmtNum, chgColor, chgText, CATEGORY_COLORS, CATEGORY_ICONS } from '@/components/dashboard/primitives.helpers'
 import type { PeriodId } from '@/components/dashboard/primitives.helpers'
-import { GlobalIndicesSection } from '@/components/dashboard/GlobalIndicesSection'
-import { CommoditiesSection } from '@/components/dashboard/CommoditiesSection'
-import { CryptoSection } from '@/components/dashboard/CryptoSection'
-import { FearGreedSection } from '@/components/dashboard/FearGreedSection'
-import { IndicatorTableSection } from '@/components/dashboard/IndicatorTableSection'
-import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
-import { AlertPanel } from '@/components/dashboard/AlertPanel'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { useNewsList } from '@/hooks/useNews'
 import { useThemeStore } from '@/store/themeStore'
+
+const GlobalIndicesSection = lazy(() =>
+  import('@/components/dashboard/GlobalIndicesSection').then((m) => ({ default: m.GlobalIndicesSection })),
+)
+const CommoditiesSection = lazy(() =>
+  import('@/components/dashboard/CommoditiesSection').then((m) => ({ default: m.CommoditiesSection })),
+)
+const CryptoSection = lazy(() =>
+  import('@/components/dashboard/CryptoSection').then((m) => ({ default: m.CryptoSection })),
+)
+const FearGreedSection = lazy(() =>
+  import('@/components/dashboard/FearGreedSection').then((m) => ({ default: m.FearGreedSection })),
+)
+const IndicatorTableSection = lazy(() =>
+  import('@/components/dashboard/IndicatorTableSection').then((m) => ({ default: m.IndicatorTableSection })),
+)
+const EconomicCalendar = lazy(() =>
+  import('@/components/dashboard/EconomicCalendar').then((m) => ({ default: m.EconomicCalendar })),
+)
+const AlertPanel = lazy(() =>
+  import('@/components/dashboard/AlertPanel').then((m) => ({ default: m.AlertPanel })),
+)
 
 const NAV_ITEMS = [
   { id: 'overview', path: '/', label: 'Overview', icon: '◫' },
@@ -548,7 +564,9 @@ export function DashboardPage() {
           </div>
         )}
 
-        {renderContent()}
+        <Suspense fallback={<div className="space-y-4"><Skeleton className="h-[200px] w-full" /><Skeleton className="h-[200px] w-full" /></div>}>
+          {renderContent()}
+        </Suspense>
 
         <footer className="db-footer" role="contentinfo">
           <span>Market Pulse Dashboard — Data from API</span>

@@ -1,20 +1,22 @@
-import {
-  ResponsiveContainer,
-  LineChart as RechartsLineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from 'recharts'
-import { BarChart } from '@/components/charts/BarChart'
-import { AreaChart } from '@/components/charts/AreaChart'
-import { CandlestickChart } from '@/components/charts/CandlestickChart'
-import { NumberCard } from '@/components/charts/NumberCard'
-import { formatChartData, formatPrice, sanitizeData } from '@/components/charts/chartFormatters'
-import { ChartTooltip } from '@/components/charts/chartUtils'
+import { lazy, Suspense } from 'react'
+import { sanitizeData } from '@/components/charts/chartFormatters'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { ChartSkeleton } from '@/components/ui/Skeleton'
 import type { ChartType, IndicatorData } from '@/types/indicator'
+
+const LazyBarChart = lazy(() =>
+  import('@/components/charts/BarChart').then((m) => ({ default: m.BarChart })),
+)
+const LazyAreaChart = lazy(() =>
+  import('@/components/charts/AreaChart').then((m) => ({ default: m.AreaChart })),
+)
+const LazyCandlestickChart = lazy(() =>
+  import('@/components/charts/CandlestickChart').then((m) => ({ default: m.CandlestickChart })),
+)
+const LazyNumberCard = lazy(() =>
+  import('@/components/charts/NumberCard').then((m) => ({ default: m.NumberCard })),
+)
+const LazyLineChartInner = lazy(() => import('@/components/charts/LineChart').then((m) => ({ default: m.LineChart })))
 
 interface ChartRendererProps {
   type: ChartType
@@ -42,29 +44,16 @@ function ChartRendererInner({ type, data, color = '#3b82f6', unit, ariaLabel }: 
 
   switch (type) {
     case 'number':
-      return <NumberCard data={safeData} color={color} unit={unit} />
+      return <LazyNumberCard data={safeData} color={color} unit={unit} />
     case 'bar':
-      return wrapChart(<BarChart data={safeData} color={color} unit={unit} />)
+      return wrapChart(<LazyBarChart data={safeData} color={color} unit={unit} />)
     case 'area':
-      return wrapChart(<AreaChart data={safeData} color={color} unit={unit} />)
+      return wrapChart(<LazyAreaChart data={safeData} color={color} unit={unit} />)
     case 'candlestick':
-      return wrapChart(<CandlestickChart data={safeData} />)
+      return wrapChart(<LazyCandlestickChart data={safeData} />)
     case 'line':
-    default: {
-      const formatted = formatChartData(safeData)
-      return wrapChart(
-        <ResponsiveContainer width="100%" height="100%">
-          <RechartsLineChart data={formatted} accessibilityLayer>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--th-chart-grid)" />
-            <XAxis dataKey="shortDate" tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: 'var(--th-chart-tick)', fontSize: 11 }} axisLine={false} tickLine={false}
-              tickFormatter={(v) => formatPrice(v)} width={60} />
-            <Tooltip content={<ChartTooltip unit={unit} color={color} />} trigger="hover" />
-            <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
-          </RechartsLineChart>
-        </ResponsiveContainer>,
-      )
-    }
+    default:
+      return wrapChart(<LazyLineChartInner data={safeData} color={color} unit={unit} />)
   }
 }
 
@@ -77,7 +66,9 @@ export function ChartRenderer(props: ChartRendererProps) {
         </div>
       }
     >
-      <ChartRendererInner {...props} />
+      <Suspense fallback={<ChartSkeleton />}>
+        <ChartRendererInner {...props} />
+      </Suspense>
     </ErrorBoundary>
   )
 }
