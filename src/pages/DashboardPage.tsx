@@ -1,6 +1,7 @@
-import { useState, useCallback, lazy, Suspense } from 'react'
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useIndicators } from '@/hooks/useIndicators'
+import { useDashboardStore } from '@/store/dashboardStore'
 import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
 import { EventCountdown } from '@/components/dashboard/EventCountdown'
 import { DashboardHeader, DashboardFooter } from '@/components/dashboard/DashboardHeader'
@@ -41,6 +42,11 @@ export function DashboardPage() {
   const [addWidgetOpen, setAddWidgetOpen] = useState(false)
 
   const effectivePeriod = useCallback((local: PeriodId | null) => local || globalPeriod, [globalPeriod])
+
+  const ensureDefaults = useDashboardStore((s) => s.ensureDefaults)
+  const resetToDefaults = useDashboardStore((s) => s.resetToDefaults)
+
+  useEffect(() => { ensureDefaults() }, [ensureDefaults])
 
   const { groups, stockIndicators, cryptoIndicators, commodityIndicators, macroIndicators, forexIndicators, bondIndicators } =
     useDashboardData(globalPeriod)
@@ -125,12 +131,20 @@ export function DashboardPage() {
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-slate-500">위젯을 추가하여 나만의 대시보드를 구성하세요</p>
-                <button
-                  onClick={() => setAddWidgetOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
-                >
-                  + 위젯 추가
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={resetToDefaults}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                  >
+                    기본 레이아웃으로 초기화
+                  </button>
+                  <button
+                    onClick={() => setAddWidgetOpen(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
+                  >
+                    + 위젯 추가
+                  </button>
+                </div>
               </div>
               <ErrorBoundary label="위젯 그리드">
                 <WidgetGrid indicators={allIndicators} />
