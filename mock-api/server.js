@@ -80,6 +80,10 @@ const INDICATORS = [
   { id: 7, name: 'Ethereum',        symbol: 'ETH',    category: 'CRYPTO',    unit: 'USD', source: 'CoinGecko',       description: 'Ethereum Price (USD)',         createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   { id: 8, name: 'Fed Funds Rate',  symbol: 'FFR',    category: 'MACRO',     unit: '%',   source: 'Fed/FRED',        description: 'Federal Funds Effective Rate', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   { id: 9, name: 'US Unemployment', symbol: 'UNRATE', category: 'MACRO',     unit: '%',   source: 'BLS/FRED',        description: 'US Unemployment Rate',        createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 10, name: 'Gold',           symbol: 'XAU',    category: 'COMMODITY', unit: 'USD', source: 'LBMA/FRED',       description: 'Gold Spot Price (USD/oz)',     createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 11, name: 'Silver',         symbol: 'XAG',    category: 'COMMODITY', unit: 'USD', source: 'LBMA/FRED',       description: 'Silver Spot Price (USD/oz)',   createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 12, name: 'Crude Oil (WTI)',symbol: 'WTI',    category: 'COMMODITY', unit: 'USD', source: 'NYMEX/FRED',      description: 'WTI Crude Oil Price (USD/bbl)',createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 13, name: 'Natural Gas',    symbol: 'NG',     category: 'COMMODITY', unit: 'USD', source: 'NYMEX/FRED',      description: 'Henry Hub Natural Gas (USD/MMBtu)', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
 ]
 
 // Fallback mock series generators (used when real API is unavailable)
@@ -93,6 +97,10 @@ const MOCK_SERIES = {
   7: () => generateTimeSeries(7, 3500, 150),
   8: () => generateTimeSeries(8, 5.33, 0.05),
   9: () => generateTimeSeries(9, 3.9, 0.1),
+  10: () => generateTimeSeries(10, 2340, 45),
+  11: () => generateTimeSeries(11, 28.5, 1.2),
+  12: () => generateTimeSeries(12, 78, 3.5),
+  13: () => generateTimeSeries(13, 2.8, 0.3),
 }
 
 // ── Live data fetchers ────────────────────────────────────────────────────────
