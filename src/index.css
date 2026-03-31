@@ -12,28 +12,28 @@
   --th-border-mid: #d1d5db;
   --th-heading: #111827;
   --th-body: #374151;
-  --th-muted: #6b7280;
-  --th-faint: #9ca3af;
+  --th-muted: #586575;
+  --th-faint: #5c6b7b;
   --th-chart-grid: #e5e7eb;
-  --th-chart-tick: #6b7280;
+  --th-chart-tick: #586575;
   --th-overlay: rgba(0, 0, 0, 0.3);
   --th-ring-offset: #ffffff;
   --th-card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --th-card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   --th-section-bg: transparent;
-  --th-accent: #6366f1;
+  --th-accent: #5254e0;
   --th-accent-soft: #eef2ff;
   --th-positive-bg: #F0FDF4;
   --th-negative-bg: #FEF2F2;
   /* Correlation heatmap */
   --corr-strong: #4338ca;
   --corr-strong-text: #e0e7ff;
-  --corr-mid: #6366f1;
-  --corr-mid-text: #eef2ff;
+  --corr-mid: #4f46e5;
+  --corr-mid-text: #ffffff;
   --corr-weak: #c7d2fe;
   --corr-weak-text: #3730a3;
   --corr-none: #f5f3ff;
-  --corr-none-text: #6366f1;
+  --corr-none-text: #4f52e0;
 }
 
 /* ── Dark theme ── */
@@ -46,16 +46,16 @@
   --th-border-mid: #4b5563;
   --th-heading: #f9fafb;
   --th-body: #d1d5db;
-  --th-muted: #9ca3af;
-  --th-faint: #6b7280;
+  --th-muted: #b8c0cc;
+  --th-faint: #adb4be;
   --th-chart-grid: #374151;
-  --th-chart-tick: #9ca3af;
+  --th-chart-tick: #b8c0cc;
   --th-overlay: rgba(0, 0, 0, 0.6);
   --th-ring-offset: #1f2937;
   --th-card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --th-card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
   --th-section-bg: transparent;
-  --th-accent: #818cf8;
+  --th-accent: #9ba6f9;
   --th-accent-soft: rgba(99,102,241,0.1);
   --th-positive-bg: rgba(22, 163, 74, 0.12);
   --th-negative-bg: rgba(239, 68, 68, 0.12);
@@ -67,7 +67,7 @@
   --corr-weak: #1e1b4b;
   --corr-weak-text: #818cf8;
   --corr-none: #1f2937;
-  --corr-none-text: #4b5563;
+  --corr-none-text: #9ca3af;
 }
 
 /* ── Register semantic tokens in Tailwind v4 ── */
