@@ -129,10 +129,10 @@ function useWidgetData(widgets: DashboardWidget[]) {
   const r1Y = useIndicatorSeries(byRange['1Y'], '1Y')
 
   const dataByRange: Record<string, Record<number, import('@/types/indicator').IndicatorData[]> | undefined> = {
-    '1W': r1W.data,
-    '1M': r1M.data,
-    '3M': r3M.data,
-    '1Y': r1Y.data,
+    '1W': r1W.data?.data,
+    '1M': r1M.data?.data,
+    '3M': r3M.data?.data,
+    '1Y': r1Y.data?.data,
   }
 
   const isLoading = r1W.isLoading || r1M.isLoading || r3M.isLoading || r1Y.isLoading

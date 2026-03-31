@@ -36,6 +36,7 @@ describe('useIndicatorSeries', () => {
   it('ids가 있으면 데이터를 불러온다', async () => {
     const { result } = renderHook(() => useIndicatorSeries([1], '1M'), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data?.[1]).toEqual(mockIndicatorData)
+    expect(result.current.data?.data[1]).toEqual(mockIndicatorData)
+    expect(result.current.data?.failedIds).toEqual([])
   })
 })

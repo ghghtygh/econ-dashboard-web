@@ -61,7 +61,8 @@ export function DashboardPage() {
 
   const { data: indicators } = useIndicators()
   const indicatorIds = indicators?.map(i => i.id) ?? []
-  const { data: allData } = useIndicatorSeries(indicatorIds, globalPeriod as '1D' | '1W' | '1M' | '3M' | '1Y')
+  const { data: seriesResult } = useIndicatorSeries(indicatorIds, globalPeriod as '1D' | '1W' | '1M' | '3M' | '1Y')
+  const allData = seriesResult?.data
 
   const groups = groupIndicators(indicators ?? [], allData ?? {})
 

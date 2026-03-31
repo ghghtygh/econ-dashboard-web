@@ -114,11 +114,11 @@ export function CorrelationHeatmap({ indicators, dataMap, selectedId, onSelect }
   const items = indicators.filter((i) => activeIds.includes(i.id))
 
   // 기간별 데이터 fetch (기본 1M은 부모에서 받은 dataMap 사용)
-  const { data: rangeData } = useIndicatorSeries(
+  const { data: rangeResult } = useIndicatorSeries(
     range !== '1M' ? activeIds : [],
     range,
   )
-  const effectiveData = range === '1M' ? dataMap : (rangeData ?? dataMap)
+  const effectiveData = range === '1M' ? dataMap : (rangeResult?.data ?? dataMap)
 
   const toggleIndicator = (id: number) => {
     setSelectedIds((prev) => {

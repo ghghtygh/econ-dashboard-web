@@ -49,7 +49,8 @@ export function ExplorePage() {
   const addWidget = useDashboardStore((s) => s.addWidget)
 
   const indicatorIds = indicators?.map((i) => i.id) ?? []
-  const { data: allData } = useIndicatorSeries(indicatorIds, '1M')
+  const { data: seriesResult } = useIndicatorSeries(indicatorIds, '1M')
+  const allData = seriesResult?.data
 
   const filtered = useMemo(() => {
     let list = indicators ?? []
