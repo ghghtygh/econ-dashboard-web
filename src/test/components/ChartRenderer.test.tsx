@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import type { IndicatorData } from '@/types/indicator'
 
@@ -25,13 +25,17 @@ describe('ChartRenderer', () => {
     expect(screen.getByText('데이터 없음')).toBeInTheDocument()
   })
 
-  it('number 타입이면 NumberCard를 렌더링한다', () => {
+  it('number 타입이면 NumberCard를 렌더링한다', async () => {
     render(<ChartRenderer type="number" data={data} />)
-    expect(screen.getByText('110')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('110')).toBeInTheDocument()
+    })
   })
 
-  it('line 타입이면 recharts 컨테이너를 렌더링한다', () => {
+  it('line 타입이면 recharts 컨테이너를 렌더링한다', async () => {
     const { container } = render(<ChartRenderer type="line" data={data} />)
-    expect(container.querySelector('.recharts-wrapper')).toBeTruthy()
+    await waitFor(() => {
+      expect(container.querySelector('.recharts-wrapper')).toBeTruthy()
+    })
   })
 })

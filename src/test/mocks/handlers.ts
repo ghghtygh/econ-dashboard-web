@@ -53,7 +53,47 @@ export const handlers = [
     HttpResponse.json(wrap(paged(mockIndicatorData)))
   ),
 
+  http.post('/api/indicators/series', () =>
+    HttpResponse.json(wrap({}))
+  ),
+
   http.get('/api/news', () =>
     HttpResponse.json(wrap(paged([mockNewsArticle])))
+  ),
+
+  http.get('/api/dashboard/widgets', () =>
+    HttpResponse.json(wrap([]))
+  ),
+
+  http.post('/api/dashboard/widgets', () =>
+    HttpResponse.json(wrap([]), { status: 201 })
+  ),
+
+  http.get('/api/dashboard/layout', () =>
+    HttpResponse.json(wrap([]))
+  ),
+
+  http.get('/api/calendar', () =>
+    HttpResponse.json(wrap([]))
+  ),
+
+  http.get('/api/alerts/rules', () =>
+    HttpResponse.json(wrap([]))
+  ),
+
+  http.post('/api/alerts/rules', () =>
+    HttpResponse.json(wrap({ id: 'mock-1', indicatorId: 1, conditionType: 'ABOVE', threshold: 100, enabled: true, createdAt: '2024-01-01T00:00:00Z' }), { status: 201 })
+  ),
+
+  http.put('/api/alerts/rules/:id', () =>
+    HttpResponse.json(wrap({ id: 'mock-1', indicatorId: 1, conditionType: 'ABOVE', threshold: 100, enabled: true, createdAt: '2024-01-01T00:00:00Z' }))
+  ),
+
+  http.delete('/api/alerts/rules/:id', () =>
+    new HttpResponse(null, { status: 204 })
+  ),
+
+  http.get('/api/health', () =>
+    HttpResponse.json({ status: 'UP', env: 'test', dataSources: { coingecko: true, fred: true, alphaVantage: true } })
   ),
 ]

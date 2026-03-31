@@ -199,7 +199,7 @@ export function ExplorePage() {
             const changePercent =
               latest && prev && prev.value !== 0
                 ? ((latest.value - prev.value) / prev.value) * 100
-                : 0
+                : (latest?.change ?? 0)
             const isUp = changePercent >= 0
             const isAdded = widgetIndicatorIds.has(indicator.id)
             const color = CATEGORY_COLORS[indicator.category] ?? '#378ADD'
