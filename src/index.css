@@ -752,6 +752,25 @@ body {
   }
 }
 
+/* ── Mobile widget list view ── */
+.widget-grid-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.widget-grid-mobile-item {
+  height: 280px;
+  touch-action: pan-y;
+}
+
+/* Prevent accidental zoom/scroll interference on grid items */
+.react-grid-item {
+  touch-action: manipulation;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

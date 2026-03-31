@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from 'react'
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
 import { X, GripVertical, Settings, LayoutGrid } from 'lucide-react'
@@ -14,6 +14,8 @@ interface WidgetGridProps {
   indicators: Indicator[]
 }
 
+const MOBILE_BREAKPOINT = 768
+
 const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: '1W', label: '1주' },
   { value: '1M', label: '1개월' },
@@ -21,12 +23,27 @@ const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: '1Y', label: '1년' },
 ]
 
-function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT,
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mql.addEventListener('change', handler)
+    setIsMobile(mql.matches)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
+function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile }: {
   widget: DashboardWidget
   indicator?: Indicator
   data?: import('@/types/indicator').IndicatorData[]
   isLoading: boolean
   onEdit: () => void
+  isMobile: boolean
 }) {
   const removeWidget = useDashboardStore((s) => s.removeWidget)
   const updateWidget = useDashboardStore((s) => s.updateWidget)
@@ -34,22 +51,39 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
 
   return (
     <div className="h-full rounded-lg border border-border-dim bg-surface flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border-dim shrink-0">
+      <div className={cn(
+        "flex items-center justify-between border-b border-border-dim shrink-0",
+        isMobile ? "px-4 py-3" : "px-3 py-2",
+      )}>
         <div className="flex items-center gap-1.5 min-w-0">
-          <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
-          <h3 className="text-xs font-medium text-body truncate">
+          {!isMobile && (
+            <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
+          )}
+          <h3 className={cn(
+            "font-medium text-body truncate",
+            isMobile ? "text-sm" : "text-xs",
+          )}>
             {widget.title ?? indicator?.name ?? '위젯'}
           </h3>
         </div>
-        <div className="flex items-center gap-1 shrink-0 ml-2">
-          {/* Period selector */}
-          <div className="flex items-center gap-0.5 mr-1">
+        <div className={cn(
+          "flex items-center shrink-0 ml-2",
+          isMobile ? "gap-1" : "gap-1",
+        )}>
+          {/* Period selector — larger touch targets on mobile */}
+          <div className={cn(
+            "flex items-center mr-1",
+            isMobile ? "gap-1" : "gap-0.5",
+          )}>
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => updateWidget(widget.id, { dateRange: opt.value })}
                 className={cn(
-                  'text-[9px] px-1.5 py-0.5 rounded transition-colors',
+                  'rounded transition-colors',
+                  isMobile
+                    ? 'text-xs px-2.5 py-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center'
+                    : 'text-[9px] px-1.5 py-0.5',
                   currentRange === opt.value
                     ? 'bg-elevated text-heading font-medium'
                     : 'text-faint hover:text-muted',
@@ -61,19 +95,25 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit }: {
           </div>
           <button
             onClick={onEdit}
-            className="text-faint hover:text-blue-400 transition-colors"
+            className={cn(
+              "text-faint hover:text-blue-400 transition-colors",
+              isMobile && "min-w-[44px] min-h-[44px] flex items-center justify-center",
+            )}
           >
-            <Settings size={14} />
+            <Settings size={isMobile ? 18 : 14} />
           </button>
           <button
             onClick={() => removeWidget(widget.id)}
-            className="text-faint hover:text-red-400 transition-colors"
+            className={cn(
+              "text-faint hover:text-red-400 transition-colors",
+              isMobile && "min-w-[44px] min-h-[44px] flex items-center justify-center",
+            )}
           >
-            <X size={14} />
+            <X size={isMobile ? 18 : 14} />
           </button>
         </div>
       </div>
-      <div className="flex-1 p-3 min-h-0">
+      <div className={cn("flex-1 min-h-0", isMobile ? "p-4" : "p-3")}>
         {isLoading ? (
           <ChartSkeleton />
         ) : data && data.length > 0 ? (
@@ -143,6 +183,7 @@ function useWidgetData(widgets: DashboardWidget[]) {
 export function WidgetGrid({ indicators }: WidgetGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const containerWidth = useContainerWidth(containerRef)
+  const isMobile = useIsMobile()
   const widgets = useDashboardStore((s) => s.widgets)
   const updateLayouts = useDashboardStore((s) => s.updateLayouts)
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
@@ -151,16 +192,16 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
 
   const { dataByRange, isLoading } = useWidgetData(widgets)
 
-  const toLayoutItem = (w: DashboardWidget): LayoutItem => ({
+  const toLayoutItem = useCallback((w: DashboardWidget): LayoutItem => ({
     i: w.id, x: w.position.x, y: w.position.y, w: w.position.w, h: w.position.h,
-    minW: 3, minH: 3,
-  })
+    minW: 1, minH: 3,
+  }), [])
 
   const layouts = useMemo(() => ({
     lg: widgets.map(toLayoutItem) as unknown as Layout,
-    md: widgets.map((w) => ({ ...toLayoutItem(w), x: w.position.x % 6, w: Math.min(w.position.w, 6) })) as unknown as Layout,
-    sm: widgets.map((w) => ({ ...toLayoutItem(w), x: 0, w: 6 })) as unknown as Layout,
-  }), [widgets])
+    md: widgets.map((w) => ({ ...toLayoutItem(w), x: w.position.x % 6, w: Math.min(w.position.w, 6), minW: 2 })) as unknown as Layout,
+    sm: widgets.map((w) => ({ ...toLayoutItem(w), x: 0, w: 1, minW: 1 })) as unknown as Layout,
+  }), [widgets, toLayoutItem])
 
   const handleLayoutChange = (layout: Layout) => {
     updateLayouts(layout as unknown as Array<{ i: string; x: number; y: number; w: number; h: number }>)
@@ -175,13 +216,48 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
     )
   }
 
+  // Mobile: stacked list view (no drag-and-drop)
+  if (isMobile) {
+    return (
+      <div ref={containerRef} className="widget-grid-mobile">
+        {widgets.map((widget) => {
+          const indicator = indicators.find((i) => i.id === widget.indicatorId)
+          const range = widget.dateRange ?? '1M'
+          const data = dataByRange[range]?.[widget.indicatorId]
+          return (
+            <div key={widget.id} className="widget-grid-mobile-item">
+              <WidgetItem
+                widget={widget}
+                indicator={indicator}
+                data={data}
+                isLoading={isLoading}
+                onEdit={() => setEditingWidgetId(widget.id)}
+                isMobile
+              />
+            </div>
+          )
+        })}
+        {editingWidget && (
+          <WidgetEditor
+            key={editingWidget.id}
+            widget={editingWidget}
+            indicator={editingIndicator}
+            open={!!editingWidgetId}
+            onClose={() => setEditingWidgetId(null)}
+          />
+        )}
+      </div>
+    )
+  }
+
+  // Desktop/tablet: grid layout with drag-and-drop
   return (
     <div ref={containerRef}>
       <ResponsiveGridLayout
         width={containerWidth}
         layouts={layouts}
         breakpoints={{ lg: 1200, md: 768, sm: 0 }}
-        cols={{ lg: 12, md: 6, sm: 6 }}
+        cols={{ lg: 12, md: 6, sm: 1 }}
         rowHeight={40}
         margin={[12, 12] as const}
         onLayoutChange={handleLayoutChange}
@@ -200,6 +276,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 data={data}
                 isLoading={isLoading}
                 onEdit={() => setEditingWidgetId(widget.id)}
+                isMobile={false}
               />
             </div>
           )
