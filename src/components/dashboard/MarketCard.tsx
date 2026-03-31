@@ -89,7 +89,7 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
 
         {/* Sparkline */}
         {sparkPoints && (
-          <svg className="mt-3 w-full h-7" viewBox="0 0 100 32" preserveAspectRatio="none">
+          <svg className="mt-3 w-full h-7" viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label={`${indicator.name} 추이 차트`}>
             <polyline
               points={sparkPoints}
               fill="none"

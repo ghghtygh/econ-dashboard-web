@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import type { Indicator, IndicatorData } from '@/types/indicator'
+import { COMMODITY_GROUP_COLORS } from '@/constants/colors'
 
 interface CommodityWidgetProps {
   indicators: Indicator[]
@@ -18,13 +19,9 @@ const SUB_GROUPS: SubGroup[] = [
   { label: 'Agriculture', symbols: ['ZW=F', 'ZS=F'] },
 ]
 
-const GROUP_COLORS: Record<string, string> = {
-  Energy: '#EF9F27',
-  Metals: '#E24B4A',
-  Agriculture: '#1D9E75',
-}
+const GROUP_COLORS = COMMODITY_GROUP_COLORS
 
-function Sparkline({ series, color }: { series: IndicatorData[]; color: string }) {
+function Sparkline({ series, color, label }: { series: IndicatorData[]; color: string; label: string }) {
   const points = useMemo(() => {
     if (series.length < 2) return ''
     const last8 = series.slice(-8)
@@ -43,7 +40,7 @@ function Sparkline({ series, color }: { series: IndicatorData[]; color: string }
   if (!points) return null
 
   return (
-    <svg className="w-full h-7" viewBox="0 0 100 32" preserveAspectRatio="none">
+    <svg className="w-full h-7" viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label={`${label} 추이 차트`}>
       <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" />
     </svg>
   )
@@ -110,7 +107,7 @@ function CommodityCard({
 
       {/* Sparkline */}
       <div className="mt-2">
-        <Sparkline series={series} color={groupColor} />
+        <Sparkline series={series} color={groupColor} label={indicator.name} />
       </div>
 
     </div>
