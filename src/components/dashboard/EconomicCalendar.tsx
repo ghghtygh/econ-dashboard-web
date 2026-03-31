@@ -1,13 +1,30 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, List, Clock, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, List, Clock, X, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ECONOMIC_EVENTS, EVENT_CATEGORY_COLORS, IMPORTANCE_LABELS } from '@/data/economicCalendar'
+import { useCalendarEvents } from '@/hooks/useCalendarEvents'
 import type { EconomicEvent, EventImportance } from '@/types/calendar'
 
 type ViewMode = 'monthly' | 'list'
 type ImportanceFilter = 'all' | 'high' | 'medium'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
+
+const EVENT_CATEGORY_COLORS: Record<string, string> = {
+  FOMC: '#378ADD',
+  CPI: '#E24B4A',
+  '고용': '#1D9E75',
+  GDP: '#7F77DD',
+  PCE: '#EF9F27',
+  PMI: '#F59E0B',
+  ECB: '#6366F1',
+  BOK: '#EC4899',
+}
+
+const IMPORTANCE_LABELS: Record<string, { label: string; color: string }> = {
+  high: { label: '매우 중요', color: '#E24B4A' },
+  medium: { label: '중요', color: '#EF9F27' },
+  low: { label: '참고', color: '#94a3b8' },
+}
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00')
@@ -17,6 +34,10 @@ function formatDate(dateStr: string): string {
 function isSameDay(dateStr: string, year: number, month: number, day: number): boolean {
   const d = new Date(dateStr + 'T00:00:00')
   return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day
+}
+
+function toDateStr(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 function ImportanceBadge({ importance }: { importance: EventImportance }) {
@@ -110,11 +131,37 @@ function EventDetail({
   )
 }
 
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted">
+      <Loader2 size={16} className="animate-spin" />
+      데이터를 불러오는 중...
+    </div>
+  )
+}
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-2 py-12 text-sm text-muted">
+      <AlertCircle size={20} />
+      <p>캘린더 데이터를 불러오지 못했습니다.</p>
+      <button
+        onClick={onRetry}
+        className="rounded-lg border border-border-dim px-3 py-1 text-xs hover:bg-hover transition-colors"
+      >
+        다시 시도
+      </button>
+    </div>
+  )
+}
+
 // ── Monthly View ──
 
 function MonthlyView({
+  events,
   importanceFilter,
 }: {
+  events: EconomicEvent[]
   importanceFilter: ImportanceFilter
 }) {
   const today = new Date()
@@ -125,10 +172,10 @@ function MonthlyView({
 
   const filteredEvents = useMemo(
     () =>
-      ECONOMIC_EVENTS.filter(
+      events.filter(
         (e) => importanceFilter === 'all' || e.importance === importanceFilter,
       ),
-    [importanceFilter],
+    [events, importanceFilter],
   )
 
   const firstDayOfWeek = new Date(year, month, 1).getDay()
@@ -287,8 +334,10 @@ function MonthlyView({
 // ── List View ──
 
 function ListView({
+  events,
   importanceFilter,
 }: {
+  events: EconomicEvent[]
   importanceFilter: ImportanceFilter
 }) {
   const [showPast, setShowPast] = useState(false)
@@ -296,15 +345,15 @@ function ListView({
 
   const todayStr = new Date().toISOString().slice(0, 10)
 
-  const events = useMemo(() => {
-    let list = ECONOMIC_EVENTS.filter(
+  const filteredEvents = useMemo(() => {
+    let list = events.filter(
       (e) => importanceFilter === 'all' || e.importance === importanceFilter,
     )
     if (!showPast) {
       list = list.filter((e) => e.date >= todayStr)
     }
     return list.sort((a, b) => a.date.localeCompare(b.date))
-  }, [importanceFilter, showPast, todayStr])
+  }, [events, importanceFilter, showPast, todayStr])
 
   return (
     <div>
@@ -323,13 +372,13 @@ function ListView({
         </button>
       </div>
 
-      {events.length === 0 ? (
+      {filteredEvents.length === 0 ? (
         <p className="text-xs text-faint text-center py-6">
           조건에 맞는 이벤트가 없습니다
         </p>
       ) : (
         <div className="space-y-2">
-          {events.map((ev) => {
+          {filteredEvents.map((ev) => {
             const expanded = expandedId === ev.id
             const isPast = ev.date < todayStr
             return (
@@ -398,10 +447,23 @@ function ListView({
 
 // ── Main Component ──
 
+function getDateRange(): { from: string; to: string } {
+  const now = new Date()
+  const from = new Date(now.getFullYear(), now.getMonth() - 3, 1)
+  const to = new Date(now.getFullYear(), now.getMonth() + 6, 0)
+  return {
+    from: toDateStr(from.getFullYear(), from.getMonth(), from.getDate()),
+    to: toDateStr(to.getFullYear(), to.getMonth(), to.getDate()),
+  }
+}
+
 export function EconomicCalendar() {
   const [view, setView] = useState<ViewMode>('monthly')
   const [importanceFilter, setImportanceFilter] =
     useState<ImportanceFilter>('all')
+
+  const { from, to } = useMemo(getDateRange, [])
+  const { data: events, isLoading, isError, refetch } = useCalendarEvents(from, to)
 
   return (
     <section className="rounded-lg border border-border-dim bg-surface p-5">
@@ -466,10 +528,14 @@ export function EconomicCalendar() {
       </div>
 
       {/* Content */}
-      {view === 'monthly' ? (
-        <MonthlyView importanceFilter={importanceFilter} />
+      {isLoading ? (
+        <LoadingState />
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
+      ) : view === 'monthly' ? (
+        <MonthlyView events={events ?? []} importanceFilter={importanceFilter} />
       ) : (
-        <ListView importanceFilter={importanceFilter} />
+        <ListView events={events ?? []} importanceFilter={importanceFilter} />
       )}
     </section>
   )

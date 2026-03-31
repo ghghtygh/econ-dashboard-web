@@ -1,5 +1,18 @@
 import axios from 'axios'
+import { z } from 'zod'
 import { errorBus } from '@/lib/errorBus'
+import {
+  apiResponseSchema,
+  indicatorSchema,
+  indicatorDataSchema,
+  indicatorCategorySchema,
+  pagedResponseSchema,
+  dashboardWidgetSchema,
+} from '@/types/indicator'
+import { newsArticleSchema } from '@/types/news'
+import { alertRuleSchema, alertRuleListSchema } from '@/types/alert'
+import type { AlertRule } from '@/types/alert'
+import { economicEventListSchema } from '@/types/calendar'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 if (!apiBaseUrl) {
@@ -42,25 +55,109 @@ api.interceptors.response.use(
 
 export default api
 
+/**
+ * API 응답을 Zod 스키마로 검증하고 data 필드를 반환합니다.
+ * 검증 실패 시 에러 버스로 사용자에게 알리고 예외를 throw합니다.
+ */
+export function parseApiResponse<T extends z.ZodTypeAny>(
+  raw: unknown,
+  dataSchema: T,
+): z.infer<T> {
+  const schema = apiResponseSchema(dataSchema)
+  const result = schema.safeParse(raw)
+  if (!result.success) {
+    const msg = '서버 응답 형식이 예상과 다릅니다. 잠시 후 다시 시도해주세요.'
+    errorBus.emit(msg)
+    throw new Error(`API 응답 검증 실패: ${result.error.message}`)
+  }
+  return (result.data as { data: z.infer<T> }).data
+}
+
+// --- 복합 스키마 ---
+const indicatorListSchema = z.array(indicatorSchema)
+const indicatorDataPagedSchema = pagedResponseSchema(indicatorDataSchema)
+const categoryListSchema = z.array(indicatorCategorySchema)
+const newsArticlePagedSchema = pagedResponseSchema(newsArticleSchema)
+const widgetListSchema = z.array(dashboardWidgetSchema)
+
 export const indicatorApi = {
-  getAll: (category?: string) =>
-    api.get('/indicators', { params: category ? { category } : undefined }),
-  getById: (id: string) => api.get(`/indicators/${id}`),
-  getCategories: () => api.get('/indicators/categories'),
-  getData: (id: string, from?: string, to?: string) =>
-    api.get(`/indicators/${id}/data`, { params: { from, to, size: 100 } }),
-  getSeries: (indicatorIds: number[], startDate: string, endDate: string) =>
-    api.post('/indicators/series', { indicatorIds, startDate, endDate }),
+  getAll: async (category?: string) => {
+    const res = await api.get('/indicators', { params: category ? { category } : undefined })
+    return parseApiResponse(res.data, indicatorListSchema)
+  },
+  getById: async (id: string) => {
+    const res = await api.get(`/indicators/${id}`)
+    return parseApiResponse(res.data, indicatorSchema)
+  },
+  getCategories: async () => {
+    const res = await api.get('/indicators/categories')
+    return parseApiResponse(res.data, categoryListSchema)
+  },
+  getData: async (id: string, from?: string, to?: string) => {
+    const res = await api.get(`/indicators/${id}/data`, { params: { from, to, size: 100 } })
+    return parseApiResponse(res.data, indicatorDataPagedSchema)
+  },
+  getSeries: async (indicatorIds: number[], startDate: string, endDate: string) => {
+    const res = await api.post('/indicators/series', { indicatorIds, startDate, endDate })
+    return res.data
+  },
 }
 
 export const newsApi = {
-  getList: (category?: string, page = 0, size = 20) =>
-    api.get('/news', { params: { category, page, size } }),
-  getById: (id: string) => api.get(`/news/${id}`),
+  getList: async (category?: string, page = 0, size = 20) => {
+    const res = await api.get('/news', { params: { category, page, size } })
+    return parseApiResponse(res.data, newsArticlePagedSchema)
+  },
+  getById: async (id: string) => {
+    const res = await api.get(`/news/${id}`)
+    return parseApiResponse(res.data, newsArticleSchema)
+  },
 }
 
 export const dashboardApi = {
-  getWidgets: () => api.get('/dashboard/widgets'),
+  getWidgets: async () => {
+    const res = await api.get('/dashboard/widgets')
+    return parseApiResponse(res.data, widgetListSchema)
+  },
   saveWidgets: (widgets: unknown[]) => api.post('/dashboard/widgets', widgets),
   updateWidget: (id: string, widget: unknown) => api.put(`/dashboard/widgets/${id}`, widget),
+}
+
+export interface HealthStatus {
+  status: string
+  env: string
+  dataSources: {
+    coingecko: boolean
+    fred: boolean
+    alphaVantage: boolean
+  }
+}
+
+export const healthApi = {
+  get: () => api.get<HealthStatus>('/health'),
+}
+
+export const calendarApi = {
+  getEvents: async (from: string, to: string) => {
+    const res = await api.get('/calendar', { params: { from, to } })
+    return parseApiResponse(res.data, economicEventListSchema)
+  },
+}
+
+export const alertApi = {
+  getRules: async (): Promise<AlertRule[]> => {
+    const res = await api.get('/alerts/rules')
+    return parseApiResponse(res.data, alertRuleListSchema)
+  },
+  createRule: async (rule: Omit<AlertRule, 'createdAt'> & { createdAt?: string }): Promise<AlertRule> => {
+    const res = await api.post('/alerts/rules', rule)
+    return parseApiResponse(res.data, alertRuleSchema)
+  },
+  updateRule: async (id: string, updates: Partial<AlertRule>): Promise<AlertRule> => {
+    const res = await api.put(`/alerts/rules/${id}`, updates)
+    return parseApiResponse(res.data, alertRuleSchema)
+  },
+  deleteRule: async (id: string): Promise<void> => {
+    await api.delete(`/alerts/rules/${id}`)
+  },
 }
