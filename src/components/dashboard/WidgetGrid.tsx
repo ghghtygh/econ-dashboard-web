@@ -200,7 +200,6 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   const updateLayouts = useDashboardStore((s) => s.updateLayouts)
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
   const [exportIndicator, setExportIndicator] = useState<Indicator | null>(null)
-  const [exportWidgetId, setExportWidgetId] = useState<string | null>(null)
   const exportChartRef = useRef<HTMLElement | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -330,7 +329,6 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 onExport={() => {
                   if (indicator) {
                     setExportIndicator(indicator)
-                    setExportWidgetId(widget.id)
                     exportChartRef.current = document.getElementById(`widget-chart-${widget.id}`)
                   }
                 }}
@@ -351,7 +349,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
       {exportIndicator && (
         <ExportModal
           open={!!exportIndicator}
-          onClose={() => { setExportIndicator(null); setExportWidgetId(null) }}
+          onClose={() => { setExportIndicator(null); exportChartRef.current = null }}
           indicatorId={exportIndicator.id}
           indicatorSymbol={exportIndicator.symbol}
           indicatorName={exportIndicator.name}
