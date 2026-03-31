@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { IndicatorData } from '@/types/indicator'
 
@@ -7,7 +8,7 @@ interface NumberCardProps {
   unit?: string
 }
 
-export function NumberCard({ data, color = '#3b82f6', unit }: NumberCardProps) {
+export const NumberCard = memo(function NumberCard({ data, color = '#3b82f6', unit }: NumberCardProps) {
   if (data.length === 0) return <p className="text-faint text-sm">데이터 없음</p>
 
   const latest = data[data.length - 1]
@@ -30,4 +31,4 @@ export function NumberCard({ data, color = '#3b82f6', unit }: NumberCardProps) {
       </div>
     </div>
   )
-}
+})

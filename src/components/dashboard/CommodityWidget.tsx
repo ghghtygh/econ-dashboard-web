@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 import { COMMODITY_GROUP_COLORS } from '@/constants/colors'
@@ -21,7 +21,7 @@ const SUB_GROUPS: SubGroup[] = [
 
 const GROUP_COLORS = COMMODITY_GROUP_COLORS
 
-function Sparkline({ series, color, label }: { series: IndicatorData[]; color: string; label: string }) {
+const Sparkline = memo(function Sparkline({ series, color, label }: { series: IndicatorData[]; color: string; label: string }) {
   const points = useMemo(() => {
     if (series.length < 2) return ''
     const last8 = series.slice(-8)
@@ -44,9 +44,9 @@ function Sparkline({ series, color, label }: { series: IndicatorData[]; color: s
       <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" />
     </svg>
   )
-}
+})
 
-function CommodityCard({
+const CommodityCard = memo(function CommodityCard({
   indicator,
   series,
   groupColor,
@@ -112,7 +112,7 @@ function CommodityCard({
 
     </div>
   )
-}
+})
 
 export function CommodityWidget({ indicators, dataMap }: CommodityWidgetProps) {
   const commodities = useMemo(

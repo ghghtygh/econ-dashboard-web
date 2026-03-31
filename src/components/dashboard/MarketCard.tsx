@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { InfoTooltip, IndicatorTooltipContent } from '@/components/ui/InfoTooltip'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
@@ -12,7 +12,7 @@ interface MarketCardProps {
   onClick?: () => void
 }
 
-export function MarketCard({ indicator, series, isSelected, onClick }: MarketCardProps) {
+export const MarketCard = memo(function MarketCard({ indicator, series, isSelected, onClick }: MarketCardProps) {
   const latest = series.length > 0 ? series[series.length - 1] : undefined
   const prev = series.length > 1 ? series[series.length - 2] : undefined
 
@@ -104,4 +104,4 @@ export function MarketCard({ indicator, series, isSelected, onClick }: MarketCar
       </div>
     </div>
   )
-}
+})
