@@ -14,8 +14,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
-    "docker:staging": "docker compose -f docker-compose.staging.yml up --build",
-    "docker:prod": "docker compose up --build"
+    "docker:qa": "docker compose -f docker-compose.staging.yml up --build",
+    "docker:prod": "docker compose up --build",
+    "mock-api": "node mock-api/server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",

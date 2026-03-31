@@ -1,23 +1,29 @@
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        VITE_APP_ENV: development
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
-      - "3000:80"
+      - "3000:5173"
+    environment:
+      - VITE_APP_ENV=development
+      - API_TARGET=http://api:8080
     depends_on:
       - api
     networks:
       - app-network
 
   api:
-    image: ${API_IMAGE:-econ-dashboard-api:latest}
+    build:
+      context: ./mock-api
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=development
+      - APP_ENV=development
     networks:
       - app-network
 
