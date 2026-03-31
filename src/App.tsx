@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { useThemeStore } from '@/store/themeStore'
+import { useWidgetSync } from '@/hooks/useWidgetSync'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ApiErrorListener } from '@/components/ui/ApiErrorListener'
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const theme = useThemeStore((s) => s.theme)
+  useWidgetSync()
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')

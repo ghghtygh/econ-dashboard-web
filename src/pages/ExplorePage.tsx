@@ -6,16 +6,9 @@ import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import { useIndicators, useIndicatorSeries } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
 import type { IndicatorCategory, DashboardWidget } from '@/types/indicator'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  ALL: '전체',
-  STOCK: '주식',
-  FOREX: '외환',
-  COMMODITY: '원자재',
-  BOND: '채권',
-  CRYPTO: '암호화폐',
-  MACRO: '거시경제',
-}
+import { CATEGORY_COLORS } from '@/constants/colors'
+import { CATEGORY_LABELS } from '@/constants/categories'
+import { SyncStatusIndicator } from '@/components/dashboard/SyncStatusIndicator'
 
 function computeSparkPoints(values: { value: number }[]): string {
   if (values.length < 2) return ''
@@ -30,15 +23,6 @@ function computeSparkPoints(values: { value: number }[]): string {
       return `${x},${y}`
     })
     .join(' ')
-}
-
-const CATEGORY_COLORS: Record<string, string> = {
-  STOCK: '#378ADD',
-  FOREX: '#E24B4A',
-  CRYPTO: '#F59E0B',
-  MACRO: '#7F77DD',
-  BOND: '#1D9E75',
-  COMMODITY: '#EF9F27',
 }
 
 export function ExplorePage() {
@@ -91,7 +75,10 @@ export function ExplorePage() {
     <main className="dash-container" id="main-content">
       {/* Header */}
       <div className="pb-6 mb-6 border-b border-border-dim">
-        <h1 className="text-lg font-semibold text-heading mb-1">지표 탐색</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-heading mb-1">지표 탐색</h1>
+          <SyncStatusIndicator />
+        </div>
         <p className="text-sm text-muted">경제 지표를 검색하고 대시보드에 추가하세요</p>
       </div>
 

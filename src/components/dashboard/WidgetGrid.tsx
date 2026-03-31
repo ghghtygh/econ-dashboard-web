@@ -7,6 +7,7 @@ import { ChartRenderer } from '@/components/charts/ChartRenderer'
 import { ChartSkeleton } from '@/components/ui/Skeleton'
 import { WidgetEditor } from '@/components/dashboard/WidgetEditor'
 import { useDashboardStore } from '@/store/dashboardStore'
+import { SyncStatusIndicator } from '@/components/dashboard/SyncStatusIndicator'
 import { useIndicatorSeries, type DateRange } from '@/hooks/useIndicators'
 import type { Indicator, DashboardWidget } from '@/types/indicator'
 
@@ -305,6 +306,9 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   // Desktop/tablet: grid layout with drag-and-drop
   return (
     <div ref={containerRef} role="region" aria-label="대시보드 위젯 그리드">
+      <div className="flex justify-end mb-2">
+        <SyncStatusIndicator />
+      </div>
       <ResponsiveGridLayout
         width={containerWidth}
         layouts={layouts}
