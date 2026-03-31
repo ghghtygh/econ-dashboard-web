@@ -43,8 +43,14 @@ export function useDashboardData(globalPeriod: DateRange) {
     [indicators, allData],
   )
 
+  const failedIds = useMemo(() => allData?.failedIds ?? [], [allData])
+
+  const dataMap = useMemo(() => allData?.data ?? {}, [allData])
+
   return {
     groups,
+    failedIds,
+    dataMap,
     stockIndicators: groups['STOCK'] ?? [],
     cryptoIndicators: groups['CRYPTO'] ?? [],
     commodityIndicators: groups['COMMODITY'] ?? [],

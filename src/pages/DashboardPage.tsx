@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useIndicators } from '@/hooks/useIndicators'
 import { useDashboardStore } from '@/store/dashboardStore'
+import { useToast } from '@/components/ui/useToast'
 import { EconomicCalendar } from '@/components/dashboard/EconomicCalendar'
 import { EventCountdown } from '@/components/dashboard/EventCountdown'
 import { DashboardHeader, DashboardFooter } from '@/components/dashboard/DashboardHeader'
@@ -19,6 +21,9 @@ import type { PeriodId } from '@/components/dashboard/constants'
 const NewsPage = lazy(() =>
   import('@/pages/NewsPage').then((m) => ({ default: m.NewsPage }))
 )
+const AlertPanel = lazy(() =>
+  import('@/components/dashboard/AlertPanel').then((m) => ({ default: m.AlertPanel }))
+)
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◫' },
@@ -27,10 +32,12 @@ const NAV_ITEMS = [
   { id: 'stocks', label: 'Stocks', icon: '◧' },
   { id: 'crypto', label: 'Crypto', icon: '◈' },
   { id: 'commodities', label: 'Commodities', icon: '◆' },
+  { id: 'alerts', label: 'Alerts', icon: '⚠' },
   { id: 'news', label: 'News Feed', icon: '◪' },
 ]
 
 export function DashboardPage() {
+  const { t, i18n } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
   const [navSel, setNavSel] = useState('overview')
   const [globalPeriod, setGlobalPeriod] = useState<PeriodId>('1M')
@@ -48,9 +55,22 @@ export function DashboardPage() {
 
   useEffect(() => { ensureDefaults() }, [ensureDefaults])
 
-  const { groups, stockIndicators, cryptoIndicators, commodityIndicators, macroIndicators, forexIndicators, bondIndicators } =
+  const { toast } = useToast()
+  const { groups, failedIds, dataMap, stockIndicators, cryptoIndicators, commodityIndicators, macroIndicators, forexIndicators, bondIndicators } =
     useDashboardData(globalPeriod)
   const { data: allIndicators = [] } = useIndicators()
+  const prevFailedRef = useRef<number[]>([])
+
+  useEffect(() => {
+    if (failedIds.length > 0 && failedIds.length !== prevFailedRef.current.length) {
+      const names = failedIds
+        .map((id) => allIndicators.find((ind) => ind.id === id)?.name ?? `#${id}`)
+        .slice(0, 3)
+      const suffix = failedIds.length > 3 ? ` 외 ${failedIds.length - 3}건` : ''
+      toast(`일부 지표 로딩 실패: ${names.join(', ')}${suffix}`, 'warning')
+    }
+    prevFailedRef.current = failedIds
+  }, [failedIds, allIndicators, toast])
 
   const topIndices = [...stockIndicators, ...macroIndicators, ...forexIndicators, ...bondIndicators].slice(0, 6)
 
@@ -112,6 +132,12 @@ export function DashboardPage() {
             ))}
           </div>
           <button
+            onClick={() => i18n.changeLanguage(i18n.language === 'ko' ? 'en' : 'ko')}
+            className="bg-slate-50 border border-slate-200 rounded-lg py-[7px] text-slate-500 cursor-pointer text-xs mt-2 font-medium font-inherit"
+          >
+            {collapsed ? (i18n.language === 'ko' ? 'EN' : '한') : (i18n.language === 'ko' ? '🌐 English' : '🌐 한국어')}
+          </button>
+          <button
             onClick={() => setCollapsed(!collapsed)}
             className="bg-slate-50 border border-slate-200 rounded-lg py-[7px] text-slate-400 cursor-pointer text-xs mt-2 font-inherit"
           >
@@ -127,26 +153,30 @@ export function DashboardPage() {
             <Suspense fallback={<div className="py-10 text-center text-slate-400">Loading…</div>}>
               <NewsPage />
             </Suspense>
+          ) : navSel === 'alerts' ? (
+            <Suspense fallback={<div className="py-10 text-center text-slate-400">Loading…</div>}>
+              <AlertPanel indicators={allIndicators} dataMap={dataMap} />
+            </Suspense>
           ) : navSel === 'my-dashboard' ? (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-slate-500">위젯을 추가하여 나만의 대시보드를 구성하세요</p>
+                <p className="text-sm text-slate-500">{t('dashboard.description')}</p>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={resetToDefaults}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
                   >
-                    기본 레이아웃으로 초기화
+                    {t('dashboard.resetLayout')}
                   </button>
                   <button
                     onClick={() => setAddWidgetOpen(true)}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
                   >
-                    + 위젯 추가
+                    {t('dashboard.addWidget')}
                   </button>
                 </div>
               </div>
-              <ErrorBoundary label="위젯 그리드">
+              <ErrorBoundary label={t('sections.widgetGrid')}>
                 <WidgetGrid indicators={allIndicators} />
               </ErrorBoundary>
               <AddWidgetModal
@@ -177,7 +207,7 @@ export function DashboardPage() {
               </div>
 
               {/* Global Indices */}
-              <ErrorBoundary label="글로벌 지수">
+              <ErrorBoundary label={t('sections.globalIndices')}>
                 <GlobalIndicesSection
                   items={topIndices}
                   localPeriod={localIndices}
@@ -189,7 +219,7 @@ export function DashboardPage() {
 
               {/* Middle Row: Commodities / Crypto / Fear & Greed */}
               <div className="grid grid-cols-[280px_1fr_200px] gap-3 mb-5">
-                <ErrorBoundary label="원자재">
+                <ErrorBoundary label={t('sections.commodities')}>
                   <CommoditySection
                     items={commodityIndicators}
                     localPeriod={localCommod}
@@ -198,7 +228,7 @@ export function DashboardPage() {
                     onReset={() => setLocalCommod(null)}
                   />
                 </ErrorBoundary>
-                <ErrorBoundary label="암호화폐">
+                <ErrorBoundary label={t('sections.crypto')}>
                   <CryptoSection
                     items={cryptoIndicators}
                     localPeriod={localCrypto}
@@ -207,13 +237,13 @@ export function DashboardPage() {
                     onReset={() => setLocalCrypto(null)}
                   />
                 </ErrorBoundary>
-                <ErrorBoundary label="공포/탐욕 지수">
+                <ErrorBoundary label={t('sections.fearGreed')}>
                   <FearGreedSection macroIndicators={macroIndicators} />
                 </ErrorBoundary>
               </div>
 
               {/* All Indicators Table */}
-              <ErrorBoundary label="지표 테이블">
+              <ErrorBoundary label={t('sections.indicatorTable')}>
                 <IndicatorTable
                   groups={groups}
                   stockTab={stockTab}
@@ -227,10 +257,10 @@ export function DashboardPage() {
 
               {/* Economic Calendar & Countdown */}
               <div className="grid grid-cols-[1fr_320px] gap-3 mt-5">
-                <ErrorBoundary label="경제 캘린더">
+                <ErrorBoundary label={t('sections.economicCalendar')}>
                   <EconomicCalendar />
                 </ErrorBoundary>
-                <ErrorBoundary label="이벤트 카운트다운">
+                <ErrorBoundary label={t('sections.eventCountdown')}>
                   <EventCountdown />
                 </ErrorBoundary>
               </div>
