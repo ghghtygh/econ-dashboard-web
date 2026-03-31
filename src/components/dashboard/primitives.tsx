@@ -1,13 +1,15 @@
 import { useId, type ReactNode } from 'react'
 import { PERIODS } from './primitives.helpers'
 import type { PeriodId } from './primitives.helpers'
+import { thresholdColor, GAUGE_GRADIENT_STOPS } from '@/constants/colors'
+import { SPARKLINE_WIDTH, SPARKLINE_HEIGHT, GAUGE_WIDTH, GAUGE_HEIGHT } from '@/constants/chart'
 
 // ── Sparkline ────────────────────────────────────────────────────────
 export function Sparkline({
   data,
   color = '#6366F1',
-  width = 80,
-  height = 28,
+  width = SPARKLINE_WIDTH,
+  height = SPARKLINE_HEIGHT,
 }: {
   data: number[]
   color?: string
@@ -42,14 +44,16 @@ export function Sparkline({
 // ── MiniBar ──────────────────────────────────────────────────────────
 export function MiniBar({ value, max = 100 }: { value: number; max?: number }) {
   const pct = Math.min(Math.max((value / max) * 100, 0), 100)
-  const c =
-    value <= 25 ? '#DC2626'
-    : value <= 45 ? '#D97706'
-    : value <= 55 ? '#9CA3AF'
-    : value <= 75 ? '#65A30D'
-    : '#16A34A'
+  const c = thresholdColor(value)
   return (
-    <div style={{ width: '100%', height: 5, borderRadius: 3, background: '#F1F5F9', overflow: 'hidden' }}>
+    <div
+      style={{ width: '100%', height: 5, borderRadius: 3, background: '#F1F5F9', overflow: 'hidden' }}
+      role="meter"
+      aria-valuenow={Math.round(pct)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`지표 수준 ${Math.round(pct)}%`}
+    >
       <div style={{ width: `${pct}%`, height: '100%', borderRadius: 3, background: c, transition: 'width 1s ease' }} />
     </div>
   )
@@ -63,23 +67,16 @@ export function FearGreedGauge({ value }: { value: number }) {
     : value <= 55 ? 'Neutral'
     : value <= 75 ? 'Greed'
     : 'Extreme Greed'
-  const c =
-    value <= 25 ? '#DC2626'
-    : value <= 45 ? '#D97706'
-    : value <= 55 ? '#9CA3AF'
-    : value <= 75 ? '#65A30D'
-    : '#16A34A'
+  const c = thresholdColor(value)
   const angle = (value / 100) * 180 - 90
   return (
     <div style={{ textAlign: 'center' }}>
-      <svg width="152" height="86" viewBox="0 0 152 86" role="img" aria-label={`Fear & Greed 게이지: ${value}점, ${label}`}>
+      <svg width={GAUGE_WIDTH} height={GAUGE_HEIGHT} viewBox={`0 0 ${GAUGE_WIDTH} ${GAUGE_HEIGHT}`} role="img" aria-label={`Fear & Greed 게이지: ${value}점, ${label}`}>
         <defs>
           <linearGradient id="g-arc" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#DC2626" />
-            <stop offset="25%" stopColor="#D97706" />
-            <stop offset="50%" stopColor="#9CA3AF" />
-            <stop offset="75%" stopColor="#65A30D" />
-            <stop offset="100%" stopColor="#16A34A" />
+            {GAUGE_GRADIENT_STOPS.map((s) => (
+              <stop key={s.offset} offset={s.offset} stopColor={s.color} />
+            ))}
           </linearGradient>
         </defs>
         <path d="M 12 76 A 64 64 0 0 1 140 76" fill="none" stroke="#F1F5F9" strokeWidth="10" strokeLinecap="round" />

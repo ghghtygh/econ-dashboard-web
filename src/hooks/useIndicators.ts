@@ -1,16 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { indicatorApi } from '@/services/api'
 import { errorBus } from '@/lib/errorBus'
-import type { ApiResponse, Indicator, IndicatorData, PagedResponse, IndicatorCategory } from '@/types/indicator'
+import type { IndicatorData, IndicatorCategory } from '@/types/indicator'
 
 export function useIndicators(category?: IndicatorCategory) {
   return useQuery({
     queryKey: ['indicators', category],
-    queryFn: async () => {
-      const res = await indicatorApi.getAll(category)
-      return (res.data as ApiResponse<Indicator[]>).data
-    },
+    queryFn: () => indicatorApi.getAll(category),
     refetchInterval: 1000 * 60 * 5,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -18,8 +16,7 @@ export function useIndicatorData(id: number, from?: string, to?: string) {
   return useQuery({
     queryKey: ['indicatorData', id, from, to],
     queryFn: async () => {
-      const res = await indicatorApi.getData(String(id), from, to)
-      const paged = (res.data as ApiResponse<PagedResponse<IndicatorData>>).data
+      const paged = await indicatorApi.getData(String(id), from, to)
       return paged.content
     },
     enabled: id > 0,
@@ -58,8 +55,7 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
       await Promise.all(
         ids.map(async (id) => {
           try {
-            const res = await indicatorApi.getData(String(id), from, to)
-            const paged = (res.data as ApiResponse<PagedResponse<IndicatorData>>).data
+            const paged = await indicatorApi.getData(String(id), from, to)
             if (paged.content.length > 0) {
               results[id] = paged.content
             }
@@ -75,15 +71,13 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
     },
     enabled: ids.length > 0,
     refetchInterval: 1000 * 60 * 5,
+    refetchIntervalInBackground: false,
   })
 }
 
 export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: async () => {
-      const res = await indicatorApi.getCategories()
-      return (res.data as ApiResponse<IndicatorCategory[]>).data
-    },
+    queryFn: () => indicatorApi.getCategories(),
   })
 }

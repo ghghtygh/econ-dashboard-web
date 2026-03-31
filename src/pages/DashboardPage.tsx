@@ -105,8 +105,20 @@ export function DashboardPage() {
   const newsTotalPages = newsData?.totalPages ?? 0
 
   useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(id)
+    let id: ReturnType<typeof setInterval> | null = setInterval(() => setTime(new Date()), 1000)
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (id) { clearInterval(id); id = null }
+      } else {
+        setTime(new Date())
+        if (!id) id = setInterval(() => setTime(new Date()), 1000)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      if (id) clearInterval(id)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [])
 
   const handleMobileClose = () => {

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from 'react'
+import { useMemo, useRef, useState, useEffect, useCallback, memo } from 'react'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
 import { X, GripVertical, Settings, LayoutGrid, ChevronUp, ChevronDown } from 'lucide-react'
@@ -38,7 +38,7 @@ function useIsMobile() {
   return isMobile
 }
 
-function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile, onMoveUp, onMoveDown, position, total }: {
+const WidgetItem = memo(function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile, onMoveUp, onMoveDown, position, total }: {
   widget: DashboardWidget
   indicator?: Indicator
   data?: import('@/types/indicator').IndicatorData[]
@@ -163,7 +163,7 @@ function WidgetItem({ widget, indicator, data, isLoading, onEdit, isMobile, onMo
       </div>
     </div>
   )
-}
+})
 
 function useContainerWidth(ref: React.RefObject<HTMLDivElement | null>) {
   const [width, setWidth] = useState(1200)
@@ -249,13 +249,13 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   }), [])
 
   const layouts = useMemo(() => ({
-    lg: widgets.map(toLayoutItem) as unknown as Layout,
-    md: widgets.map((w) => ({ ...toLayoutItem(w), x: w.position.x % 6, w: Math.min(w.position.w, 6), minW: 2 })) as unknown as Layout,
-    sm: widgets.map((w) => ({ ...toLayoutItem(w), x: 0, w: 1, minW: 1 })) as unknown as Layout,
+    lg: widgets.map(toLayoutItem),
+    md: widgets.map((w) => ({ ...toLayoutItem(w), x: w.position.x % 6, w: Math.min(w.position.w, 6), minW: 2 })),
+    sm: widgets.map((w) => ({ ...toLayoutItem(w), x: 0, w: 1, minW: 1 })),
   }), [widgets, toLayoutItem])
 
   const handleLayoutChange = (layout: Layout) => {
-    updateLayouts(layout as unknown as Array<{ i: string; x: number; y: number; w: number; h: number }>)
+    updateLayouts(layout.map(({ i, x, y, w, h }) => ({ i, x, y, w, h })))
   }
 
   if (widgets.length === 0) {

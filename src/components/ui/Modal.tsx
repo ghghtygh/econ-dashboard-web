@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useCallback, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -11,19 +11,45 @@ interface ModalProps {
 
 export function Modal({ open, onClose, children, className }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  const trapFocus = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !contentRef.current) return
+    const focusable = contentRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus() }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+  }, [])
 
   useEffect(() => {
     if (!open) return
+    previousFocusRef.current = document.activeElement as HTMLElement | null
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      trapFocus(e)
     }
     document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
+    requestAnimationFrame(() => {
+      const firstFocusable = contentRef.current?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      firstFocusable?.focus()
+    })
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
+      previousFocusRef.current?.focus()
     }
-  }, [open, onClose])
+  }, [open, onClose, trapFocus])
 
   if (!open) return null
 
@@ -31,12 +57,15 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose()
       }}
     >
       <div className="fixed inset-0 bg-overlay backdrop-blur-sm" />
       <div
+        ref={contentRef}
         className={cn(
           'relative z-10 w-full max-w-lg rounded-lg border border-border-dim bg-surface p-6 shadow-xl',
           className,
@@ -62,6 +91,7 @@ export function ModalHeader({ children, onClose, className }: ModalHeaderProps) 
         <button
           onClick={onClose}
           className="text-muted hover:text-heading transition-colors"
+          aria-label="닫기"
         >
           <X size={18} />
         </button>
