@@ -6,6 +6,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  Brush,
 } from 'recharts'
 import type { IndicatorData } from '@/types/indicator'
 import { format, isValid } from 'date-fns'
@@ -73,6 +74,9 @@ export function LineChart({ data, title, color = '#3b82f6', unit }: LineChartPro
             tickFormatter={(v) => formatPrice(v)} width={60} />
           <Tooltip content={<CustomTooltip unit={unit} color={color} />} />
           <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
+          {formatted.length > 30 && (
+            <Brush dataKey="shortDate" height={20} stroke={color} travellerWidth={8} />
+          )}
         </RechartsLineChart>
       </ResponsiveContainer>
     </div>

@@ -45,37 +45,31 @@ function CandlestickTooltip({ active, payload }: {
 }
 
 export function CandlestickChart({ data }: CandlestickChartProps) {
-  const hasOHLC = data.some((d) => d.open != null && d.close != null)
+  const formatted: CandleData[] = []
+  for (const d of data) {
+    if (d.open == null || d.close == null || d.high == null || d.low == null) continue
+    const isUp = d.close >= d.open
+    formatted.push({
+      shortDate: format(new Date(d.date), 'MM/dd'),
+      date: format(new Date(d.date), 'yyyy.MM.dd (EEE)', { locale: ko }),
+      open: d.open,
+      close: d.close,
+      high: d.high,
+      low: d.low,
+      body: isUp ? [d.open, d.close] : [d.close, d.open],
+      wick: [d.low, d.high],
+      isUp,
+      value: d.close,
+    })
+  }
 
-  if (!hasOHLC) {
+  if (formatted.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-faint text-xs">OHLC 데이터가 없습니다</p>
       </div>
     )
   }
-
-  const formatted: CandleData[] = data
-    .filter((d) => d.open != null && d.close != null && d.high != null && d.low != null)
-    .map((d) => {
-      const open = d.open!
-      const close = d.close!
-      const high = d.high!
-      const low = d.low!
-      const isUp = close >= open
-      return {
-        shortDate: format(new Date(d.date), 'MM/dd'),
-        date: format(new Date(d.date), 'yyyy.MM.dd (EEE)', { locale: ko }),
-        open,
-        close,
-        high,
-        low,
-        body: isUp ? [open, close] : [close, open],
-        wick: [low, high],
-        isUp,
-        value: close,
-      }
-    })
 
   return (
     <ResponsiveContainer width="100%" height="100%">

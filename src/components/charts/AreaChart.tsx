@@ -6,6 +6,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  Brush,
 } from 'recharts'
 import { formatChartData, formatPrice } from '@/components/charts/chartFormatters'
 import { ChartTooltip } from '@/components/charts/chartUtils'
@@ -36,6 +37,9 @@ export function AreaChart({ data, color = '#3b82f6', unit }: AreaChartProps) {
         <Tooltip content={<ChartTooltip unit={unit} color={color} />} />
         <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2}
           fill={`url(#${gradientId})`} />
+        {formatted.length > 30 && (
+          <Brush dataKey="shortDate" height={20} stroke={color} travellerWidth={8} />
+        )}
       </RechartsAreaChart>
     </ResponsiveContainer>
   )
