@@ -1,4 +1,6 @@
 import type { Indicator, IndicatorData } from '@/types/indicator'
+export { CATEGORY_COLORS, chgColor } from '@/constants/colors'
+export { CATEGORY_ICONS } from '@/constants/categories'
 
 // ── Time Periods ─────────────────────────────────────────────────────
 export const PERIODS = [
@@ -14,17 +16,7 @@ export type PeriodId = (typeof PERIODS)[number]['id']
 // ── Helpers ──────────────────────────────────────────────────────────
 export const fmtNum = (n: number) =>
   n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-export const chgColor = (v: number) => (v >= 0 ? '#16A34A' : '#DC2626')
 export const chgText = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
-
-export const CATEGORY_COLORS: Record<string, string> = {
-  STOCK: '#4F46E5', FOREX: '#2563EB', CRYPTO: '#EA580C',
-  MACRO: '#7C3AED', BOND: '#0D9488', COMMODITY: '#CA8A04',
-}
-
-export const CATEGORY_ICONS: Record<string, string> = {
-  STOCK: '◩', FOREX: '$', CRYPTO: '₿', MACRO: '◫', BOND: '◧', COMMODITY: '◆',
-}
 
 // ── Types ────────────────────────────────────────────────────────────
 export type IndicatorGroupItem = {

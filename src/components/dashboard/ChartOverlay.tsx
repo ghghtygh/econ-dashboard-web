@@ -4,16 +4,18 @@ import { cn } from '@/lib/utils'
 import type { Indicator, IndicatorData } from '@/types/indicator'
 import { pearsonCorrelation, normalizeToBase100, alignByDate } from './chartOverlayUtils'
 import { OverlayLineChart } from './OverlayLineChart'
+import { CHART_PALETTE } from '@/constants/colors'
+import { MAX_OVERLAY_INDICATORS, MIN_OVERLAY_INDICATORS } from '@/constants/chart'
 
 interface ChartOverlayProps {
   indicators: Indicator[]
   dataMap: Record<number, IndicatorData[]>
 }
 
-const COLORS = ['#378ADD', '#E24B4A', '#1D9E75', '#EF9F27', '#7F77DD']
+const COLORS = CHART_PALETTE
 
-const MAX_INDICATORS = 5
-const MIN_INDICATORS = 2
+const MAX_INDICATORS = MAX_OVERLAY_INDICATORS
+const MIN_INDICATORS = MIN_OVERLAY_INDICATORS
 
 interface PresetComparison {
   id: string

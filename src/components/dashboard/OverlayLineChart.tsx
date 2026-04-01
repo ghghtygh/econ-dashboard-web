@@ -9,8 +9,9 @@ import {
   Legend,
 } from 'recharts'
 import type { Indicator } from '@/types/indicator'
+import { CHART_PALETTE } from '@/constants/colors'
 
-const COLORS = ['#378ADD', '#E24B4A', '#1D9E75', '#EF9F27', '#7F77DD']
+const COLORS = CHART_PALETTE
 
 interface OverlayLineChartProps {
   chartData: Record<string, string | number>[]

@@ -50,24 +50,31 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
     queryKey: ['indicatorSeries', ids, range],
     queryFn: async (): Promise<IndicatorSeriesResult> => {
       if (ids.length === 0) return { data: {}, failedIds: [] }
-      const results: Record<number, IndicatorData[]> = {}
-      const failedIds: number[] = []
-      await Promise.all(
-        ids.map(async (id) => {
-          try {
-            const paged = await indicatorApi.getData(String(id), from, to)
-            if (paged.content.length > 0) {
-              results[id] = paged.content
+      try {
+        const resp = await indicatorApi.getSeries(ids, from, to)
+        const data: Record<number, IndicatorData[]> = resp.data ?? resp
+        return { data, failedIds: [] }
+      } catch {
+        // 배치 엔드포인트 실패 시 개별 요청 폴백
+        const results: Record<number, IndicatorData[]> = {}
+        const failedIds: number[] = []
+        await Promise.all(
+          ids.map(async (id) => {
+            try {
+              const paged = await indicatorApi.getData(String(id), from, to)
+              if (paged.content.length > 0) {
+                results[id] = paged.content
+              }
+            } catch {
+              failedIds.push(id)
             }
-          } catch {
-            failedIds.push(id)
-          }
-        })
-      )
-      if (failedIds.length > 0) {
-        errorBus.emit(`${failedIds.length}개 지표 데이터를 불러오지 못했습니다 (ID: ${failedIds.join(', ')}).`)
+          })
+        )
+        if (failedIds.length > 0) {
+          errorBus.emit(`${failedIds.length}개 지표 데이터를 불러오지 못했습니다 (ID: ${failedIds.join(', ')}).`)
+        }
+        return { data: results, failedIds }
       }
-      return { data: results, failedIds }
     },
     enabled: ids.length > 0,
     refetchInterval: 1000 * 60 * 5,

@@ -8,6 +8,7 @@ import { useDashboardStore } from '@/store/dashboardStore'
 import { useIndicatorData } from '@/hooks/useIndicators'
 import type { DashboardWidget, ChartType, Indicator } from '@/types/indicator'
 import type { DateRange } from '@/hooks/useIndicators'
+import { WIDGET_COLORS } from '@/constants/colors'
 
 interface WidgetEditorProps {
   widget: DashboardWidget
@@ -32,7 +33,7 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: '1Y', label: '1년' },
 ]
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899', '#06b6d4', '#f97316']
+const COLORS = WIDGET_COLORS
 
 export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorProps) {
   const [title, setTitle] = useState(widget.title ?? '')

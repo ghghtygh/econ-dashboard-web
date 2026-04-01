@@ -6,6 +6,7 @@ import { Dropdown } from '@/components/ui/Dropdown'
 import { cn } from '@/lib/utils'
 import { useDashboardStore } from '@/store/dashboardStore'
 import type { Indicator, ChartType } from '@/types/indicator'
+import { WIDGET_COLORS, WIDGET_COLOR_NAMES } from '@/constants/colors'
 
 interface AddWidgetModalProps {
   open: boolean
@@ -21,11 +22,8 @@ const CHART_TYPE_OPTIONS: { value: ChartType; label: string; icon: typeof LineCh
   { value: 'number', label: 'Number', icon: Hash },
 ]
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899', '#06b6d4', '#f97316']
-const COLOR_NAMES: Record<string, string> = {
-  '#3b82f6': '파랑', '#8b5cf6': '보라', '#f59e0b': '노랑', '#10b981': '초록',
-  '#ef4444': '빨강', '#ec4899': '분홍', '#06b6d4': '하늘', '#f97316': '주황',
-}
+const COLORS = WIDGET_COLORS
+const COLOR_NAMES = WIDGET_COLOR_NAMES
 
 export function AddWidgetModal({ open, onClose, indicators }: AddWidgetModalProps) {
   const [selectedIndicator, setSelectedIndicator] = useState<string>('')

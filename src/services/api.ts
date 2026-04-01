@@ -94,7 +94,7 @@ export const indicatorApi = {
     return parseApiResponse(res.data, categoryListSchema)
   },
   getData: async (id: string, from?: string, to?: string) => {
-    const res = await api.get(`/indicators/${id}/data`, { params: { from, to, size: 100 } })
+    const res = await api.get(`/indicators/${id}/data`, { params: { from, to, size: 500 } })
     return parseApiResponse(res.data, indicatorDataPagedSchema)
   },
   getSeries: async (indicatorIds: number[], startDate: string, endDate: string) => {

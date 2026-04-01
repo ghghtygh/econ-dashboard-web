@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BarChart2, LayoutDashboard, Search, Newspaper, Sun, Moon, Menu, X } from 'lucide-react'
+import { BarChart2, LayoutDashboard, Search, Newspaper, Sun, Moon, Menu, X, TrendingUp, DollarSign, Bitcoin, Package, Calendar, Bell } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useThemeStore } from '@/store/themeStore'
@@ -7,8 +7,14 @@ import { useAlertStore } from '@/store/alertStore'
 
 const NAV_ITEMS = [
   { path: '/', label: '대시보드', icon: LayoutDashboard },
-  { path: '/explore', label: '지표 탐색', icon: Search },
+  { path: '/indices', label: '지수', icon: TrendingUp },
+  { path: '/stocks', label: '주식', icon: DollarSign },
+  { path: '/crypto', label: '암호화폐', icon: Bitcoin },
+  { path: '/commodities', label: '원자재', icon: Package },
   { path: '/news', label: '뉴스', icon: Newspaper },
+  { path: '/explore', label: '지표 탐색', icon: Search },
+  { path: '/calendar', label: '캘린더', icon: Calendar },
+  { path: '/alerts', label: '알림', icon: Bell },
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {

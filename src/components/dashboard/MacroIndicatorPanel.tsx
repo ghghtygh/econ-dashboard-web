@@ -4,16 +4,11 @@ import { cn } from '@/lib/utils'
 import { getIndicatorDescription } from '@/data/indicatorDescriptions'
 import type { ThresholdLevel } from '@/data/indicatorDescriptions'
 import type { Indicator, IndicatorData } from '@/types/indicator'
+import { SEVERITY_COLORS } from '@/constants/colors'
 
 interface MacroIndicatorPanelProps {
   indicators: Indicator[]
   dataMap: Record<number, IndicatorData[]>
-}
-
-const SEVERITY_COLORS: Record<string, string> = {
-  safe: '#1D9E75',
-  warning: '#EF9F27',
-  danger: '#E24B4A',
 }
 
 const SEVERITY_LABELS: Record<string, string> = {

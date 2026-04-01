@@ -55,8 +55,14 @@ function App() {
                   </ErrorBoundary>
                 }
               />
+              <Route path="/indices" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+              <Route path="/stocks" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+              <Route path="/crypto" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+              <Route path="/commodities" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+              <Route path="/calendar" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+              <Route path="/alerts" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
               <Route
-                path="/*"
+                path="/"
                 element={
                   <ErrorBoundary>
                     <DashboardPage />

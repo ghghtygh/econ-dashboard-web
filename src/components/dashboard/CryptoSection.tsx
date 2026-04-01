@@ -18,52 +18,40 @@ export function CryptoSection({ cryptoIndicators, localPeriod, onLocalChange, on
   return (
     <div className="card" style={{ animationDelay: '0.35s' }}>
       <CardHeader title="Cryptocurrency" localPeriod={localPeriod} onLocalChange={onLocalChange} onReset={onReset} globalPeriod={globalPeriod} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div className="grid grid-cols-2 gap-2.5">
         {cryptoIndicators.length === 0 ? (
-          <div style={{ gridColumn: '1/-1', color: '#94A3B8', fontSize: 12, textAlign: 'center', padding: 20 }}>No data</div>
+          <div className="col-span-full text-slate-400 text-xs text-center p-5">No data</div>
         ) : cryptoIndicators.slice(0, 4).map(c => {
           const sparkData = c.series.map(d => d.value)
           return (
             <div
               key={c.indicator.id}
+              className="bg-slate-50 rounded-[10px] p-3.5 border border-slate-200 cursor-pointer transition-[transform,box-shadow] duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
               onClick={() => setSelected(c)}
-              style={{
-                background: '#F8FAFC', borderRadius: 10, padding: 14,
-                border: '1px solid #E2E8F0',
-                cursor: 'pointer',
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = ''
-              }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: `${CATEGORY_COLORS.CRYPTO}10`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, fontWeight: 700, color: CATEGORY_COLORS.CRYPTO,
-                  border: `1px solid ${CATEGORY_COLORS.CRYPTO}20`,
-                }}>
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{
+                    background: `${CATEGORY_COLORS.CRYPTO}10`,
+                    color: CATEGORY_COLORS.CRYPTO,
+                    border: `1px solid ${CATEGORY_COLORS.CRYPTO}20`,
+                  }}
+                >
                   {CATEGORY_ICONS.CRYPTO}
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#1E293B' }}>{c.indicator.name}</div>
-                  <div style={{ fontSize: 10, color: '#94A3B8' }}>{c.indicator.symbol}</div>
+                  <div className="text-xs font-semibold text-slate-800">{c.indicator.name}</div>
+                  <div className="text-[10px] text-slate-400">{c.indicator.symbol}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 17, fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A', letterSpacing: '-0.02em' }}>
+              <div className="text-[17px] font-bold font-mono text-slate-900 tracking-tight">
                 {c.latest ? fmtNum(c.latest.value) : '--'}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: chgColor(c.change) }}>{chgText(c.change)}</span>
+              <div className="flex justify-between items-end mt-1.5">
+                <span className="text-[11px] font-semibold" style={{ color: chgColor(c.change) }}>{chgText(c.change)}</span>
               </div>
-              <div style={{ marginTop: 6 }}>
+              <div className="mt-1.5">
                 <Sparkline data={sparkData} color={chgColor(c.change)} width={140} height={22} />
               </div>
             </div>

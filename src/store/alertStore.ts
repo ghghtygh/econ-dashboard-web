@@ -1,14 +1,20 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { alertApi } from '@/services/api'
 import type { AlertRule, AlertNotification } from '@/types/alert'
+
+export type SyncStatus = 'idle' | 'loading' | 'saving' | 'saved' | 'error'
 
 interface AlertState {
   rules: AlertRule[]
   notifications: AlertNotification[]
+  syncStatus: SyncStatus
 
-  addRule: (rule: AlertRule) => void
-  removeRule: (id: string) => void
-  toggleRule: (id: string) => void
+  fetchRules: () => Promise<void>
+  addRule: (rule: AlertRule) => Promise<void>
+  removeRule: (id: string) => Promise<void>
+  toggleRule: (id: string) => Promise<void>
+  updateRule: (id: string, updates: Partial<AlertRule>) => Promise<void>
 
   addNotification: (notification: AlertNotification) => void
   markAsRead: (id: string) => void
@@ -48,19 +54,90 @@ export const useAlertStore = create<AlertState>()(
     (set, get) => ({
       rules: defaultRules,
       notifications: [],
+      syncStatus: 'idle' as SyncStatus,
 
-      addRule: (rule) =>
-        set((state) => ({ rules: [...state.rules, rule] })),
+      fetchRules: async () => {
+        set({ syncStatus: 'loading' })
+        try {
+          const serverRules = await alertApi.getRules()
+          if (serverRules && serverRules.length > 0) {
+            set({ rules: serverRules, syncStatus: 'idle' })
+          } else {
+            // 서버에 규칙이 없으면 로컬 기본 규칙을 서버에 동기화
+            const localRules = get().rules
+            if (localRules.length > 0) {
+              await Promise.all(localRules.map((r) => alertApi.createRule(r).catch(() => {})))
+            }
+            set({ syncStatus: 'idle' })
+          }
+        } catch {
+          // 서버 실패 시 localStorage 폴백 유지
+          set({ syncStatus: 'error' })
+        }
+      },
 
-      removeRule: (id) =>
-        set((state) => ({ rules: state.rules.filter((r) => r.id !== id) })),
+      addRule: async (rule) => {
+        // 낙관적 업데이트: 즉시 로컬에 반영
+        set((state) => ({ rules: [...state.rules, rule], syncStatus: 'saving' }))
+        try {
+          await alertApi.createRule(rule)
+          set({ syncStatus: 'saved' })
+          setTimeout(() => {
+            if (get().syncStatus === 'saved') set({ syncStatus: 'idle' })
+          }, 2000)
+        } catch {
+          // 서버 실패해도 로컬에는 이미 저장됨
+          set({ syncStatus: 'error' })
+        }
+      },
 
-      toggleRule: (id) =>
+      removeRule: async (id) => {
+        set((state) => ({ rules: state.rules.filter((r) => r.id !== id), syncStatus: 'saving' }))
+        try {
+          await alertApi.deleteRule(id)
+          set({ syncStatus: 'saved' })
+          setTimeout(() => {
+            if (get().syncStatus === 'saved') set({ syncStatus: 'idle' })
+          }, 2000)
+        } catch {
+          set({ syncStatus: 'error' })
+        }
+      },
+
+      toggleRule: async (id) => {
+        const rule = get().rules.find((r) => r.id === id)
+        if (!rule) return
+        const newEnabled = !rule.enabled
         set((state) => ({
-          rules: state.rules.map((r) =>
-            r.id === id ? { ...r, enabled: !r.enabled } : r,
-          ),
-        })),
+          rules: state.rules.map((r) => (r.id === id ? { ...r, enabled: newEnabled } : r)),
+          syncStatus: 'saving',
+        }))
+        try {
+          await alertApi.updateRule(id, { enabled: newEnabled })
+          set({ syncStatus: 'saved' })
+          setTimeout(() => {
+            if (get().syncStatus === 'saved') set({ syncStatus: 'idle' })
+          }, 2000)
+        } catch {
+          set({ syncStatus: 'error' })
+        }
+      },
+
+      updateRule: async (id, updates) => {
+        set((state) => ({
+          rules: state.rules.map((r) => (r.id === id ? { ...r, ...updates } : r)),
+          syncStatus: 'saving',
+        }))
+        try {
+          await alertApi.updateRule(id, updates)
+          set({ syncStatus: 'saved' })
+          setTimeout(() => {
+            if (get().syncStatus === 'saved') set({ syncStatus: 'idle' })
+          }, 2000)
+        } catch {
+          set({ syncStatus: 'error' })
+        }
+      },
 
       addNotification: (notification) =>
         set((state) => ({
@@ -85,6 +162,10 @@ export const useAlertStore = create<AlertState>()(
     }),
     {
       name: 'econ-alerts',
+      partialize: (state) => ({
+        rules: state.rules,
+        notifications: state.notifications,
+      }),
     },
   ),
 )

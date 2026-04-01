@@ -4,28 +4,10 @@ import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNewsList } from '@/hooks/useNews'
 import type { NewsArticle, NewsCategory } from '@/types/news'
+import { CATEGORY_BADGE_COLORS } from '@/constants/colors'
+import { CATEGORY_LABELS } from '@/constants/categories'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  ALL: '전체',
-  STOCK: '주식',
-  FOREX: '외환',
-  COMMODITY: '원자재',
-  BOND: '채권',
-  CRYPTO: '암호화폐',
-  MACRO: '거시경제',
-}
-
-const CATEGORY_COLORS: Record<
-  string,
-  { bg: string; text: string; dot: string; darkBg: string; darkText: string }
-> = {
-  STOCK: { bg: '#E6F1FB', text: '#185FA5', dot: '#378ADD', darkBg: 'rgba(55,138,221,0.15)', darkText: '#93C5FD' },
-  FOREX: { bg: '#FEE2E2', text: '#991B1B', dot: '#E24B4A', darkBg: 'rgba(226,75,74,0.15)', darkText: '#FCA5A5' },
-  CRYPTO: { bg: '#FAEEDA', text: '#854F0B', dot: '#EF9F27', darkBg: 'rgba(239,159,39,0.15)', darkText: '#FCD34D' },
-  MACRO: { bg: '#EEEDFE', text: '#3C3489', dot: '#7F77DD', darkBg: 'rgba(127,119,221,0.15)', darkText: '#C4B5FD' },
-  BOND: { bg: '#E1F5EE', text: '#0F6E56', dot: '#1D9E75', darkBg: 'rgba(29,158,117,0.15)', darkText: '#6EE7B7' },
-  COMMODITY: { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', darkBg: 'rgba(245,158,11,0.15)', darkText: '#FDE68A' },
-}
+const CATEGORY_COLORS = CATEGORY_BADGE_COLORS
 
 const ALL_CATEGORIES: NewsCategory[] = ['STOCK', 'FOREX', 'CRYPTO', 'MACRO', 'BOND', 'COMMODITY']
 

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ThresholdLevel } from '@/data/indicatorDescriptions'
+import { SEVERITY_COLORS } from '@/constants/colors'
 
 interface InfoTooltipProps {
   children: ReactNode
@@ -58,12 +59,6 @@ export function InfoTooltip({ children, className }: InfoTooltipProps) {
       )}
     </div>
   )
-}
-
-const SEVERITY_COLORS: Record<string, string> = {
-  safe: '#1D9E75',
-  warning: '#EF9F27',
-  danger: '#E24B4A',
 }
 
 interface IndicatorTooltipContentProps {

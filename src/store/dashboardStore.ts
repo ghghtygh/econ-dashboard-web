@@ -13,9 +13,19 @@ interface LayoutItem {
 
 export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
 
+const DEFAULT_WIDGETS: DashboardWidget[] = [
+  { id: 'default-spx',    indicatorId: 2,  chartType: 'area',   position: { x: 0, y: 0, w: 4, h: 3 }, title: 'S&P 500',     color: '#3b82f6', dateRange: '1M' },
+  { id: 'default-kospi',  indicatorId: 14, chartType: 'area',   position: { x: 4, y: 0, w: 4, h: 3 }, title: 'KOSPI',        color: '#10b981', dateRange: '1M' },
+  { id: 'default-usdkrw', indicatorId: 3,  chartType: 'line',   position: { x: 8, y: 0, w: 4, h: 3 }, title: 'USD/KRW',      color: '#f59e0b', dateRange: '1M' },
+  { id: 'default-btc',    indicatorId: 4,  chartType: 'area',   position: { x: 0, y: 3, w: 4, h: 3 }, title: 'Bitcoin',      color: '#f97316', dateRange: '1M' },
+  { id: 'default-eth',    indicatorId: 7,  chartType: 'area',   position: { x: 4, y: 3, w: 4, h: 3 }, title: 'Ethereum',     color: '#6366f1', dateRange: '1M' },
+  { id: 'default-vix',    indicatorId: 1,  chartType: 'line',   position: { x: 8, y: 3, w: 4, h: 3 }, title: 'VIX',          color: '#ef4444', dateRange: '3M' },
+]
+
 interface DashboardStore {
   widgets: DashboardWidget[]
   selectedIndicators: number[]
+  initialized: boolean
   syncStatus: SyncStatus
   lastSyncedAt: number | null
   addWidget: (widget: DashboardWidget) => void
@@ -26,6 +36,8 @@ interface DashboardStore {
   setWidgets: (widgets: DashboardWidget[]) => void
   fetchWidgetsFromServer: () => Promise<void>
   setSyncStatus: (status: SyncStatus) => void
+  resetToDefaults: () => void
+  ensureDefaults: () => void
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
@@ -54,6 +66,7 @@ export const useDashboardStore = create<DashboardStore>()(
     (set, get) => ({
       widgets: [],
       selectedIndicators: [],
+      initialized: false,
       syncStatus: 'idle' as SyncStatus,
       lastSyncedAt: null,
       addWidget: (widget) => {
@@ -98,6 +111,19 @@ export const useDashboardStore = create<DashboardStore>()(
         }
       },
       setSyncStatus: (status) => set({ syncStatus: status }),
+      resetToDefaults: () => {
+        const newWidgets = DEFAULT_WIDGETS.map(w => ({ ...w, id: `default-${w.indicatorId}-${Date.now()}` }))
+        set({ widgets: newWidgets })
+        debouncedSave(newWidgets, set)
+      },
+      ensureDefaults: () => {
+        const state = get()
+        if (!state.initialized && state.widgets.length === 0) {
+          set({ widgets: [...DEFAULT_WIDGETS], initialized: true })
+        } else if (!state.initialized) {
+          set({ initialized: true })
+        }
+      },
     }),
     {
       name: 'econ-dashboard',

@@ -13,6 +13,7 @@ import { History, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIndicatorSeries } from '@/hooks/useIndicators'
 import type { Indicator, IndicatorData } from '@/types/indicator'
+import { CHART_PALETTE } from '@/constants/colors'
 
 interface HistoricalComparisonProps {
   indicators: Indicator[]
@@ -28,7 +29,7 @@ const CRISIS_PRESETS = [
   { id: '2022', label: '2022 긴축', startDate: '2022-01-01', description: '' },
 ] as const
 
-const COLORS = ['#378ADD', '#EF9F27', '#E24B4A', '#1D9E75']
+const COLORS = [CHART_PALETTE[0], CHART_PALETTE[3], CHART_PALETTE[1], CHART_PALETTE[2]]
 
 /**
  * 시계열을 기준 시점(t=0) 기준으로 정규화하여 비교 가능하게 만듭니다.
