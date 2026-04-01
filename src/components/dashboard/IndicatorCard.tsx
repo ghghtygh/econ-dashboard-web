@@ -22,20 +22,20 @@ export const IndicatorCard = memo(function IndicatorCard({ indicator, latest, pr
 
   return (
     <div
-      className="rounded-lg border border-border-dim bg-surface p-4 hover:border-border-mid transition-all"
+      className="rounded-lg border border-border-dim bg-surface p-5 hover:border-border-mid transition-all"
       style={{ boxShadow: 'var(--th-card-shadow)' }}
     >
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-[11px] text-muted font-medium uppercase tracking-wide">{indicator.category}</p>
+            <p className="text-xs text-muted font-medium uppercase tracking-wide">{indicator.category}</p>
             <InfoTooltip>
               <IndicatorTooltipContent {...desc} />
             </InfoTooltip>
           </div>
           <h3 className="text-sm font-semibold text-heading mt-0.5">{indicator.name}</h3>
         </div>
-        <span className="text-[10px] text-faint font-mono bg-elevated px-1.5 py-0.5 rounded">{indicator.symbol}</span>
+        <span className="text-[11px] text-faint font-mono bg-elevated px-2 py-0.5 rounded">{indicator.symbol}</span>
       </div>
 
       {latest ? (

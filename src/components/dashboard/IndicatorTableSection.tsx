@@ -46,13 +46,13 @@ export function IndicatorTableSection({
                   key={h}
                   scope="col"
                   style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     color: '#94A3B8',
                     fontWeight: 600,
-                    letterSpacing: '0.06em',
+                    letterSpacing: '0.05em',
                     textTransform: 'uppercase',
                     textAlign: i > 0 ? 'right' : 'left',
-                    padding: '0 0 8px',
+                    padding: '0 0 10px',
                   }}
                 >
                   {h}
@@ -63,17 +63,17 @@ export function IndicatorTableSection({
           <tbody>
             {rows.map((item, i) => (
               <tr key={item.indicator.id} className="stock-row" style={{ animation: 'fadeUp 0.3s ease both', animationDelay: `${0.5 + i * 0.03}s` }}>
-                <td style={{ padding: '8px 0' }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{item.indicator.name}</div>
-                  <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: "'DM Mono', monospace" }}>{item.indicator.symbol}</div>
+                <td style={{ padding: '11px 0' }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#1E293B' }}>{item.indicator.name}</div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', fontFamily: "'DM Mono', monospace", marginTop: 1 }}>{item.indicator.symbol}</div>
                 </td>
-                <td style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 500, color: '#0F172A', padding: '8px 0' }}>
+                <td style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 500, color: '#0F172A', padding: '11px 0' }}>
                   {item.latest ? fmtNum(item.latest.value) : '--'}
                 </td>
-                <td style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: chgColor(item.change), padding: '8px 0' }}>
+                <td style={{ textAlign: 'right', fontSize: 13, fontWeight: 600, color: chgColor(item.change), padding: '11px 0' }}>
                   {chgText(item.change)}
                 </td>
-                <td style={{ textAlign: 'right', fontSize: 11, color: '#94A3B8', padding: '8px 0' }}>
+                <td style={{ textAlign: 'right', fontSize: 12, color: '#94A3B8', padding: '11px 0' }}>
                   {item.indicator.unit}
                 </td>
               </tr>

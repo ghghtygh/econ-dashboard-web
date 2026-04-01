@@ -103,6 +103,8 @@ body {
   background-color: var(--th-page);
   color: var(--th-body);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
   min-height: 100vh;
   transition: background-color 0.2s, color 0.2s;
   -webkit-font-smoothing: antialiased;
@@ -132,18 +134,18 @@ body {
 }
 
 .section-label {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--th-heading);
   letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 /* ── Section divider ── */
 .section-divider {
   border: none;
   border-top: 1px solid var(--th-border-dim);
-  margin: 0 0 2rem;
+  margin: 0.5rem 0 2.5rem;
 }
 
 /* ── Card base styles ── */
@@ -222,11 +224,11 @@ body {
 
 /* --- Sidebar --- */
 .db-sidebar {
-  width: 224px;
+  width: 240px;
   flex-shrink: 0;
   background: var(--th-surface);
   border-right: 1px solid var(--th-border-dim);
-  padding: 20px 14px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease, transform 0.25s ease;
@@ -239,16 +241,16 @@ body {
 }
 
 .db-sidebar--collapsed {
-  width: 56px;
-  padding: 20px 8px;
+  width: 60px;
+  padding: 24px 10px;
 }
 
 .db-sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 32px;
-  min-height: 32px;
+  gap: 12px;
+  margin-bottom: 36px;
+  min-height: 36px;
   padding-left: 2px;
 }
 
@@ -278,7 +280,7 @@ body {
 .db-sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
 }
 
@@ -286,11 +288,12 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.12s;
-  font-size: 13px;
+  font-size: 13.5px;
+  line-height: 1.4;
   color: var(--th-faint);
   border: 1px solid transparent;
   font-weight: 500;
@@ -414,30 +417,30 @@ body {
 .db-main {
   flex: 1;
   overflow: auto;
-  padding: 28px 32px;
+  padding: 36px 40px;
   max-width: 1440px;
-  margin-left: 224px;
+  margin-left: 240px;
   transition: margin-left 0.25s ease;
 }
 
 .db-sidebar--collapsed ~ .db-main,
 .db-layout:has(.db-sidebar--collapsed) .db-main {
-  margin-left: 56px;
+  margin-left: 60px;
 }
 
 .db-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .db-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--th-heading);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .db-time-row {
@@ -472,14 +475,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 10px 16px;
+  margin-bottom: 28px;
+  padding: 14px 20px;
   background: var(--th-surface);
   border: 1px solid var(--th-border-dim);
   border-radius: 10px;
   box-shadow: var(--th-card-shadow);
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .db-period-label {
@@ -508,10 +511,10 @@ body {
 
 /* --- Content elements --- */
 .db-table-header {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--th-body);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .db-table-head {
@@ -523,10 +526,10 @@ body {
 }
 
 .db-table-th {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--th-faint);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -534,9 +537,9 @@ body {
   display: grid;
   grid-template-columns: 1fr 100px 80px 80px 70px;
   align-items: center;
-  padding: 9px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--th-border-dim);
-  gap: 8px;
+  gap: 10px;
   transition: background 0.12s;
   cursor: default;
 }
@@ -544,7 +547,7 @@ body {
 .stock-row:hover {
   background: var(--th-hover);
   margin: 0 -12px;
-  padding: 9px 12px;
+  padding: 12px 12px;
   border-radius: 6px;
 }
 
@@ -553,34 +556,36 @@ body {
 }
 
 .db-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--th-heading);
+  line-height: 1.4;
 }
 
 .db-symbol {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--th-faint);
   font-family: 'DM Mono', monospace;
+  margin-top: 1px;
 }
 
 .db-value {
   text-align: right;
   font-family: 'DM Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--th-heading);
 }
 
 .db-change {
   text-align: right;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .db-unit {
   text-align: right;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--th-faint);
 }
 
@@ -592,26 +597,26 @@ body {
 }
 
 .db-big-value {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   font-family: 'DM Mono', monospace;
   color: var(--th-heading);
   letter-spacing: -0.02em;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .db-meta {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
-  font-size: 11px;
+  margin-top: 12px;
+  font-size: 12px;
   color: var(--th-faint);
 }
 
 .db-article-summary {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--th-muted);
-  line-height: 1.5;
+  line-height: 1.6;
   flex: 1;
   overflow: hidden;
   display: -webkit-box;
@@ -620,19 +625,19 @@ body {
 }
 
 .db-article-source {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--th-faint);
-  margin-top: 8px;
+  margin-top: 10px;
   border-top: 1px solid var(--th-border-dim);
-  padding-top: 8px;
+  padding-top: 10px;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
 }
@@ -641,7 +646,7 @@ body {
 .db-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .db-card-grid--wide {
@@ -652,8 +657,8 @@ body {
 .db-overview-mid {
   display: grid;
   grid-template-columns: 280px 1fr 200px;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 /* --- Pagination --- */
@@ -689,12 +694,12 @@ body {
 
 /* --- Footer --- */
 .db-footer {
-  margin-top: 28px;
-  padding: 14px 0;
+  margin-top: 40px;
+  padding: 18px 0;
   border-top: 1px solid var(--th-border-dim);
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--th-faint);
   flex-wrap: wrap;
   gap: 8px;
@@ -703,8 +708,8 @@ body {
 /* ── Responsive: tablet (768px–1024px) — collapsed sidebar (icons only) ── */
 @media (max-width: 1024px) {
   .db-sidebar {
-    width: 56px;
-    padding: 20px 8px;
+    width: 60px;
+    padding: 24px 10px;
   }
   .db-sidebar .db-logo-text,
   .db-sidebar .db-nav-label,
@@ -714,12 +719,12 @@ body {
   }
   .db-sidebar .nav-item {
     justify-content: center;
-    padding: 8px;
+    padding: 9px;
   }
   .db-main,
   .db-layout:has(.db-sidebar) .db-main,
   .db-layout:has(.db-sidebar--collapsed) .db-main {
-    margin-left: 56px;
+    margin-left: 60px;
   }
   .db-overview-mid {
     grid-template-columns: 1fr 1fr;
@@ -775,7 +780,7 @@ body {
   .db-layout:has(.db-sidebar) .db-main,
   .db-layout:has(.db-sidebar--collapsed) .db-main {
     margin-left: 0;
-    padding: 20px 16px;
+    padding: 24px 20px;
   }
   .db-overview-mid {
     grid-template-columns: 1fr;
