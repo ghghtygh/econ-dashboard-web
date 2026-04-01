@@ -111,11 +111,12 @@ export function PeriodPills({
 }) {
   const isSm = size === 'sm'
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: isSm ? 2 : 3, background: '#F1F5F9', borderRadius: 7, padding: 2 }}>
+    <div role="group" aria-label="기간 선택" style={{ display: 'flex', alignItems: 'center', gap: isSm ? 2 : 3, background: '#F1F5F9', borderRadius: 7, padding: 2 }}>
       {PERIODS.map(p => (
         <button
           key={p.id}
           onClick={() => onChange(p.id)}
+          aria-pressed={active === p.id}
           style={{
             padding: isSm ? '2px 6px' : '3px 10px',
             fontSize: isSm ? 10 : 11,
@@ -135,6 +136,7 @@ export function PeriodPills({
         <button
           onClick={onReset}
           title="Reset to global"
+          aria-label="기간을 전역 설정으로 초기화"
           style={{
             padding: isSm ? '2px 5px' : '3px 7px',
             fontSize: isSm ? 9 : 10,

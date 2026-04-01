@@ -8,8 +8,8 @@ interface CandlestickChartProps {
   data: IndicatorData[]
 }
 
-const CANDLE_UP = 'var(--th-candle-up, #22c55e)'
-const CANDLE_DOWN = 'var(--th-candle-down, #ef4444)'
+const CANDLE_UP = 'var(--th-candle-up, #0173B2)'
+const CANDLE_DOWN = 'var(--th-candle-down, #D55E00)'
 
 interface CandleData {
   shortDate: string
@@ -36,8 +36,8 @@ function CandlestickTooltip({ active, payload }: {
       <p className="text-muted mb-1">{d.date}</p>
       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         <span className="text-muted">시가</span><span className="text-body">{formatPrice(d.open)}</span>
-        <span className="text-muted">고가</span><span className="text-green-400">{formatPrice(d.high)}</span>
-        <span className="text-muted">저가</span><span className="text-red-400">{formatPrice(d.low)}</span>
+        <span className="text-muted">고가</span><span className="text-body">{formatPrice(d.high)}</span>
+        <span className="text-muted">저가</span><span className="text-body">{formatPrice(d.low)}</span>
         <span className="text-muted">종가</span><span className="text-body">{formatPrice(d.close)}</span>
       </div>
     </div>

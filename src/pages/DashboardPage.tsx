@@ -578,12 +578,12 @@ export function DashboardPage() {
 
       {/* Main */}
       <main className="db-main" id="main-content">
-        <div className="db-header">
+        <header className="db-header">
           <div>
             <h1 className="db-title">{PAGE_TITLES[navSel] ?? 'Market Overview'}</h1>
             <LiveClock />
           </div>
-        </div>
+        </header>
         <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
           {lastRefresh && `데이터가 ${lastRefresh}에 갱신되었습니다`}
         </div>
