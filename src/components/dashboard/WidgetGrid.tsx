@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ResponsiveGridLayout } from 'react-grid-layout'
 import type { Layout, LayoutItem } from 'react-grid-layout'
 import { X, GripVertical, Settings, LayoutGrid, Download, Pencil, Check } from 'lucide-react'
@@ -17,12 +18,7 @@ interface WidgetGridProps {
   indicators: Indicator[]
 }
 
-const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { value: '1W', label: '1주' },
-  { value: '1M', label: '1개월' },
-  { value: '3M', label: '3개월' },
-  { value: '1Y', label: '1년' },
-]
+const RANGE_KEYS: DateRange[] = ['1D', '1W', '1M', '3M', '1Y']
 
 function WidgetItem({ widget, indicator, data, isLoading, isFailed, isEditing, onEdit, onExport }: {
   widget: DashboardWidget
@@ -34,6 +30,7 @@ function WidgetItem({ widget, indicator, data, isLoading, isFailed, isEditing, o
   onEdit: () => void
   onExport: () => void
 }) {
+  const { t } = useTranslation()
   const removeWidget = useDashboardStore((s) => s.removeWidget)
   const updateWidget = useDashboardStore((s) => s.updateWidget)
   const currentRange = widget.dateRange ?? '1M'
@@ -52,31 +49,31 @@ function WidgetItem({ widget, indicator, data, isLoading, isFailed, isEditing, o
             <GripVertical size={14} className="text-faint cursor-grab shrink-0 drag-handle" />
           )}
           <h3 className="text-xs font-medium text-body truncate">
-            {widget.title ?? indicator?.name ?? '위젯'}
+            {widget.title ?? indicator?.name ?? t('dashboard.widget')}
           </h3>
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
           {/* Period selector */}
           <div className="flex items-center gap-0.5 mr-1">
-            {RANGE_OPTIONS.map((opt) => (
+            {RANGE_KEYS.map((key) => (
               <button
-                key={opt.value}
-                onClick={() => updateWidget(widget.id, { dateRange: opt.value })}
+                key={key}
+                onClick={() => updateWidget(widget.id, { dateRange: key })}
                 className={cn(
                   'text-[9px] px-1.5 py-0.5 rounded transition-colors',
-                  currentRange === opt.value
+                  currentRange === key
                     ? 'bg-elevated text-heading font-medium'
                     : 'text-faint hover:text-muted',
                 )}
               >
-                {opt.label}
+                {t(`period.${key}`)}
               </button>
             ))}
           </div>
           <button
             onClick={onExport}
             className="text-faint hover:text-green-400 transition-colors"
-            title="데이터 내보내기"
+            title={t('data.exportTooltip')}
           >
             <Download size={14} />
           </button>
@@ -99,7 +96,7 @@ function WidgetItem({ widget, indicator, data, isLoading, isFailed, isEditing, o
           <ChartSkeleton />
         ) : isFailed ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-red-400 text-xs">데이터를 불러올 수 없습니다</p>
+            <p className="text-red-400 text-xs">{t('data.loadError')}</p>
           </div>
         ) : data && data.length > 0 ? (
           <ErrorBoundary label={widget.title ?? indicator?.name}>
@@ -112,7 +109,7 @@ function WidgetItem({ widget, indicator, data, isLoading, isFailed, isEditing, o
           </ErrorBoundary>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-faint text-xs">데이터 없음</p>
+            <p className="text-faint text-xs">{t('data.noData')}</p>
           </div>
         )}
       </div>
@@ -145,7 +142,8 @@ function useContainerWidth(ref: React.RefObject<HTMLDivElement | null>) {
 
 /**
  * 위젯별 dateRange에 따라 그룹화하여 각 그룹별로 useIndicatorSeries를 호출.
- * (React hooks는 조건부 호출이 안 되므로, 고정 4개 range에 대해 항상 호출)
+ * 위젯이 사용하지 않는 range는 빈 배열로 전달되어 enabled: false로 스킵됨.
+ * 로딩 상태는 range별로 추적하여 해당 위젯만 로딩 표시.
  */
 function useWidgetData(widgets: DashboardWidget[]) {
   const byRange = useMemo(() => {
@@ -157,12 +155,14 @@ function useWidgetData(widgets: DashboardWidget[]) {
     return groups
   }, [widgets])
 
+  const r1D = useIndicatorSeries(byRange['1D'], '1D')
   const r1W = useIndicatorSeries(byRange['1W'], '1W')
   const r1M = useIndicatorSeries(byRange['1M'], '1M')
   const r3M = useIndicatorSeries(byRange['3M'], '3M')
   const r1Y = useIndicatorSeries(byRange['1Y'], '1Y')
 
   const dataByRange: Record<string, Record<number, import('@/types/indicator').IndicatorData[]> | undefined> = {
+    '1D': r1D.data?.data,
     '1W': r1W.data?.data,
     '1M': r1M.data?.data,
     '3M': r3M.data?.data,
@@ -170,15 +170,22 @@ function useWidgetData(widgets: DashboardWidget[]) {
   }
 
   const failedIds = new Set([
+    ...(r1D.data?.failedIds ?? []),
     ...(r1W.data?.failedIds ?? []),
     ...(r1M.data?.failedIds ?? []),
     ...(r3M.data?.failedIds ?? []),
     ...(r1Y.data?.failedIds ?? []),
   ])
 
-  const isLoading = r1W.isLoading || r1M.isLoading || r3M.isLoading || r1Y.isLoading
+  const isLoadingByRange: Record<string, boolean> = {
+    '1D': r1D.isLoading,
+    '1W': r1W.isLoading,
+    '1M': r1M.isLoading,
+    '3M': r3M.isLoading,
+    '1Y': r1Y.isLoading,
+  }
 
-  return { dataByRange, isLoading, failedIds }
+  return { dataByRange, isLoadingByRange, failedIds }
 }
 
 function useIsMobile(breakpoint = 768) {
@@ -194,6 +201,7 @@ function useIsMobile(breakpoint = 768) {
 }
 
 export function WidgetGrid({ indicators }: WidgetGridProps) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const containerWidth = useContainerWidth(containerRef)
   const widgets = useDashboardStore((s) => s.widgets)
@@ -207,7 +215,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
   const editingWidget = widgets.find((w) => w.id === editingWidgetId)
   const editingIndicator = editingWidget ? indicators.find((i) => i.id === editingWidget.indicatorId) : undefined
 
-  const { dataByRange, isLoading, failedIds } = useWidgetData(widgets)
+  const { dataByRange, isLoadingByRange, failedIds } = useWidgetData(widgets)
 
   const toLayoutItem = (w: DashboardWidget): LayoutItem => ({
     i: w.id, x: w.position.x, y: w.position.y, w: w.position.w, h: w.position.h,
@@ -264,7 +272,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
     return (
       <div ref={containerRef} className="rounded-xl border border-dashed border-border-dim p-12 text-center">
         <div className="flex justify-center mb-3"><LayoutGrid size={40} className="text-faint" /></div>
-        <p className="text-faint">위젯을 추가하여 대시보드를 구성하세요</p>
+        <p className="text-faint">{t('dashboard.emptyState')}</p>
       </div>
     )
   }
@@ -274,7 +282,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
       {/* Edit mode toggle bar */}
       <div className="flex items-center justify-end gap-2 mb-3">
         {isSaving && (
-          <span className="text-xs text-muted animate-pulse">저장 중...</span>
+          <span className="text-xs text-muted animate-pulse">{t('dashboard.saving')}</span>
         )}
         {canEdit && (
           <button
@@ -287,9 +295,9 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
             )}
           >
             {isEditing ? (
-              <><Check size={13} />편집 완료</>
+              <><Check size={13} />{t('dashboard.editDone')}</>
             ) : (
-              <><Pencil size={13} />레이아웃 편집</>
+              <><Pencil size={13} />{t('dashboard.editLayout')}</>
             )}
           </button>
         )}
@@ -297,7 +305,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
 
       {isEditing && (
         <div className="mb-3 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300">
-          위젯을 드래그하여 위치를 변경하거나 모서리를 끌어 크기를 조절하세요.
+          {t('dashboard.editHint')}
         </div>
       )}
 
@@ -322,7 +330,7 @@ export function WidgetGrid({ indicators }: WidgetGridProps) {
                 widget={widget}
                 indicator={indicator}
                 data={data}
-                isLoading={isLoading}
+                isLoading={isLoadingByRange[range] ?? false}
                 isFailed={failedIds.has(widget.indicatorId)}
                 isEditing={isEditing}
                 onEdit={() => setEditingWidgetId(widget.id)}

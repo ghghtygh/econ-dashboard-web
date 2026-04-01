@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BarChart3, LineChartIcon, AreaChartIcon, Hash, CandlestickChart } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -24,17 +25,20 @@ const CHART_TYPE_OPTIONS: { value: ChartType; label: string; icon: typeof LineCh
   { value: 'number', label: 'Number', icon: Hash },
 ]
 
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { value: '1D', label: '1일' },
-  { value: '1W', label: '1주' },
-  { value: '1M', label: '1개월' },
-  { value: '3M', label: '3개월' },
-  { value: '1Y', label: '1년' },
-]
+const DATE_RANGE_KEYS: Record<string, string> = {
+  '1D': 'period.1D',
+  '1W': 'period.1W',
+  '1M': 'period.1M',
+  '3M': 'period.3M',
+  '1Y': 'period.1Y',
+}
+
+const DATE_RANGES: DateRange[] = ['1D', '1W', '1M', '3M', '1Y']
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899', '#06b6d4', '#f97316']
 
 export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorProps) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState(widget.title ?? '')
   const [chartType, setChartType] = useState<ChartType>(widget.chartType)
   const [dateRange, setDateRange] = useState<DateRange>(widget.dateRange ?? '1M')
@@ -50,22 +54,22 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
   return (
     <Modal open={open} onClose={onClose} className="max-w-xl">
-      <ModalHeader onClose={onClose}>위젯 설정</ModalHeader>
+      <ModalHeader onClose={onClose}>{t('widgetEditor.title')}</ModalHeader>
       <ModalBody className="space-y-5">
         {/* 제목 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">위젯 제목</label>
+          <label className="block text-xs text-muted mb-1.5">{t('widgetEditor.widgetTitle')}</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={indicator?.name ?? '위젯 제목'}
+            placeholder={indicator?.name ?? t('widgetEditor.widgetTitle')}
             className="w-full rounded-lg border border-border-mid bg-elevated px-3 py-2 text-sm text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* 차트 타입 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">차트 타입</label>
+          <label className="block text-xs text-muted mb-1.5">{t('widgetEditor.chartType')}</label>
           <div className="grid grid-cols-5 gap-2">
             {CHART_TYPE_OPTIONS.map((opt) => {
               const Icon = opt.icon
@@ -90,20 +94,20 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 기간 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">데이터 기간</label>
+          <label className="block text-xs text-muted mb-1.5">{t('widgetEditor.dataPeriod')}</label>
           <div className="flex gap-1">
-            {DATE_RANGE_OPTIONS.map((opt) => (
+            {DATE_RANGES.map((dr) => (
               <button
-                key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                key={dr}
+                onClick={() => setDateRange(dr)}
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                  dateRange === opt.value
+                  dateRange === dr
                     ? 'bg-blue-600 text-white'
                     : 'bg-elevated text-muted hover:text-heading',
                 )}
               >
-                {opt.label}
+                {t(DATE_RANGE_KEYS[dr])}
               </button>
             ))}
           </div>
@@ -111,7 +115,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 색상 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">차트 색상</label>
+          <label className="block text-xs text-muted mb-1.5">{t('widgetEditor.chartColor')}</label>
           <div className="flex gap-2">
             {COLORS.map((c) => (
               <button
@@ -129,7 +133,7 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
 
         {/* 미리보기 */}
         <div>
-          <label className="block text-xs text-muted mb-1.5">미리보기</label>
+          <label className="block text-xs text-muted mb-1.5">{t('widgetEditor.preview')}</label>
           <div className="rounded-lg border border-border-dim bg-page p-4 h-[180px]">
             {previewData && previewData.length > 0 ? (
               <ChartRenderer
@@ -140,15 +144,15 @@ export function WidgetEditor({ widget, indicator, open, onClose }: WidgetEditorP
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-faint text-xs">미리보기 데이터 로딩 중...</p>
+                <p className="text-faint text-xs">{t('widgetEditor.previewLoading')}</p>
               </div>
             )}
           </div>
         </div>
       </ModalBody>
       <ModalFooter>
-        <Button variant="secondary" size="sm" onClick={onClose}>취소</Button>
-        <Button size="sm" onClick={handleSave}>저장</Button>
+        <Button variant="secondary" size="sm" onClick={onClose}>{t('common.cancel')}</Button>
+        <Button size="sm" onClick={handleSave}>{t('common.save')}</Button>
       </ModalFooter>
     </Modal>
   )

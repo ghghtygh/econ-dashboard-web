@@ -1,17 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BarChart2, Sun, Moon, Search, LayoutDashboard, Newspaper, Bell } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useThemeStore } from '@/store/themeStore'
 import { useAlertStore } from '@/store/alertStore'
 
-const NAV_ITEMS = [
-  { path: '/', label: '대시보드', icon: LayoutDashboard },
-  { path: '/explore', label: '지표 탐색', icon: Search },
-  { path: '/news', label: '뉴스', icon: Newspaper },
-]
-
 export function Header() {
+  const { t, i18n } = useTranslation()
   const { theme, toggleTheme } = useThemeStore()
   const location = useLocation()
   const notifications = useAlertStore((s) => s.notifications)
@@ -19,6 +15,12 @@ export function Header() {
   const unreadCount = useAlertStore((s) => s.unreadCount())
   const [bellOpen, setBellOpen] = useState(false)
   const bellRef = useRef<HTMLDivElement>(null)
+
+  const NAV_ITEMS = [
+    { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { path: '/explore', label: t('nav.explore'), icon: Search },
+    { path: '/news', label: t('nav.news'), icon: Newspaper },
+  ]
 
   useEffect(() => {
     if (!bellOpen) return
@@ -32,6 +34,7 @@ export function Header() {
   }, [bellOpen])
 
   const recentNotifications = notifications.slice(0, 5)
+  const locale = i18n.language === 'ko' ? 'ko-KR' : 'en-US'
 
   return (
     <header className="border-b border-border-dim bg-surface/90 backdrop-blur-md sticky top-0 z-50" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -71,7 +74,7 @@ export function Header() {
             <button
               onClick={() => setBellOpen(!bellOpen)}
               className="relative p-2.5 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-all"
-              aria-label="알림"
+              aria-label={t('header.alerts')}
             >
               <Bell size={17} />
               {unreadCount > 0 && (
@@ -84,19 +87,19 @@ export function Header() {
             {bellOpen && (
               <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-border-dim bg-surface animate-fadeIn z-50" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border-dim">
-                  <span className="text-sm font-semibold text-heading">알림</span>
+                  <span className="text-sm font-semibold text-heading">{t('header.alerts')}</span>
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
                       className="text-[11px] text-accent hover:underline transition-colors"
                     >
-                      모두 읽음
+                      {t('header.markAllRead')}
                     </button>
                   )}
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {recentNotifications.length === 0 ? (
-                    <p className="text-xs text-faint text-center py-8">알림이 없습니다</p>
+                    <p className="text-xs text-faint text-center py-8">{t('header.noAlerts')}</p>
                   ) : (
                     recentNotifications.map((n) => (
                       <div
@@ -113,7 +116,7 @@ export function Header() {
                           <div className="flex-1 min-w-0">
                             <p className="text-body leading-relaxed">{n.message}</p>
                             <p className="text-faint text-[10px] mt-1">
-                              {n.indicatorName} · {new Date(n.triggeredAt).toLocaleString('ko-KR')}
+                              {n.indicatorName} · {new Date(n.triggeredAt).toLocaleString(locale)}
                             </p>
                           </div>
                         </div>
@@ -128,7 +131,7 @@ export function Header() {
           <button
             onClick={toggleTheme}
             className="p-2.5 rounded-lg text-muted hover:text-heading hover:bg-elevated transition-all"
-            aria-label="테마 전환"
+            aria-label={t('common.themeToggle')}
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>

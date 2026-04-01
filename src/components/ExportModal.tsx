@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Download, FileText, FileJson, FileImage } from 'lucide-react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -32,6 +33,7 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
   const [period, setPeriod] = useState<ExportPeriod>('1M')
   const [exporting, setExporting] = useState(false)
   const { toast } = useToast()
+  const { t } = useTranslation()
 
   const handleExport = async () => {
     setExporting(true)
@@ -46,18 +48,18 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
 
       if (format === 'pdf') {
         if (!chartRef?.current) {
-          toast('차트를 찾을 수 없습니다', 'error')
+          toast(t('export.chartNotFound'), 'error')
           return
         }
         await exportChartToPdf(chartRef.current, paged.content, indicatorName, indicatorSymbol, indicatorUnit, period)
       } else {
         exportIndicatorData(paged.content, indicatorSymbol, indicatorUnit, period, format)
       }
-      toast('데이터를 내보냈습니다', 'success')
+      toast(t('export.success'), 'success')
       onClose()
     } catch (err) {
       console.error('Export failed:', err)
-      toast('데이터 내보내기에 실패했습니다', 'error')
+      toast(t('export.error'), 'error')
     } finally {
       setExporting(false)
     }
@@ -68,17 +70,17 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
       <ModalHeader onClose={onClose}>
         <div className="flex items-center gap-2">
           <Download size={16} />
-          데이터 내보내기
+          {t('export.title')}
         </div>
       </ModalHeader>
       <ModalBody className="space-y-4">
         <div className="rounded-lg border border-border-dim bg-elevated px-4 py-3">
-          <p className="text-xs text-muted">지표</p>
+          <p className="text-xs text-muted">{t('export.indicator')}</p>
           <p className="text-sm font-medium text-heading">{indicatorName} <span className="text-xs text-faint font-mono">({indicatorSymbol})</span></p>
         </div>
 
         <div>
-          <label className="block text-xs text-muted mb-1.5">파일 형식</label>
+          <label className="block text-xs text-muted mb-1.5">{t('export.fileFormat')}</label>
           <div className="grid grid-cols-3 gap-2">
             {FORMAT_OPTIONS.map((opt) => {
               const Icon = opt.icon
@@ -102,7 +104,7 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
         </div>
 
         <div>
-          <label className="block text-xs text-muted mb-1.5">기간</label>
+          <label className="block text-xs text-muted mb-1.5">{t('export.period')}</label>
           <div className="flex gap-1.5">
             {PERIODS.map((p) => (
               <button
@@ -126,10 +128,10 @@ export function ExportModal({ open, onClose, indicatorId, indicatorSymbol, indic
         </p>
       </ModalBody>
       <ModalFooter>
-        <Button variant="secondary" size="sm" onClick={onClose}>취소</Button>
+        <Button variant="secondary" size="sm" onClick={onClose}>{t('export.cancel')}</Button>
         <Button size="sm" onClick={handleExport} disabled={exporting}>
           <Download size={14} className="mr-1.5" />
-          {exporting ? '내보내는 중...' : '내보내기'}
+          {exporting ? t('export.exporting') : t('export.exportBtn')}
         </Button>
       </ModalFooter>
     </Modal>

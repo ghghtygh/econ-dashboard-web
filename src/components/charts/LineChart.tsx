@@ -8,21 +8,13 @@ import {
   CartesianGrid,
 } from 'recharts'
 import type { IndicatorData } from '@/types/indicator'
-import { format } from 'date-fns'
-import { ko } from 'date-fns/locale'
+import { formatPrice, formatChartData } from './chartFormatters'
 
 interface LineChartProps {
   data: IndicatorData[]
   title?: string
   color?: string
   unit?: string
-}
-
-function formatPrice(value: number): string {
-  if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`
-  if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(1)}K`
-  if (Math.abs(value) < 1) return value.toFixed(4)
-  return value.toLocaleString('ko-KR', { maximumFractionDigits: 2 })
 }
 
 interface CustomTooltipProps {
@@ -47,11 +39,7 @@ function CustomTooltip({ active, payload, label, unit, color }: CustomTooltipPro
 }
 
 export function LineChart({ data, title, color = '#3b82f6', unit }: LineChartProps) {
-  const formatted = data.map((d) => ({
-    date: format(new Date(d.date), 'yyyy.MM.dd (EEE)', { locale: ko }),
-    shortDate: format(new Date(d.date), 'MM/dd'),
-    value: d.value,
-  }))
+  const formatted = formatChartData(data)
 
   return (
     <div className="rounded-lg border border-border-dim bg-surface p-4">
