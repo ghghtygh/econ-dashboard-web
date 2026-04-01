@@ -25,7 +25,7 @@ export const MarketCard = memo(function MarketCard({ indicator, series, isSelect
   const color = CATEGORY_COLORS[indicator.category] ?? '#6366f1'
 
   const sparkPoints = useMemo(() => {
-    if (series.length < 2) return ''
+    if (series.length < 3) return ''
     const last8 = series.slice(-8)
     const min = Math.min(...last8.map((d) => d.value))
     const max = Math.max(...last8.map((d) => d.value))

@@ -14,7 +14,7 @@ import { HistoricalComparison } from '@/components/dashboard/HistoricalCompariso
 type ExploreTab = 'indicators' | 'historical'
 
 function computeSparkPoints(values: { value: number }[]): string {
-  if (values.length < 2) return ''
+  if (values.length < 3) return ''
   const last12 = values.slice(-12)
   const min = Math.min(...last12.map((d) => d.value))
   const max = Math.max(...last12.map((d) => d.value))
