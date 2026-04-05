@@ -52,7 +52,17 @@ export function useIndicatorSeries(ids: number[], range: DateRange) {
       if (ids.length === 0) return { data: {}, failedIds: [] }
       try {
         const resp = await indicatorApi.getSeries(ids, from, to)
-        const data: Record<number, IndicatorData[]> = resp.data ?? resp
+        const raw = resp.data ?? resp
+        const data: Record<number, IndicatorData[]> = {}
+        if (Array.isArray(raw)) {
+          for (const item of raw) {
+            if (item.indicatorId != null && Array.isArray(item.data)) {
+              data[item.indicatorId] = item.data
+            }
+          }
+        } else if (raw && typeof raw === 'object') {
+          Object.assign(data, raw)
+        }
         return { data, failedIds: [] }
       } catch {
         // 배치 엔드포인트 실패 시 개별 요청 폴백
