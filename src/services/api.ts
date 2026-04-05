@@ -125,11 +125,10 @@ export const dashboardApi = {
 
 export interface HealthStatus {
   status: string
-  env: string
+  timestamp: string
   dataSources: {
-    coingecko: boolean
-    fred: boolean
-    alphaVantage: boolean
+    database: boolean
+    redis: boolean
   }
 }
 

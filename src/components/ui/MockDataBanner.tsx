@@ -7,12 +7,13 @@ export function MockDataBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   if (dismissed || !health) return null
+  if (health.status === 'ok') return null
 
-  const missing: string[] = []
-  if (!health.dataSources.fred) missing.push('FRED (VIX, CPI, 국채금리, 기준금리, 실업률)')
-  if (!health.dataSources.alphaVantage) missing.push('Alpha Vantage (S&P 500, USD/KRW)')
+  const issues: string[] = []
+  if (!health.dataSources.database) issues.push('데이터베이스')
+  if (!health.dataSources.redis) issues.push('Redis')
 
-  if (missing.length === 0) return null
+  if (issues.length === 0) return null
 
   return (
     <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700/50 px-4 py-2.5">
@@ -23,16 +24,8 @@ export function MockDataBanner() {
         />
         <div className="flex-1 min-w-0">
           <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-            <span className="font-semibold">모의 데이터 사용 중</span> — 다음 데이터소스의 API 키가 설정되지 않아 샘플 데이터로 표시됩니다:{' '}
-            {missing.join(', ')}. 실시간 데이터를 보려면{' '}
-            <code className="bg-amber-100 dark:bg-amber-800/40 px-1 py-0.5 rounded text-[11px]">
-              FRED_API_KEY
-            </code>{' '}
-            및{' '}
-            <code className="bg-amber-100 dark:bg-amber-800/40 px-1 py-0.5 rounded text-[11px]">
-              ALPHA_VANTAGE_API_KEY
-            </code>{' '}
-            를 설정하세요.
+            <span className="font-semibold">서비스 상태 이상</span> — 다음 연결에 문제가 있습니다:{' '}
+            {issues.join(', ')}
           </p>
         </div>
         <button

@@ -1,6 +1,9 @@
 type ErrorListener = (message: string) => void
 
 const listeners: ErrorListener[] = []
+let lastMessage = ''
+let lastTime = 0
+const DEDUPE_MS = 5000
 
 export const errorBus = {
   subscribe: (fn: ErrorListener): (() => void) => {
@@ -11,6 +14,10 @@ export const errorBus = {
     }
   },
   emit: (message: string) => {
+    const now = Date.now()
+    if (message === lastMessage && now - lastTime < DEDUPE_MS) return
+    lastMessage = message
+    lastTime = now
     listeners.forEach((fn) => fn(message))
   },
 }
