@@ -18,7 +18,7 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
 
   return (
     <>
-      <div className="flex justify-between items-center mb-3.5">
+      <div className="flex justify-between items-center mb-3.5 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-slate-600">Global Indices</h2>
           {localPeriod && (
