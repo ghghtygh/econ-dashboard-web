@@ -27,10 +27,8 @@ export function GlobalIndicesSection({ topIndices, localPeriod, effectivePeriod,
         </div>
         <PeriodPills active={effectivePeriod} onChange={onLocalChange} size="sm" showReset={!!localPeriod} onReset={onReset} />
       </div>
-      <div
-        className="grid gap-4 mb-7"
-        style={{ gridTemplateColumns: `repeat(${Math.min(topIndices.length || 1, 6)}, 1fr)` }}
-      >
+      <div className="indices-grid mb-7">
+
         {topIndices.length === 0 ? (
           <GlobalIndicesCardSkeleton />
         ) : topIndices.map((item, i) => {

@@ -642,6 +642,13 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* --- Global Indices grid --- */
+.indices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
 /* --- Card grids --- */
 .db-card-grid {
   display: grid;
@@ -785,6 +792,10 @@ body {
   .db-overview-mid {
     grid-template-columns: 1fr;
   }
+  .indices-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
   .db-card-grid,
   .db-card-grid--wide {
     grid-template-columns: 1fr;
@@ -808,6 +819,49 @@ body {
   }
   .db-time-row {
     font-size: 11px;
+  }
+}
+
+/* ── Responsive: small mobile (< 480px) — compact layout ── */
+@media (max-width: 480px) {
+  .db-main {
+    padding: 16px 12px;
+  }
+  .db-title {
+    font-size: 16px;
+  }
+  .indices-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .db-card-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .db-card-grid--wide {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .db-table-head,
+  .stock-row {
+    grid-template-columns: 1fr 70px;
+  }
+  .db-table-head > :nth-child(3),
+  .db-table-head > :nth-child(4),
+  .db-table-head > :last-child,
+  .stock-row > :nth-child(3),
+  .stock-row > :nth-child(4),
+  .stock-row > :last-child {
+    display: none;
+  }
+  .db-footer {
+    flex-direction: column;
+    text-align: center;
+  }
+  .db-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 

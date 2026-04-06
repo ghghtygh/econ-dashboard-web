@@ -24,7 +24,7 @@ export function IndicatorTableSection({
   const rows = groups[activeTab] ?? []
   return (
     <div className="card" style={{ animationDelay: '0.45s' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0, flexWrap: 'wrap', gap: 8 }}>
         <Tabs
           tabs={Object.keys(groups).map(cat => ({ id: cat, label: `${CATEGORY_ICONS[cat] || ''} ${cat}` }))}
           active={activeTab}
@@ -38,7 +38,7 @@ export function IndicatorTableSection({
         </div>
       </div>
       <div className="indicator-table-wrap" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table className="indicator-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
+        <table className="indicator-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
               {['Name', 'Value', 'Change', 'Unit'].map((h, i) => (

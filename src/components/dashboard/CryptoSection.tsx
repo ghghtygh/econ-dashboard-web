@@ -18,7 +18,7 @@ export function CryptoSection({ cryptoIndicators, localPeriod, onLocalChange, on
   return (
     <div className="card" style={{ animationDelay: '0.35s' }}>
       <CardHeader title="Cryptocurrency" localPeriod={localPeriod} onLocalChange={onLocalChange} onReset={onReset} globalPeriod={globalPeriod} />
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {cryptoIndicators.length === 0 ? (
           <div className="col-span-full text-slate-400 text-xs text-center p-5">No data</div>
         ) : cryptoIndicators.slice(0, 4).map(c => {

@@ -122,11 +122,12 @@ export function IndicatorDetailModal({ item, open, onClose }: Props) {
         tabIndex={-1}
         style={{
         position: 'relative', zIndex: 10,
-        width: '100%', maxWidth: 640,
+        width: 'calc(100% - 32px)', maxWidth: 640,
+        maxHeight: '90vh', overflowY: 'auto',
         background: '#fff', borderRadius: 16,
         border: '1px solid #E2E8F0',
         boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-        padding: 28,
+        padding: 'clamp(16px, 4vw, 28px)',
         animation: 'fadeIn 0.2s ease',
       }}>
         {/* Header */}
@@ -142,7 +143,7 @@ export function IndicatorDetailModal({ item, open, onClose }: Props) {
             aria-label="닫기"
             style={{
               background: '#F1F5F9', border: 'none', borderRadius: 8,
-              width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', color: '#64748B',
             }}
           >
@@ -152,7 +153,7 @@ export function IndicatorDetailModal({ item, open, onClose }: Props) {
 
         {/* Value + Change */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 20 }}>
-          <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A' }}>
+          <span style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: '#0F172A' }}>
             {filtered.latest ? fmtNum(filtered.latest.value) : '--'}
           </span>
           <span style={{ fontSize: 14, fontWeight: 600, color }}>

@@ -28,7 +28,7 @@ export function Sparkline({
     .join(' ')
   const uid = `sp-${instanceId.replace(/:/g, '')}`
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }} role="img" aria-label="추세 차트">
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', maxWidth: '100%', height: 'auto' }} role="img" aria-label="추세 차트">
       <defs>
         <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity={0.12} />
@@ -169,7 +169,7 @@ export function CardHeader({
   const isOverridden = localPeriod !== null
   const effective = localPeriod || globalPeriod
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, minHeight: 26 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, minHeight: 26, flexWrap: 'wrap', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <h2 style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>{title}</h2>
         {isOverridden && (
@@ -195,13 +195,13 @@ export function Tabs({
   onChange: (id: string) => void
 }) {
   return (
-    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E2E8F0', marginBottom: 16 }}>
+    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E2E8F0', marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       {tabs.map(t => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
           style={{
-            padding: '8px 16px', fontSize: 13,
+            padding: '8px 12px', fontSize: 13, whiteSpace: 'nowrap',
             fontWeight: active === t.id ? 600 : 400,
             color: active === t.id ? '#4F46E5' : '#94A3B8',
             background: 'none', border: 'none',
