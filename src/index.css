@@ -894,7 +894,7 @@ body {
 }
 
 .widget-grid-mobile-item {
-  height: 280px;
+  height: 240px;
   touch-action: pan-y;
 }
 

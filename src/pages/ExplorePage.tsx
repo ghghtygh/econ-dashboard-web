@@ -259,7 +259,7 @@ export function ExplorePage() {
                   </div>
 
                   {sparkPoints && (
-                    <svg className="w-28 h-9" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label={`${indicator.name} 추세 차트`}>
+                    <svg className="w-16 sm:w-28 h-9 shrink-0" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label={`${indicator.name} 추세 차트`}>
                       <polyline
                         points={sparkPoints}
                         fill="none"
